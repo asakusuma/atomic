@@ -1,9 +1,6 @@
 // abstract behavior
 
-var Fiber = Trinket.Libs.Fiber,
-    base = {};
-
-Trinket.AbstractBehavior = Fiber.extend(base, function (base) {
+var AbstractBehavior = Fiber.extend({}, function (base) {
   return {
     events: {},
     contract: {},

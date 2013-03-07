@@ -1,14 +1,11 @@
 // abstract component
 
-var Fiber = Trinket.Libs.Fiber,
-    base = {};
-
-Trinket.AbstractComponent = Fiber.extend(base, function (base) {
+var AbstractComponent = Fiber.extend({}, function (base) {
   return {
     events: {},
     behaviors: {},
-    subComponents: [],
     components: {},
+    composition: [],
 
     init: function (el /* optional */) {},
     destroy: function () {},

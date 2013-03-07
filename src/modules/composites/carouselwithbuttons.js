@@ -1,11 +1,11 @@
 // carouselwithbuttons
-var Trinket = require('trinket'),
+var Atomic = require('atomic'),
     $ = require('jquery'),
     Button = require('components/button'),
     Carousel = require('components/carousel'),
     CarouselWithButtons;
 
-CarouselWithButtons = Trinket.Libs.Fiber.extend(Trinket.AbstractComponent, function (base) {
+CarouselWithButtons = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, function (base) {
   return {
     onAttach: function () {
       var $el = $(this.ELEMENT),

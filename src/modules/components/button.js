@@ -1,9 +1,9 @@
 // button
-var Trinket = require('trinket'),
+var Atomic = require('atomic'),
     $ = require('jquery'),
     Button;
 
-Button = Trinket.Libs.Fiber.extend(Trinket.AbstractComponent, function (base) {
+Button = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, function (base) {
   return {
     events: {
       USE: 'use'

@@ -1,9 +1,9 @@
 // selectable
-var Trinket = require('trinket'),
+var Atomic = require('atomic'),
     $ = require('jquery'),
     CarouselSelectableBehavior;
 
-CarouselSelectableBehavior = Trinket.Libs.Fiber.extend(Trinket.AbstractBehavior, function (base) {
+CarouselSelectableBehavior = Atomic.Libs.Fiber.extend(Atomic.AbstractBehavior, function (base) {
   return {
     events: {
       SELECTED: 'selected'

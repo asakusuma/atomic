@@ -1,9 +1,9 @@
 // carousel
-var Trinket = require('trinket'),
+var Atomic = require('atomic'),
     $ = require('jquery'),
     Carousel;
 
-Carousel = Trinket.Libs.Fiber.extend(Trinket.AbstractComponent, function (base) {
+Carousel = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, function (base) {
   return {
     events: {},
     behaviors: {
