@@ -13,4 +13,4 @@ Carousel = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, function (base) {
   };
 });
 
-module.exports = Button;
+module.exports = Carousel;

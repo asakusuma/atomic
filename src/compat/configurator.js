@@ -1,33 +1,35 @@
-
-var CONFIG = Atomic.Config;
+/*global Atomic:true, context:true */
 
 // ensure configuration is valid
-if (!CONFIG[CONFIG.system]) {
-  throw new Error('unable to locate a dependency configuration: ' + CONFIG.system);
+if (!Atomic.Config[Atomic.Config.system]) {
+  throw new Error('unable to locate a dependency configuration: ' + Atomic.Config.system);
 }
 
 // INJECT
 // http://www.injectjs.com
-if (CONFIG.system === 'inject') {
+if (Atomic.Config.system === 'inject') {
   if (!context.Inject) {
     throw new Error('Inject is not available in the global window scope');
   }
-  context.Inject.setModuleRoot(CONFIG.inject.modules);
-  context.Inject.addRule(/^atomic$/, {
-    last: true,
-    path: CONFIG.inject.atomicjs
-  });
-  if (CONFIG.inject.resolver && typeof CONFIG.inject.resolver === 'function') {
-    context.Inject.addRule(/.*/, {
-      path: function(path) {
-        return CONFIG.inject.resolver(path);
-      }
+
+  Atomic.initLoader = function () {
+    context.Inject.setModuleRoot(Atomic.Config.inject.modules);
+    context.Inject.addRule(/^atomic$/, {
+      last: true,
+      path: Atomic.Config.inject.atomicjs
     });
-  }
+    if (Atomic.Config.inject.resolver && typeof Atomic.Config.inject.resolver === 'function') {
+      context.Inject.addRule(/.*/, {
+        path: function(path) {
+          return Atomic.Config.inject.resolver(path);
+        }
+      });
+    }
+  };
 }
 
 // REQUIREJS
 // http://www.requirejs.org
-if (CONFIG.system === 'requirejs') {
+if (Atomic.Config.system === 'requirejs') {
   // TODO
 }

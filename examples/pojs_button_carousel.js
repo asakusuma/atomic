@@ -10,6 +10,9 @@ $.ready(function () {
     carousel.bind(next, next.events.USE, carousel.next);
     carousel.bind(prev, prev.events.USE, carousel.previous);
     // or...
+    carousel.bind(next, next.events.USE, 'next');
+    carousel.bind(prev, prev.events.USE, 'previous');
+    // or...
     next.on(next.events.USE, function () {
       carousel.next();
     });

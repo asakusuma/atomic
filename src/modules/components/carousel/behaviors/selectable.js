@@ -5,28 +5,30 @@ var Atomic = require('atomic'),
 
 CarouselSelectableBehavior = Atomic.Libs.Fiber.extend(Atomic.AbstractBehavior, function (base) {
   return {
-    events: {
-      SELECTED: 'selected'
-    },
     contract: {
       nodes: true,
       data: {required: false, type: 'function'}
     },
+    events: {
+      SELECTED: 'selected'
+    },
+    methods: {
+      disable: function () {
+        this.disabled = true;
+      },
+      enable: function () {
+        this.disabled = false;
+      }
+    },
     modify: function (done) {
-      var disabled = false;
-      $(this.options.nodes).on('click', function (evt) {
-        if (disabled) {
+      var myself = this;
+
+      $(this.configuration.nodes).on('click', function (evt) {
+        if (myself.disabled) {
           return;
         }
-        var results = (this.options.data) ? this.options.data(evt.target) : {};
+        var results = (this.configuration.data) ? this.configuration.data(evt.target) : {};
         this.trigger(this.events.SELECTED, results);
-      });
-
-      this.addMethod('disable', function () {
-        disabled = true;
-      });
-      this.addMethod('enable', function () {
-        disabled = false;
       });
 
       done();
