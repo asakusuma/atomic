@@ -17,9 +17,8 @@ var AbstractComponent = Fiber.extend({}, function (base) {
     behaviors: {},
 
     // composition dependencies. This "has" the following
-    // on load, resolved versions of these are in hasResolved
-    has: [],
-    hasResolved: {},
+    // on load, resolved versions of these are passed to onAttach
+    has: {},
 
     // constructor, destructor
     init: function (el /* optional */) {},
@@ -49,7 +48,9 @@ var AbstractComponent = Fiber.extend({}, function (base) {
     // dom EL management
     attach: function (el) {},
     detatch: function () {}
-    onAttach: function () {},
+    
+    // overridable EL management resolution: a components "onReady" if you will
+    onAttach: function (resolved) {},
     onDetatch: function (el) {},
   };
 });
