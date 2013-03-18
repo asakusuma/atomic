@@ -24,12 +24,20 @@
  */
 var AbstractBehavior = Fiber.extend({}, function (base) {
   return {
+    // the element. Auto-attached during construction
+    ELEMENT: null,
+    
     /**
      * A key/string collection of events
      * events in a Behavior are namespaced onto the parent
      * component under objName.events.NAMESPACE.key
      */
     events: {},
+
+    /**
+     * A key/function collection of methods to attach to the component
+     */
+    methods: {},
 
     /**
      * A contract that the configuration object must abide by
@@ -46,11 +54,6 @@ var AbstractBehavior = Fiber.extend({}, function (base) {
     contract: {},
 
     /**
-     * A key/function collection of methods to attach to the component
-     */
-    methods: {},
-
-    /**
      * Initialize the Behavior
      * @param {Object} component - the component we are augmenting
      * @param {Object} configuration - the object we are configuring with
@@ -61,6 +64,7 @@ var AbstractBehavior = Fiber.extend({}, function (base) {
       this.configuration = configuration;
 
       // verify contract, throw exception if required
+      // the invoke modify()
     },
 
     /**
@@ -76,6 +80,7 @@ var AbstractBehavior = Fiber.extend({}, function (base) {
      * modify the host component. Invoked after a contract is fulfilled
      * and the host object is successfully augmented
      * @method AbstractBehavior#modify
+     * @param {Function} done - an async callback triggered when modification is complete
      */
     modify: function (done) {
       done();
