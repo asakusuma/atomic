@@ -1,4 +1,4 @@
-// abstract behavior
+/*global Fiber:true */
 
 /**
  * AbstractBehavior a template for creating additional behaviors
@@ -23,19 +23,52 @@
  * @class AbstractBehavior
  */
 var AbstractBehavior = Fiber.extend({}, function (base) {
+
+  /**
+   * Verify a contract is being fufilled for a given configuration
+   * Iterate through the contract, checking each needed item
+   * exists in the configuration, throwing an exception if a
+   * condition is not met
+   * @private
+   * @method AbstractBehavior._verifyContract
+   * @param {Object} contract - a contract to test
+   * @param {Object} configuration - a configuration object to test against
+   * @return {Boolean}
+   * @throw {Error} throws if the contract is not fulfilled
+   */
+  var _verifyContract = function (contract, configuration) {
+  };
+
+  /**
+   * Trigger an event from within a behavior
+   * Each behavior is given a unique signature so that there are never
+   * conflicts. This _triggerEvent abstraction adds the signature to
+   * the requested event in order to namespace it.
+   * @private
+   * @method AbstractBehavior._triggerEvent
+   * @param {AbstractBehavior} behavior - an abstract behavior subclass
+   * @param {String} signature - the unique signature for this behavior
+   * @param {Array} triggerArgs - the arguments called from the internal trigger()
+   */
+  var _triggerEvent = function (behavior, signature, triggerArgs) {
+  };
+
   return {
-    // the element. Auto-attached during construction
-    ELEMENT: null,
-    
     /**
      * A key/string collection of events
      * events in a Behavior are namespaced onto the parent
      * component under objName.events.NAMESPACE.key
+     * @property {Object} AbstractBehavior#events
      */
     events: {},
 
     /**
      * A key/function collection of methods to attach to the component
+     * similar to the events {} collection, the methods collection
+     * denotes a series of methods to be attached to the host component
+     *
+     * methods are namespaced into objName.methods.NAMESPACE.key
+     * @property {Object} AbstractBehavior#methods
      */
     methods: {},
 
@@ -50,37 +83,40 @@ var AbstractBehavior = Fiber.extend({}, function (base) {
      * propertyName: { required: true|false, type: 'TYPE' }
      * where "required" is a boolean, and in the object system,
      * the type parameter forces a typeof check.
+     * @property {Object} AbstractBehavior#contract
      */
     contract: {},
 
     /**
      * Initialize the Behavior
+     * @constructor
      * @param {Object} component - the component we are augmenting
      * @param {Object} configuration - the object we are configuring with
-     * @param {String} signature - a unique string signature for events and methods
+     * @param {String} signature - a unique string signature for events (used in trigger)
+     * @throws {Error} invalid contracts can throw an error
      */
     init: function (component, configuration, signature) {
+      _verifyContract(this.contract, configuration);
+
       this.component = component;
       this.configuration = configuration;
 
-      // verify contract, throw exception if required
-      // the invoke modify()
-    },
+      var self = this;
 
-    /**
-     * Calls the namespaced version of the trigger() method
-     * on the hosting component
-     * @method AbstractBehavior#trigger
-     * @param {String} eventName - the event name to trigger
-     * @param {Object} arg1 - a sequential set of arguments for the event
-     */
-    trigger: function (eventName, arg1, arg2...) {},
+      // this local trigger instance calls the static reference
+      this.trigger = function() {
+        var args = [].slice.call(arguments, 0);
+        _triggerEvent(self, signature, args);
+      };
+
+      this.modify();
+    },
 
     /**
      * modify the host component. Invoked after a contract is fulfilled
      * and the host object is successfully augmented
      * @method AbstractBehavior#modify
-     * @param {Function} done - an async callback triggered when modification is complete
+     * @param {Function} done - an asynchronous callback that triggers at the end of modification
      */
     modify: function (done) {
       done();
@@ -88,3 +124,6 @@ var AbstractBehavior = Fiber.extend({}, function (base) {
   };
 });
 
+if (module && module.exports) {
+  module.exports = AbstractBehavior;
+}
