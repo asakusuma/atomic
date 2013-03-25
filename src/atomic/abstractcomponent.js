@@ -1,4 +1,4 @@
-/*global Fiber:true */
+/*global Atomic:true */
 
 /**
  * AbstractComponent a template for creating components in Atomic
@@ -7,7 +7,7 @@
  * components to create Compsites.
  * @class AbstractComponent
  */
-var AbstractComponent = Fiber.extend({}, function (base) {
+var AbstractComponent = Atomic.OOP.extend({}, function (base) {
   return {
     /**
      * The element once attached, visible as this.ELEMENT throughout

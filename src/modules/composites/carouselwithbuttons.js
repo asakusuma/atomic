@@ -1,9 +1,10 @@
 // carouselwithbuttons
 var Atomic = require('atomic'),
-    $ = require('jquery'),
+    $$ = require('jquery'),
     CarouselWithButtons;
 
-CarouselWithButtons = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, function (base) {
+CarouselWithButtons = Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {
+  var $ = $$;
   return {
     has: {
       Carousel: 'components/carousel',
@@ -31,4 +32,4 @@ CarouselWithButtons = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, functio
   };
 });
 
-module.exports = Button;
+module.exports = CarouselWithButtons;

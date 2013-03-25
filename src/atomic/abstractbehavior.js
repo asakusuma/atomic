@@ -1,4 +1,4 @@
-/*global Fiber:true */
+/*global Atomic:true */
 
 /**
  * AbstractBehavior a template for creating additional behaviors
@@ -22,7 +22,7 @@
  *
  * @class AbstractBehavior
  */
-var AbstractBehavior = Fiber.extend({}, function (base) {
+var AbstractBehavior = Atomic.OOP.extend({}, function (base) {
 
   /**
    * Verify a contract is being fufilled for a given configuration

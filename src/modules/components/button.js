@@ -1,9 +1,10 @@
 // button
 var Atomic = require('atomic'),
-    $ = require('jquery'),
+    $$ = require('jquery'),
     Button;
 
-Button = Atomic.Libs.Fiber.extend(Atomic.AbstractComponent, function (base) {
+Button = Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {
+  var $ = $$;
   return {
     events: {
       USE: 'use'

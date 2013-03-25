@@ -1,9 +1,10 @@
 // selectable
 var Atomic = require('atomic'),
-    $ = require('jquery'),
+    $$ = require('jquery'),
     CarouselSelectableBehavior;
 
-CarouselSelectableBehavior = Atomic.Libs.Fiber.extend(Atomic.AbstractBehavior, function (base) {
+CarouselSelectableBehavior = Atomic.OOP.extend(Atomic.AbstractBehavior, function (base) {
+  var $ = $$;
   return {
     contract: {
       nodes: true,
