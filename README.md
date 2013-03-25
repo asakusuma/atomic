@@ -47,4 +47,20 @@ Click "next", advance "carousel". What just happened?
 
 ## What Can Elements Do?
 
-Atomic Elements are designed to wrap normal HTML elements, making them behave more like modular bits of a larger system.
+Atomic Elements are designed to wrap normal HTML elements, making them behave more like modular bits of a larger system. An Element...
+
+* Produces events independent of the DOM, enabling an abstraction of accessibility, touch events, and more
+* Has a public API for manipulation
+
+## Combining Elements Into Molecules
+
+The fun doesn't stop there! Atomic Elements have a way to fuse together. The end result, we call Molecules. Molecules are jsut like elements, except they also...
+
+* Include other Atomic Elements
+* May expose their internals or provide an abstraction in front of its "inner workings"
+
+# Um, examples?
+You got it. The examples/ directory shows how you can use Atomic in many different ways:
+
+* files starting with pojs_* are the `plain old JavaScript` apis. Backbone, jQuery, it doesn't matter. Make Elements and use them.
+* files starting with magic_* are the `magic HTML interface` apis. Make some Elements straight from your markup? Sure, if that's your thing!

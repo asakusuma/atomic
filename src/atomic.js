@@ -18,8 +18,9 @@
   var module = null;
   var exports = null;
 
-  var AbstractComponent = null;
+  var AbstractElement = null;
   var AbstractBehavior = null;
+  var CONSTANTS = null;
 
   var fiber = null;
 
@@ -56,6 +57,7 @@
   // --------------------------------------------------
   // ./constants.js
   /* @@ INSERT constants.js */
+  Atomic.CONSTANTS = CONSTANTS;
 
   // --------------------------------------------------
   // EVENT EMITTER 2
@@ -84,7 +86,7 @@
   if (oldAmd) {
     context.define.amd = oldAmd;
   }
-  Atomic.EventEmitter = context.EventEmitter;
+  Atomic.CustomEvent = context.EventEmitter;
   context.EventEmitter = oldEE;
 
   // --------------------------------------------------
@@ -92,7 +94,7 @@
   // --------------------------------------------------
   // atomic/abstractcomponent.js
   /* @@ INSERT atomic/abstractcomponent.js */
-  Atomic.AbstractComponent = AbstractComponent;
+  Atomic.AbstractElement = AbstractElement;
 
   // --------------------------------------------------
   // ABSTRACT BEHAVIOR
