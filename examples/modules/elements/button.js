@@ -1,4 +1,4 @@
-/*global require:true, module:true */
+/*global require:true, module:true, define:true */
 
 /*
 ============================================================
@@ -20,41 +20,54 @@ document level listener as opposed to listeners on individual
 nodes.
 */
 
-var Atomic = require('atomic'),
-    $$ = require('jquery'),
-    Button;
+function factory() {
 
-/**
- * The button is an Element that translates mouse behavior into
- * a generic "use" method that can be listened to by other
- * code.
- * @class Button
- * @extends AbstractElement
- */
-Button = Atomic.OOP.extend(Atomic.AbstractElement, function (base) {
-  var $ = $$;
-  return {
-    events: {
+  var Atomic = require('atomic'),
+      $$ = require('jquery'),
+      Button;
+
+  /**
+   * The button is an Element that translates mouse behavior into
+   * a generic "use" method that can be listened to by other
+   * code.
+   * @class Button
+   * @extends AbstractElement
+   */
+  Button = Atomic.OOP.extend(Atomic.AbstractElement, function (base) {
+    var $ = $$;
+    return {
+      events: {
+        /**
+         * Triggered when the carousel has exceeded the max # of nodes
+         * @event Button#USE
+         */
+        USE: 'use'
+      },
+
       /**
-       * Triggered when the carousel has exceeded the max # of nodes
-       * @event Button#USE
+       * Ran on element attach
+       * @method onAttach
        */
-      USE: 'use'
-    },
+      onAttach: function () {
+        var $el = $(this.ELEMENT),
+            button = this;
 
-    /**
-     * Ran on element attach
-     * @method onAttach
-     */
-    onAttach: function () {
-      var $el = $(this.ELEMENT),
-          button = this;
+        $el.on('click', function () {
+          button.trigger(button.events.USE);
+        });
+      }
+    };
+  });
 
-      $el.on('click', function () {
-        button.trigger(button.events.USE);
-      });
-    }
-  };
-});
+  return Button;
+}
 
-module.exports = Button;
+if (module && module.exports) {
+  module.exports = factory();
+}
+else if (define && define.amd) {
+  define(factory);
+}
+else if (this.AtomicElements) {
+  this.AtomicElements['elements/button'] = factory;
+}

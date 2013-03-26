@@ -33,3 +33,9 @@ if (Atomic.Config.system === 'inject') {
 if (Atomic.Config.system === 'requirejs') {
   // TODO
 }
+
+// SINGLEFILE
+// http://www.requirejs.org
+if (Atomic.Config.system === 'globals') {
+  context.AtomicElements = {};
+}

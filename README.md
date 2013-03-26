@@ -1,7 +1,17 @@
 # Atomic
 ## It's Just JavaScript
 
-Atomic is a way to create a better HTML Element. Atomic Elements are like their HTML counterparts, but come with a robust event system and patterns for composing multiple Elements together for a greater cause.
+Atomic is a DOM Library Agnostic solution for creating a better HTML element. They're called **Atomic Elements**, and they come with a robust event system and patterns for composition.
+
+Why would someone choose Atomic?
+* **No DOM Library Opinion** You're not bound to jQuery, YUI, Ender, or anything
+* **Small** < 9999kb **SIZE TBD**
+* **Simple** enhance an element, put them together, that's it
+* **Works with AMD and CJS Loaders** You can use any loader strategy you'd like
+
+Why would you avoid Atomic?
+* **Out-of-the-box** products like jQuery UI, Dijit, Flight, and more can give you large amounts of functionality for free.
+* **Prototyping** the amount of initial work you will need to build up in Atomic makes it a poor choice for prototyping. You should consider something like Bootstrap in those cases
 
 # Getting Started
 ## Your Script Tags
