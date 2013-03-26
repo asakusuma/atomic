@@ -60,12 +60,6 @@
   Atomic.CONSTANTS = CONSTANTS;
 
   // --------------------------------------------------
-  // EVENT EMITTER 2
-  // --------------------------------------------------
-  // compat/configurator.js
-  /* @@ INSERT compat/configurator.js */
-
-  // --------------------------------------------------
   // FIBER
   // --------------------------------------------------
   // lib/fiber.js
@@ -90,7 +84,7 @@
   context.EventEmitter = oldEE;
 
   // --------------------------------------------------
-  // ABSTRACT COMPONENT
+  // ABSTRACT ELEMENT
   // --------------------------------------------------
   // atomic/abstractcomponent.js
   /* @@ INSERT atomic/abstractcomponent.js */

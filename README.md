@@ -3,7 +3,7 @@
 
 Atomic is a DOM Library Agnostic solution for creating a better HTML element. They're called **Atomic Elements**, and they come with a robust event system and patterns for composition.
 
-Why would someone choose Atomic?
+Why would you choose Atomic?
 * **No DOM Library Opinion** You're not bound to jQuery, YUI, Ender, or anything
 * **Small** < 9999kb **SIZE TBD**
 * **Simple** enhance an element, put them together, that's it
