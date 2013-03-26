@@ -1,12 +1,39 @@
 /*global require:true, module:true */
 
+/*
+============================================================
+ELEMENTS
+============================================================
+Elements are the building blocks of rich UIs. Their purpose
+in life is to augment an existing HTML element on the page
+and make it produce new events, accept additional
+configuration, and add/remove classes as required. By
+default, Elements do not depend on anything other than Atomic
+itself. Often times, developers will use a DOM Library such
+as YUI or jQuery to make the DOM operations easier.
+
+The Element below shows how to expose a public API to external
+items. Additionally, it shows how inside of onAttach(), smart
+node selection can be used to catch errant use cases.
+
+Lastly, the Element below supports a Behavior, known as
+SELECTABLE. If configured, the SELECTABLE behavior can add
+the ability to "click" on any element within the Carousel and
+extract data.
+
+This Element makes use of the constructor to set up some
+variables. It's important to call the base's constructor after
+you are done, otherwise there won't be an event system ready
+for you.
+*/
+
 var Atomic = require('atomic'),
     $$ = require('jquery'),
     Carousel;
 
 /**
  * The carousel is a component that contains a collection of
- * elements, controlled by an API. Items in the carousel that are
+ * html items, controlled by an API. Items in the carousel that are
  * hidden are given classes of "atomic-hidden", while items in the
  * carousel that are visible are given classes of "atomic-visible".
  * It's up to the end-developer to create CSS classes that support
@@ -37,13 +64,16 @@ Carousel = Atomic.OOP.extend(Atomic.AbstractElement, function (base) {
       SELECTABLE: { namespace: 'Selectable', path: 'elements/carousel/behaviors/selectable' }
     },
 
+    init: function () {
+      this.index = 0;
+      base.prototype.init.apply(this, arguments);
+    },
+
     /**
      * Ran on element attach
      * @method Carousel@onAttach
      */
     onAttach: function () {
-      this.index = 0;
-
       switch(this.ELEMENT.tagName.toLowerCase()) {
       case 'ul':
         this._nodes = $(this.ELEMENT).children('li');
@@ -56,6 +86,8 @@ Carousel = Atomic.OOP.extend(Atomic.AbstractElement, function (base) {
       }
 
       this._$nodes = $(this._nodes);
+
+      this._setClasses();
     },
 
     /**

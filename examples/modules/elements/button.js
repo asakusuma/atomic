@@ -1,5 +1,25 @@
 /*global require:true, module:true */
 
+/*
+============================================================
+ELEMENTS
+============================================================
+Elements are the building blocks of rich UIs. Their purpose
+in life is to augment an existing HTML element on the page
+and make it produce new events, accept additional
+configuration, and add/remove classes as required. By
+default, Elements do not depend on anything other than Atomic
+itself. Often times, developers will use a DOM Library such
+as YUI or jQuery to make the DOM operations easier.
+
+The Element below is one of the simplest Elements one can
+make. It exposes a generic "USE" event, which is the result
+of translating click events on the element itself. jQuery
+is used as a convienence, as modern jQuery uses a single
+document level listener as opposed to listeners on individual
+nodes.
+*/
+
 var Atomic = require('atomic'),
     $$ = require('jquery'),
     Button;
