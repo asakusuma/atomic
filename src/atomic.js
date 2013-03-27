@@ -14,19 +14,48 @@
   var oldAtomic = context.Atomic;
   var initialized = false;
 
-  // these prevent commonjs foolery
-  var module = null;
-  var exports = null;
-
   var AbstractElement = null;
   var AbstractBehavior = null;
   var CONSTANTS = null;
 
   var fiber = null;
 
+  var module;
+  var exports;
+  var process;
+
   Atomic.Config = context.ATOMIC_CONFIG || {};
   Atomic.initConfig = function() {};
   Atomic.Libs = {};
+
+  /**
+   * Create a "CommonJS" environment. This lets us
+   * include a library directly, without having to alter
+   * the original code. We can then collect the contents
+   * from the module.exports object
+   * @method cjsHarness
+   * @private
+   */
+  function cjsHarness() {
+    module = {
+      exports: {}
+    };
+    exports = module.exports;
+    process = {
+      title: 'Atomic CommonJS Harness'
+    };
+  }
+
+  /**
+   * Destroy the "CommonJS" environment.
+   * @method resetCjs
+   * @private
+   */
+  function resetCjs() {
+    module = undefined;
+    exports = undefined;
+    process = undefined;
+  }
 
   /**
    * prevent conflicts with an existing variable
@@ -35,7 +64,11 @@
    * @method Atomic.noConflict
    * @return Object - the current Atomic reference
    */
-  Atomic.noConflict = function () {};
+  Atomic.noConflict = function () {
+    var thisAtomic = context.Atomic;
+    context.Atomic = oldAtomic;
+    return thisAtomic;
+  };
 
   /**
    * load the specified dependencies, then run the callback
@@ -50,6 +83,11 @@
       Atomic.initConfig();
       initialized = true;
     }
+
+    // USE THE SPECIFIED LOADER's ASYNC INTERFACE
+    // AND ON COMPLETION, RUN THE CALLBACK FUNCTION
+    // WITH DEPENDENCIES ENUMERATED
+
   };
 
   // --------------------------------------------------
@@ -70,18 +108,10 @@
   // EVENT EMITTER 2
   // --------------------------------------------------
   // lib/eventemitter2.js
-  var oldAmd = null;
-  var oldEE = context.EventEmitter;
-  if (context.define && context.define.amd) {
-    oldAmd = context.define.amd;
-    context.define.amd = false;
-  }
+  cjsHarness();
   /* @@ INSERT lib/eventemitter2.js */
-  if (oldAmd) {
-    context.define.amd = oldAmd;
-  }
-  Atomic.CustomEvent = context.EventEmitter;
-  context.EventEmitter = oldEE;
+  Atomic.CustomEvent = module.exports;
+  resetCjs();
 
   // --------------------------------------------------
   // ABSTRACT ELEMENT
