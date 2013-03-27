@@ -93,38 +93,33 @@
   // --------------------------------------------------
   // CONSTANTS
   // --------------------------------------------------
-  // ./constants.js
-  /* @@ INSERT constants.js */
+  //@@include('./constants.js')
   Atomic.CONSTANTS = CONSTANTS;
 
   // --------------------------------------------------
   // FIBER
   // --------------------------------------------------
-  // lib/fiber.js
-  /* @@ INSERT lib/fiber.js */
+  //@@include('./lib/fiber.js')
   Atomic.OOP = context.Fiber.noConflict();
 
   // --------------------------------------------------
   // EVENT EMITTER 2
   // --------------------------------------------------
-  // lib/eventemitter2.js
   cjsHarness();
-  /* @@ INSERT lib/eventemitter2.js */
+  //@@include('./lib/eventemitter2.js')
   Atomic.CustomEvent = module.exports;
   resetCjs();
 
   // --------------------------------------------------
   // ABSTRACT ELEMENT
   // --------------------------------------------------
-  // atomic/abstractcomponent.js
-  /* @@ INSERT atomic/abstractcomponent.js */
+  //@@include('./atomic/abstractelement.js')
   Atomic.AbstractElement = AbstractElement;
 
   // --------------------------------------------------
   // ABSTRACT BEHAVIOR
   // --------------------------------------------------
-  // atomic/abstractbehavior.js
-  /* @@ INSERT atomic/abstractbehavior.js */
+  //@@include('./atomic/abstractbehavior.js')
   Atomic.AbstractBehavior = AbstractBehavior;
 
   // assign public interface in window scope
