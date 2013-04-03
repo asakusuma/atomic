@@ -1,11 +1,11 @@
 # About the Examples
 
-## modules/*
-In here, you can find a collection of modules that show how to build on top of Atomic.AbstractBehavior and Atomic.AbstractElement. This would likely mirror the structure of your own code. These are very minimalist examples.
+## atomic/*
+In here, you can find a collection of Elements and Molecules that show how to build on top of Atomic.AbstractBehavior and Atomic.AbstractElement. This would likely mirror the structure of your own code. These are very minimalist examples.
 
-* modules/elements/carousel.js - a sample Element, the "Carousel"
-* modules/elements/carousel/behaviors/selectable - a sample Behavior that modifies "Carousel"
-* modules/elements/button.js - a sample Element, the "Button"
+* atomic/elements/carousel.js - a sample Element, the "Carousel"
+* atomic/elements/carousel/behaviors/selectable - a sample Behavior that modifies "Carousel"
+* atomic/elements/button.js - a sample Element, the "Button"
 
 * molecules/carouselwithbuttons.js - a sample Molecule, combining a "Carousel" and a "Button" into a single reusable object that depends on DOM structure.
 
