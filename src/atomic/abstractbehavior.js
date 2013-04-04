@@ -90,15 +90,15 @@ var AbstractBehavior = Atomic.OOP.extend({}, function (base) {
     /**
      * Initialize the Behavior
      * @constructor
-     * @param {Object} component - the component we are augmenting
+     * @param {Object} element - the element we are augmenting
      * @param {Object} configuration - the object we are configuring with
      * @param {String} signature - a unique string signature for events (used in trigger)
      * @throws {Error} invalid contracts can throw an error
      */
-    init: function (component, configuration, signature) {
+    init: function (element, configuration, signature) {
       _verifyContract(this.contract, configuration);
 
-      this.component = component;
+      this.element = element;
       this.configuration = configuration;
 
       var self = this;

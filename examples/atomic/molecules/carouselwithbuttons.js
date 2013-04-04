@@ -22,9 +22,9 @@ var Atomic = require('atomic'),
  * - .prev all references will be turned into buttons that rewind the carousel
  *
  * @class CarouselWithButtons
- * @extends AbstractElement
+ * @extends AbstractMolecule
  */
-CarouselWithButtons = Atomic.OOP.extend(Atomic.AbstractElement, function (base) {
+CarouselWithButtons = Atomic.OOP.extend(Atomic.AbstractMolecule, function (base) {
   var $ = $$;
   return {
     /**
@@ -37,21 +37,24 @@ CarouselWithButtons = Atomic.OOP.extend(Atomic.AbstractElement, function (base) 
       Button: 'elements/button'
     },
 
+    /**
+     * Declares "roles", additional HTML Elements
+     * required for this element to be created.
+     */
+    actors: ['Carousel', 'Next', 'Previous'],
+
     // this Molecule has no events unique to itself
     events: {},
 
     /**
      * method ran on element attach
-     * @see AbstractElement#onAttach
+     * @see AbstractElement#load
      */
-    onAttach: function (resolved) {
+    modify: function (done, resolved, actors) {
       var $el = $(this.ELEMENT),
-          $carousel = $('.carousel', $el),
-          $next = $('.next', $el),
-          $prev = $('.prev', $el),
           Carousel = resolved.Carousel,
           Button = resolved.Button,
-          carousel = new Carousel($carousel.get(0)),
+          carousel = new Carousel(actors.Carousel),
           self = this;
 
       // expose a jQuery wrapped object
@@ -81,15 +84,21 @@ CarouselWithButtons = Atomic.OOP.extend(Atomic.AbstractElement, function (base) 
       // gotta bind them all
       // In order to improve debugging, remember to add
       // these objects to the _nextButtons and _prevButtons
-      $next.each(function (idx, nextEl) {
+      $.each(actors.Next, function (idx, nextEl) {
         var btn = new Button(nextEl);
         self._nextButtons.push(btn);
         carousel.bind(btn, btn.events.USE, 'next');
+        btn.load();
       });
-      $prev.each(function (idx, prevEl) {
+      $.each(actors.Previous, function (idx, prevEl) {
         var btn = new Button(prevEl);
         self._prevButtons.push(btn);
         carousel.bind(btn, btn.events.USE, 'previous');
+        btn.load();
+      });
+
+      carousel.load(function () {
+        done();
       });
     }
   };

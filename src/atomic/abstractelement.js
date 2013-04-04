@@ -27,13 +27,14 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
      * These identify various behaviors that the implemented
      * component supports.
      *
-     * A behavior's object contains two properties, "name" and
-     * "module".
+     * A behavior's object contains three properties, "namespace",
+     * "path", and "object".
      *
-     * name: a local name for the string to assist in namespacing
-     * module: a path from the current component to the behavior
+     * namespace: a local name for the string to assist in namespacing
+     * path: a path from the current component to the behavior
+     * object: the behavior object (can be used in place of "path")
      *
-     * SELECTED: {name: 'selected', module: 'module/path'}
+     * SELECTED: {namespace: 'selected', path: 'module/path'}
      *
      * @property {Object} AbstractElement#behaviors
      */
@@ -214,7 +215,6 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Attach an element to this Component
-     * Resolves all dependencies, and triggers onAttach()
      * @method AbstractElement#attach
      * @param {HTMLElement} el - an HTML element to attach
      */
@@ -222,24 +222,28 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Detatch an element from this Component
-     * On complete, runs onDetatch()
      * @method AbstractElement#detatch
      */
     detatch: function () {},
 
     /**
-     * Triggers when an element is attached. Should be overridden
-     * @method AbstractElement#onAttach
-     * @param {Object} resolved - a collection of resolved dependencies
+     * Load the Element, resolve all dependencies
+     * calls the ready method
+     * @method AbstractElement#load
+     * @param {Object} cb - a callback to run when this is loaded
      */
-    onAttach: function (resolved) {},
+    load: function (cb) {
+      this.modify(cb);
+    },
 
     /**
-     * Triggers when an element is detached. Should be overridden
-     * @method AbstractElement#onDetatch
-     * @param {HTMLElement} el - the element that was removed
+     * Triggers when an element is loaded.
+     * @method AbstractElement#onLoad
+     * @param {Object} done - invoke this callback when the modifying is complete
+     * @param {Object} resolved - a collection of resolved dependencies
+     * @param {Object} roles - If you are a Molecule, then you will get your roles
      */
-    onDetatch: function (el) {}
+    modify: function (done, resolved, roles) {}
   };
 });
 

@@ -73,9 +73,9 @@ function factory() {
 
       /**
        * Ran on element attach
-       * @method Carousel@onAttach
+       * @method Carousel@modify
        */
-      onAttach: function () {
+      modify: function (done) {
         switch(this.ELEMENT.tagName.toLowerCase()) {
         case 'ul':
           this._nodes = $(this.ELEMENT).children('li');
@@ -90,6 +90,8 @@ function factory() {
         this._$nodes = $(this._nodes);
 
         this._setClasses();
+
+        done();
       },
 
       /**

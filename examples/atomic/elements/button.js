@@ -46,15 +46,16 @@ function factory() {
 
       /**
        * Ran on element attach
-       * @method onAttach
+       * @method modify
        */
-      onAttach: function () {
+      modify: function (done) {
         var $el = $(this.ELEMENT),
             button = this;
 
         $el.on('click', function () {
           button.trigger(button.events.USE);
         });
+        done();
       }
     };
   });

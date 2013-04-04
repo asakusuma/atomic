@@ -16,6 +16,7 @@
 
   var AbstractElement = null;
   var AbstractBehavior = null;
+  var AbstractMolecule = null;
   var CONSTANTS = null;
 
   var fiber = null;
@@ -115,6 +116,12 @@
   // --------------------------------------------------
   //@@include('./atomic/abstractelement.js')
   Atomic.AbstractElement = AbstractElement;
+
+  // --------------------------------------------------
+  // ABSTRACT MOLECULE
+  // --------------------------------------------------
+  //@@include('./atomic/abstractmolecule.js')
+  Atomic.AbstractMolecule = AbstractMolecule;
 
   // --------------------------------------------------
   // ABSTRACT BEHAVIOR
