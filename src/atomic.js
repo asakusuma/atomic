@@ -10,13 +10,17 @@
    * The global Atomic Object
    * @class Atomic
    */
-  var Atomic = {};
+  var Atomic = {
+    behaviors: {
+      composites: {}
+    }
+  };
   var oldAtomic = context.Atomic;
   var initialized = false;
 
-  var AbstractElement = null;
+  var AbstractComponent = null;
   var AbstractBehavior = null;
-  var AbstractMolecule = null;
+  var AbstractComposite = null;
   var CONSTANTS = null;
 
   var fiber = null;
@@ -112,22 +116,27 @@
   resetCjs();
 
   // --------------------------------------------------
-  // ABSTRACT ELEMENT
-  // --------------------------------------------------
-  //@@include('./atomic/abstractelement.js')
-  Atomic.AbstractElement = AbstractElement;
-
-  // --------------------------------------------------
-  // ABSTRACT MOLECULE
-  // --------------------------------------------------
-  //@@include('./atomic/abstractmolecule.js')
-  Atomic.AbstractMolecule = AbstractMolecule;
-
-  // --------------------------------------------------
   // ABSTRACT BEHAVIOR
   // --------------------------------------------------
   //@@include('./atomic/abstractbehavior.js')
   Atomic.AbstractBehavior = AbstractBehavior;
+
+  // --------------------------------------------------
+  // BUILT IN ATOMIC BEHAVIORS
+  // --------------------------------------------------
+  //@@include('./atomic/behaviors/composites/actors.js')
+
+  // --------------------------------------------------
+  // ABSTRACT COMPONENT
+  // --------------------------------------------------
+  //@@include('./atomic/abstractcomponent.js')
+  Atomic.AbstractComponent = AbstractComponent;
+
+  // --------------------------------------------------
+  // ABSTRACT COMPOSITE
+  // --------------------------------------------------
+  //@@include('./atomic/abstractcomposite.js')
+  Atomic.AbstractComposite = AbstractComposite;
 
   // assign public interface in window scope
   context.Atomic = Atomic;

@@ -3,20 +3,20 @@
 -->
 
 <!--
-  Define a molecule using data-atomic-id (identify it)
-  and data-atomic (molecule reference)
+  Define a Composite using data-atomic-id (identify it)
+  and data-atomic (Composite reference)
 -->
-<div data-atomic-id="my-cool-molecule" data-atomic="molecules/carouselwithbuttons">
+<div data-atomic-id="my-cool-composite" data-atomic="composites/carouselwithbuttons">
   <!--
-    use data-atomic-role (get during onAttach) with
+    use data-atomic-actor (get during onAttach) with
     data-atomic-for (reference data-atomic-id) to identify
-    sub components
+    html elements needed as Actors for the Composite
   -->
-  <ul data-atomic-role="carousel" data-atomic-for="my-cool-molecule">
+  <ul data-atomic-actor="carousel" data-atomic-for="my-cool-composite">
     <li>one</li>
     <li>two</li>
     <li>three</li>
   </ul>
-  <a href="#" data-atomic-role="next" data-atomic-for="my-cool-molecule">Next</a>
-  <a href="#" data-atomic-role="previous" data-atomic-for="my-cool-molecule">Previous</a>
+  <a href="#" data-atomic-actor="next" data-atomic-for="my-cool-composite">Next</a>
+  <a href="#" data-atomic-actor="previous" data-atomic-for="my-cool-composite">Previous</a>
 </div>

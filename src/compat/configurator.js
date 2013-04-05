@@ -37,5 +37,5 @@ if (Atomic.Config.system === 'requirejs') {
 // SINGLEFILE
 // http://www.requirejs.org
 if (Atomic.Config.system === 'globals') {
-  context.AtomicElements = {};
+  context.AtomicRegistry = {};
 }

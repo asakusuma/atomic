@@ -1,7 +1,7 @@
 /*global Atomic:true */
 
-Atomic.behaviors.molecule.COMBINE = {
-  namespace: 'AtomicMoleculeComposition',
+Atomic.behaviors.composites.ACTORS = {
+  namespace: 'AtomicCompositeActors',
   path: null,
   object: Atomic.OOP.extend(Atomic.AbstractBehavior, function (base) {
     return {

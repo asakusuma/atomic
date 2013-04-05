@@ -1,24 +1,24 @@
 /*global Atomic:true */
 
 /**
- * AbstractElement a template for creating components in Atomic
+ * AbstractComponent a template for creating Components in Atomic
  * Components are the lego blocks of Atomic. They emit events
  * at interesting moments, and can be combined with additional
- * components to create Compsites.
- * @class AbstractElement
+ * components to create Composites.
+ * @class AbstractComponent
  */
-var AbstractElement = Atomic.OOP.extend({}, function (base) {
+var AbstractComponent = Atomic.OOP.extend({}, function (base) {
   return {
     /**
      * The element once attached, visible as this.ELEMENT throughout
-     * @property {HTMLElement} AbstractElement#ELEMENT
+     * @property {HTMLElement} AbstractComponent#ELEMENT
      */
     ELEMENT: null,
 
     /**
      * A key/string collection of events
-     * These are events that the AbstractElement can emit
-     * @property {Object} AbstractElement#events
+     * These are events that the AbstractComponent can emit
+     * @property {Object} AbstractComponent#events
      */
     events: {},
 
@@ -36,7 +36,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
      *
      * SELECTED: {namespace: 'selected', path: 'module/path'}
      *
-     * @property {Object} AbstractElement#behaviors
+     * @property {Object} AbstractComponent#behaviors
      */
     behaviors: {},
 
@@ -47,13 +47,13 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
      * instead of in require() statements at the top has several
      * advantages
      *
-     * - has{} dependencies are late-loaded resolved at element-attach
-     * - has{} dependencies are localized to your attach() method
-     * - has{} dependencies are easily expected using console.log
+     * - has{} dependencies are late-loaded resolved at load()
+     * - has{} dependencies are localized as a var in your modify() method
+     * - has{} dependencies are easily inspected using console.log
      *
      * Make the lives of people depending on you better. Use has{}
      *
-     * @property {Object} AbstractElement#has
+     * @property {Object} AbstractComponent#has
      */
     has: {},
 
@@ -72,13 +72,13 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Destroy the object
-     * @method AbstractElement#destroy
+     * @method AbstractComponent#destroy
      */
     destroy: function () {},
 
     /**
      * Listen for events emitted by the Component
-     * @method AbstractElement#on
+     * @method AbstractComponent#on
      * @param {String} name - the event name
      * @param {Function} fn - the callback function
      */
@@ -86,7 +86,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Remove an event added via on
-     * @method AbstractElement#off
+     * @method AbstractComponent#off
      * @param {String} name - the name to remove callbacks from
      * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
      */
@@ -94,21 +94,21 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Listen to all events emitted from this Component
-     * @method AbstractElement#onAny
+     * @method AbstractComponent#onAny
      * @param {Function} fn - a function to fire on all events
      */
     onAny: function (fn) {},
 
     /**
      * Remove a listener from the "listen to everything" group
-     * @method AbstractElement#offAny
+     * @method AbstractComponent#offAny
      * @param {Function} fn - the callback to remove
      */
     offAny: function (fn) {},
 
     /**
      * Queue a callback to run once, and then remove itself
-     * @method AbstractElement#onOnce
+     * @method AbstractComponent#onOnce
      * @param {String} name - the event name
      * @param {Function} fn - the callback function
      */
@@ -116,7 +116,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Queue a callback to run X times, and then remove itself
-     * @method AbstractElement#on
+     * @method AbstractComponent#on
      * @param {String} name - the event name
      * @param {Number} count - a number of times to invoke the callback
      * @param {Function} fn - the callback function
@@ -125,7 +125,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Remove all of the listeners from the given namespace
-     * @method AbstractElement#offAll
+     * @method AbstractComponent#offAll
      * @param {String} name - the event name
      */
     offAll: function (name) {},
@@ -135,14 +135,14 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
      * highly interactive components can increase the base number,
      * but setting arbitrarily large numbers should be a performance
      * warning.
-     * @method AbstractElement#setMaxListeners
+     * @method AbstractComponent#setMaxListeners
      * @param {Number} count - the max number of listeners
      */
     setMaxListeners: function (count) {},
 
     /**
      * Get a list of all the current listeners
-     * @method AbstractElement#listeners
+     * @method AbstractComponent#listeners
      * @returns {Object}
      */
     listeners: function () {},
@@ -151,7 +151,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
      * Trigger an event
      * This triggers the specified event string, calling all
      * listeners that are subscribed to it.
-     * @method AbstractElement#trigger
+     * @method AbstractComponent#trigger
      * @param {String} - the event name
      * @param {Object} variable - any additional arguments to pass in the event
      */
@@ -166,7 +166,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
      * object literal and its properties. The configure() method does
      * its part by creating the configuration object needed at
      * augmentation time
-     * @method AbstractElement#configure
+     * @method AbstractComponent#configure
      * @param {Object} definition - the definition object for the behavior
      * @param {Object} configuration - the configuration to apply for a definition
      */
@@ -174,7 +174,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Remove a configuration object from this component
-     * @method AbstractElement#removeConfiguration
+     * @method AbstractComponent#removeConfiguration
      * @param {Object} definition - a definition object to remove
      */
     removeConfiguration: function (definition) {},
@@ -197,7 +197,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Provides an easy way to link an event and method
-     * @method AbstractElement#bind
+     * @method AbstractComponent#bind
      * @param {Object} eventing - an eventing object
      * @param {String} eventName - the name of the event to listen to
      * @param {String|Function} method - the method to invoke. If a string, resolves under this.*
@@ -206,7 +206,7 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Remove a bind() operation
-     * @method AbstractElement#unbind
+     * @method AbstractComponent#unbind
      * @param {Object} eventing - an eventing object
      * @param {String} eventName - optional. an event name to unsubscribe from
      * @param {String|Function} method - optional. the method to remove. If a string, resolves under this.*
@@ -215,21 +215,21 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Attach an element to this Component
-     * @method AbstractElement#attach
+     * @method AbstractComponent#attach
      * @param {HTMLElement} el - an HTML element to attach
      */
     attach: function (el) {},
 
     /**
      * Detatch an element from this Component
-     * @method AbstractElement#detatch
+     * @method AbstractComponent#detatch
      */
     detatch: function () {},
 
     /**
-     * Load the Element, resolve all dependencies
+     * Load the Component, resolve all dependencies
      * calls the ready method
-     * @method AbstractElement#load
+     * @method AbstractComponent#load
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
@@ -238,10 +238,10 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
     /**
      * Triggers when an element is loaded.
-     * @method AbstractElement#onLoad
+     * @method AbstractComponent#onLoad
      * @param {Object} done - invoke this callback when the modifying is complete
      * @param {Object} resolved - a collection of resolved dependencies
-     * @param {Object} roles - If you are a Molecule, then you will get your roles
+     * @param {Object} roles - If you are a Composite, then you will get your roles
      */
     modify: function (done, resolved, roles) {}
   };
@@ -249,5 +249,5 @@ var AbstractElement = Atomic.OOP.extend({}, function (base) {
 
 
 if (module && module.exports) {
-  module.exports = AbstractElement;
+  module.exports = AbstractComponent;
 }

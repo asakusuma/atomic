@@ -3,7 +3,7 @@
 /**
  * AbstractBehavior a template for creating additional behaviors
  * Behaviors are ways to increase the abilities of instantiated
- * components. They can add, change, or replace functionality in
+ * Components. They can add, change, or replace functionality in
  * their host objects. In order to keep things simple, we
  * recommend only adding and augmenting the hosting component.
  *
@@ -90,15 +90,15 @@ var AbstractBehavior = Atomic.OOP.extend({}, function (base) {
     /**
      * Initialize the Behavior
      * @constructor
-     * @param {Object} element - the element we are augmenting
+     * @param {Object} component - the Component we are augmenting
      * @param {Object} configuration - the object we are configuring with
      * @param {String} signature - a unique string signature for events (used in trigger)
      * @throws {Error} invalid contracts can throw an error
      */
-    init: function (element, configuration, signature) {
+    init: function (component, configuration, signature) {
       _verifyContract(this.contract, configuration);
 
-      this.element = element;
+      this.component = component;
       this.configuration = configuration;
 
       var self = this;
@@ -113,7 +113,7 @@ var AbstractBehavior = Atomic.OOP.extend({}, function (base) {
     },
 
     /**
-     * modify the host component. Invoked after a contract is fulfilled
+     * modify the host Component. Invoked after a contract is fulfilled
      * and the host object is successfully augmented
      * @method AbstractBehavior#modify
      * @param {Function} done - an asynchronous callback that triggers at the end of modification

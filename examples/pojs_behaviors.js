@@ -14,7 +14,7 @@ access to
   carousel.methods.SELECTABLE  - new methods exposed by the behavior
 */
 $.ready(function () {
-  Atomic.load(['jquery', 'elements/Carousel'],
+  Atomic.load(['jquery', 'components/Carousel'],
   function ($, Carousel) {
     var carousel = new Carousel($('#carousel'));
 

@@ -1,7 +1,7 @@
 # Atomic
 ## It's Just JavaScript
 
-Atomic is a DOM Library Agnostic solution for creating a better HTML element. They're called **Atomic Elements**, and they come with a robust event system and patterns for composition.
+Atomic is a DOM Library Agnostic solution for creating a better HTML element. They're called **Atomic Components**, and they come with a robust event system and patterns for composition.
 
 Why would you choose Atomic?
 * **No DOM Library Opinion** You're not bound to jQuery, YUI, Ender, or anything
@@ -36,41 +36,44 @@ Finally, load the atomic.js script
 
 Got all that? Good! Now we can enhance some elements.
 
-## Enhancing Elements
+## Enhancing elements with Components
 
 Let's say you want to make a button. And a carousel. And have the button control the carousel. Just write JavaScript.
 
 ```js
-Atomic.load(['Button', 'Carousel'], function(Button, Carousel) {
+Atomic.load(['components/button', 'components/carousel'], function(Button, Carousel) {
   var button = new Button(document.getElementById('next')),
       carousel = new Carousel(document.getElementById('carousel'));
 
   carousel.bind(button, button.events.USE, 'next');
+
+  button.load();
+  carousel.load();
 });
 ```
 
 Click "next", advance "carousel". What just happened?
 
-1. **Atomic.load()** will load the Button and Carousel from the `elements` directory. This is where all simple HTML Enhancements reside. Once the DOM is ready and the Elements objects loaded, the callback `function` is called with Button and Carousel in order.
+1. **Atomic.load()** will load the Button and Carousel from the `components/` directory. This is where all simple HTML Enhancements reside. Once the DOM is ready and the Elements objects loaded, the callback `function` is called with Button and Carousel in order.
 2. Create the new objects with the **new** keyword, and pass them an element. This is the enhancement.
 3. Use `bind()`, `on()`, `off()`, and more, all still with JavaScript
 
-## What Can Elements Do?
+## What Can Components Do?
 
-Atomic Elements are designed to wrap normal HTML elements, making them behave more like modular bits of a larger system. An Element...
+Atomic Components are designed to wrap normal HTML elements, making them behave more like modular bits of a larger system. A Component...
 
 * Produces events independent of the DOM, enabling an abstraction of accessibility, touch events, and more
 * Has a public API for manipulation
 
-## Combining Elements Into Molecules
+## Combining Components Into Composites
 
-The fun doesn't stop there! Atomic Elements have a way to fuse together. The end result, we call Molecules. Molecules are jsut like elements, except they also...
+The fun doesn't stop there! Atomic Components have a way to fuse together. The end result, we call Composites. Composites are just like Components, except they also...
 
-* Include other Atomic Elements
+* Include other Atomic Components
 * May expose their internals or provide an abstraction in front of its "inner workings"
 
 # Um, examples?
 You got it. The examples/ directory shows how you can use Atomic in many different ways:
 
-* files starting with pojs_* are the `plain old JavaScript` apis. Backbone, jQuery, it doesn't matter. Make Elements and use them.
-* files starting with magic_* are the `magic HTML interface` apis. Make some Elements straight from your markup? Sure, if that's your thing!
+* files starting with pojs_* are the `plain old JavaScript` apis. Backbone, jQuery, it doesn't matter. Make Components and use them.
+* files starting with magic_* are the `magic HTML interface` apis. Make some Components straight from your markup? Sure, if that's your thing!

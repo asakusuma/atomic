@@ -13,7 +13,7 @@ added bonus of only using the method "when you need it", but
 makes error tracing harder.
 */
 $.ready(function () {
-  Atomic.load(['jquery', 'elements/Button', 'elements/Carousel'],
+  Atomic.load(['jquery', 'components/Button', 'components/Carousel'],
   function ($, Button, Carousel) {
     var next = new Button($('#next')),
         prev = new Button($('#prev')),

@@ -2,26 +2,26 @@
 
 /*
 ============================================================
-ELEMENTS
+COMPONENTS
 ============================================================
-Elements are the building blocks of rich UIs. Their purpose
+Components are the building blocks of rich UIs. Their purpose
 in life is to augment an existing HTML element on the page
 and make it produce new events, accept additional
 configuration, and add/remove classes as required. By
-default, Elements do not depend on anything other than Atomic
+default, Components do not depend on anything other than Atomic
 itself. Often times, developers will use a DOM Library such
 as YUI or jQuery to make the DOM operations easier.
 
-The Element below shows how to expose a public API to external
+The Component below shows how to expose a public API to external
 items. Additionally, it shows how inside of onAttach(), smart
 node selection can be used to catch errant use cases.
 
-Lastly, the Element below supports a Behavior, known as
+Lastly, the Component below supports a Behavior, known as
 SELECTABLE. If configured, the SELECTABLE behavior can add
 the ability to "click" on any element within the Carousel and
 extract data.
 
-This Element makes use of the constructor to set up some
+This Component makes use of the constructor to set up some
 variables. It's important to call the base's constructor after
 you are done, otherwise there won't be an event system ready
 for you.
@@ -30,7 +30,7 @@ for you.
 function factory() {
 
   var Atomic = require('atomic'),
-      $$ = require('jquery'),
+      $ = require('jquery'),
       Carousel;
 
   /**
@@ -41,10 +41,9 @@ function factory() {
    * It's up to the end-developer to create CSS classes that support
    * these styles.
    * @class Carousel
-   * @extends AbstractElement
+   * @extends AbstractComponent
    */
-  Carousel = Atomic.OOP.extend(Atomic.AbstractElement, function (base) {
-    var $ = $$;
+  Carousel = Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {
     return {
       events: {
         /**
@@ -63,7 +62,7 @@ function factory() {
         /**
          * @property {Object} behaviors.SELECTABLE - makes elements of a carousel individually selectable
          */
-        SELECTABLE: { namespace: 'Selectable', path: 'elements/carousel/behaviors/selectable' }
+        SELECTABLE: { namespace: 'Selectable', path: 'components/carousel/behaviors/selectable' }
       },
 
       init: function () {
@@ -72,7 +71,8 @@ function factory() {
       },
 
       /**
-       * Ran on element attach
+       * Ran in response to a load() call externally
+       * remember to call done() when complete
        * @method Carousel@modify
        */
       modify: function (done) {
@@ -162,6 +162,6 @@ if (module && module.exports) {
 else if (define && define.amd) {
   define(factory);
 }
-else if (this.AtomicElements) {
-  this.AtomicElements['elements/carousel'] = factory;
+else if (this.AtomicRegistry) {
+  this.AtomicRegistry['components/carousel'] = factory;
 }

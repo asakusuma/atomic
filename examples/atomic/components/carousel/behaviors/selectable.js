@@ -4,14 +4,14 @@
 ============================================================
 BEHAVIORS
 ============================================================
-Behaviors are a way to prevent any one Element from doing
+Behaviors are a way to prevent any one Component from doing
 too much. It's too easy to just bolt-on functionality into
-an Element to meet a business case. Repeated a dozen times,
-the Element becomes unmaintainable due to all the if {}
+an Component to meet a business case. Repeated a dozen times,
+the Component becomes unmaintainable due to all the if {}
 logic strewn about. Behaviors are a way to yank that
 conditional logic out, allowing dynamic extension,
 modification, new events, and new methods to be bestowed on
-the original Element.
+the original Component.
 
 All Behaviors have the option of specifying a `contract`
 object. This contract identifies how a configuration must
@@ -20,16 +20,16 @@ object literal to contain a "nodes" property, and a "data"
 property. The "data" property must be a function.
 
 Any events specified in the Behavior's "events" collection
-will be made available on the parent Element under
+will be made available on the parent Component under
   instanceName.events.<namespace>.EVENTNAME
-where <namespace> is defined by the Element, and EVENTNAME
+where <namespace> is defined by the Component, and EVENTNAME
 is the key in the event object's key/value pairing.
 
 Any methods specified in the Behavior's "methods"
-collection will be made available on the parent Element
+collection will be made available on the parent Component
 under
   instanceName.methods.<namespace>.methodName
-where <namespace> is defined by the Element, and methodName
+where <namespace> is defined by the Component, and methodName
 is the key in the method object's key/value pairing.
 
 The modify() method is automatically invoked after the
@@ -38,7 +38,7 @@ contract is completed.
 
 function factory() {
   var Atomic = require('atomic'),
-      $$ = require('jquery'),
+      $ = require('jquery'),
       CarouselSelectableBehavior;
 
   /**
@@ -47,7 +47,6 @@ function factory() {
    * @extends AbstractBehavior
    */
   CarouselSelectableBehavior = Atomic.OOP.extend(Atomic.AbstractBehavior, function (base) {
-    var $ = $$;
     return {
       /**
        * @property {Object} CarouselSelectableBehavior.contract - the contract for this behavior
@@ -114,7 +113,7 @@ if (module && module.exports) {
 else if (define && define.amd) {
   define(factory);
 }
-else if (this.AtomicElements) {
-  this.AtomicElements['elements/carousel/behaviors/carouselselectablebehavior'] = factory;
+else if (this.AtomicRegistry) {
+  this.AtomicRegistry['components/carousel/behaviors/carouselselectablebehavior'] = factory;
 }
 

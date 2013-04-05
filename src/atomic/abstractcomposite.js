@@ -1,13 +1,13 @@
-/*global Atomic:true, AbstractElement:true */
+/*global Atomic:true, AbstractComponent:true */
 
 /**
- * AbstractElement a template for creating components in Atomic
+ * AbstractComposite a template for creating components in Atomic
  * Components are the lego blocks of Atomic. They emit events
  * at interesting moments, and can be combined with additional
  * components to create Compsites.
- * @class AbstractElement
+ * @class AbstractComposite
  */
-var AbstractMolecule = Atomic.OOP.extend(AbstractElement, function (base) {
+var AbstractComposite = Atomic.OOP.extend(AbstractComponent, function (base) {
   return {
     /**
      * A key/string collection of dependencies in this component
@@ -22,20 +22,20 @@ var AbstractMolecule = Atomic.OOP.extend(AbstractElement, function (base) {
      *
      * Make the lives of people depending on you better. Use has{}
      *
-     * @property {Object} AbstractMolecule#has
+     * @property {Object} AbstractComposite#has
      */
     has: {},
 
     /**
-     * A set of actors to use using the molecule.COMBINE
+     * A set of actors to use using the composite.ACTORS
      * augmentation.
-     * @property {Array} AbstractMolecule#actors
+     * @property {Array} AbstractComposite#actors
      */
     actors: [],
 
     /**
-     * A key/object collection of built in molecule operations
-     * These identify various behaviors that all molecules get for free
+     * A key/object collection of built in Composite operations
+     * These identify various behaviors that all Composites get for free
      *
      * A behavior's object contains three properties, "namespace",
      * "path", and "object".
@@ -46,16 +46,16 @@ var AbstractMolecule = Atomic.OOP.extend(AbstractElement, function (base) {
      *
      * SELECTED: {namespace: 'selected', path: 'module/path'}
      *
-     * @property {Object} AbstractMolecule#molecule
+     * @property {Object} AbstractComposite#composite
      */
-    molecule: {
-      COMBINE: Atomic.behaviors.molecule.COMBINE
+    composite: {
+      ACTORS: Atomic.behaviors.composites.ACTORS
     },
 
     /**
-     * Load the Element, resolve all dependencies
+     * Load the Composite, resolve all dependencies
      * calls the ready method
-     * @method AbstractMolecule#load
+     * @method AbstractComposite#load
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
@@ -66,11 +66,11 @@ var AbstractMolecule = Atomic.OOP.extend(AbstractElement, function (base) {
     },
 
     /**
-     * Triggers when an element is loaded.
-     * @method AbstractMolecule#modify
+     * Triggers when a Component is loaded.
+     * @method AbstractComposite#modify
      * @param {Object} done - invoke this callback when the modifying is complete
      * @param {Object} resolved - a collection of resolved dependencies
-     * @param {Object} actors - If you are a Molecule, then you will get your roles
+     * @param {Object} actors - If you are a Composite, then you will get your actors
      */
     modify: function (done, resolved, actors) {}
   };
@@ -78,5 +78,5 @@ var AbstractMolecule = Atomic.OOP.extend(AbstractElement, function (base) {
 
 
 if (module && module.exports) {
-  module.exports = AbstractMolecule;
+  module.exports = AbstractComposite;
 }

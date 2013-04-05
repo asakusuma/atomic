@@ -10,7 +10,7 @@ This example uses the .bind() interface, attaching to the existing
 functions on the carousel object.
 */
 $.ready(function () {
-  Atomic.load(['jquery', 'elements/Button', 'elements/Carousel'],
+  Atomic.load(['jquery', 'components/Button', 'components/Carousel'],
   function ($, Button, Carousel) {
     var next = new Button($('#next')),
         prev = new Button($('#prev')),
