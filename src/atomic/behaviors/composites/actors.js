@@ -15,8 +15,8 @@ Atomic.behaviors.composites.ACTORS = {
        */
       modify: function (done) {
         var myself = this,
-            element = this.element,
-            oldModify = this.element.modify;
+            component = this.component,
+            oldModify = this.component.modify;
 
         this.element.modify = function(done) {
           // create the roles config object with every item
@@ -30,7 +30,7 @@ Atomic.behaviors.composites.ACTORS = {
             roles[name] = this.configuration[name];
           }
 
-          return oldModify.call(element, done, roles);
+          return oldModify.call(myself.component, done, roles);
         };
       }
     };
