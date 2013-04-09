@@ -14,7 +14,7 @@ $.ready(function () {
     carousel = new Carousel($('#carousel'));
 
     // add an event, and add extra behavior
-    Carousel.addEvent(carousel, 'SELECT');
+    carousel.addEvent('SELECT');
     carousel.wireIn(function(next, needs, actors) {
       $('li', $(carousel)).click(function(evt) {
         var out;

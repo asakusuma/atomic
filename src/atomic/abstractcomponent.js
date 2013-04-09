@@ -201,7 +201,14 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {Function} fn - a functon to run in response to load
      * @param {Number} idx - optional. A 0-index slot for inserting the wiring
      */
-    wireIn: function(fn, idx) {}
+    wireIn: function(fn, idx) {},
+
+    /**
+     * Add an additional event to this Component
+     * @method AbstractComponent#addEvent
+     * @param {String} name - the event name. Stored as NAME for usage
+     */
+    addEvent: function(name) {}
   };
 });
 
