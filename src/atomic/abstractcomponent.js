@@ -190,7 +190,18 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
       //   if no next, then invoke cb()
       // call the first wiring w/ continuation function
       // signature: next, needs, actors
-    }
+    },
+
+    /**
+     * Adds additional wiring commands to this Component
+     * wiring is done in response to a load() call. An optional idx
+     * can be provided, allowing you to insert your wiring wherever you
+     * need to.
+     * @method AbstractComponent#wireIn
+     * @param {Function} fn - a functon to run in response to load
+     * @param {Number} idx - optional. A 0-index slot for inserting the wiring
+     */
+    wireIn: function(fn, idx) {}
   };
 });
 

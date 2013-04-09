@@ -1,7 +1,7 @@
 # About Atomic Source
 
 ## atomic/*
-These files are folded into the main `atomic.js` file. Their insertion points are identified by the `/* @@ INSERT constants.js */` string.
+These files are folded into the main `atomic.js` file. Their insertion points are identified by the `//@@insert(.....)` string.
 
 ## compat/*
 Contains compatibility with objects or items outside of the Atomic system. This is where library bridges may go if required, and it also includes the `configurator.js`, which sets of the dependency manager of choice.

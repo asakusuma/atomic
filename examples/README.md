@@ -6,7 +6,6 @@
 In here, you can find a collection of Components and Composites that show how to build on top of Atomic.AbstractBehavior and Atomic.AbstractComponent. This would likely mirror the structure of your own code. These are very minimalist examples.
 
 * atomic/components/carousel.js - a sample Components, the "Carousel"
-* atomic/components/carousel/behaviors/selectable - a sample Behavior that modifies "Carousel"
 * atomic/components/button.js - a sample Component, the "Button"
 
 * composites/carouselwithbuttons.js - a sample Composite, combining a "Carousel" and a "Button" into a single reusable object that depends on DOM structure.
@@ -19,14 +18,14 @@ The Plain Old JavaScript (POJS) interfaces show how you would use regular ole Ja
 ## composite_* files
 The Composition API (Comps) shows how as an end developer, you would use a Composite. Since a Composite requires multiple "actors", you add them using the built in .composite.ACTORS behavior. These actors fulfill their roles in the Composite, and the composite will do whatever it needs to with those elements in order to build our your final object.
 
-## magic_* files
-The Atomic Magic Interface (AMI) is a plugin that when used allows you to scan your HTML for Atomic Components and Composites, creating them on demand. If you just want to write markup and have magic happen, perhaps this is for you. For users of JS frameworks, this is probably less desirable, and you may wish to fall back to the Comps or POJS interfaces.
+## html_* files
+The Atomic HTML Interface (AHI) is a plugin that when used allows you to scan your HTML for Atomic Components and Composites, creating them on demand. If you just want to write markup and have magic happen, perhaps this is for you. For users of JS frameworks, this is probably less desirable, and you may wish to fall back to the Comps or POJS interfaces.
 
 # Layers
 To keep everything cohesive, think of the Atomic ecosystem like this:
 
-* The AMI (Atomic Magic Interface) is just a HTML scanner that makes use of
-* The Composition (Comps) interface to put together Components
+* The AHI (Atomic HTML Interface) is just a HTML scanner that makes use of
+* The Composition interface to put together Components
 * All of which are created using an obvious Plain Old JavaScript (POJS) API
 
 # How do I build a Component?
@@ -34,21 +33,14 @@ The following template can be used as a guide for creating a Component:
 
 ```js
 function factory() {
-
-  var Atomic = require('atomic'),
-      $ = require('jquery'),
-      SampleTemplate;
-
-  SampleTemplate = Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {
-    return {
-      events: {},
-      modify: function (done) {
-        done();
-      }
-    };
+  var $ = require('jquery');
+  var Atomic = require('atomic');
+  return Atomic.Component({
+    needs: {},
+    actors: {},
+    events: {},
+    wiring: []
   });
-
-  return SampleTemplate;
 }
 
 if (module && module.exports) {
@@ -65,55 +57,20 @@ else if (this.AtomicRegistry) {
 So what's going on here?
 
 1. The `factory` function allows you to create a local scope for all your require() statements. In non-commonJS environments, this can also help you avoid putting things into the window scope. This module depends on `jquery` and the `Atomic` library.
-2. `Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {})` is a direct pass through to [Fiber.js](https://github.com/linkedin/fiber). Fiber isn't exposed directly for readability.
-3. The return object inside of `Atomic.OOP.extend` is your public interface for the Component. By inheriting from `AbstractComponent`, instantiation via `init()` is handled for you automatically. The two elements you likely want to implement are `events{}` and `modify()`.
-  * *events{}* is a key/value pair that identifies the events this Component could generate. It's recommended that consuming developers reference the `events{}` collection as opposed to hard coding strings. This way, the external consuming developer is never left waiting for events that never fire
-  * *modify()* is the execution step. Atomic only calls *modify()* when the consuming developer invokes `yourComponent.load()`. Since this is promoted to developers as an asynchronous operation, you should call `done()` once you are done setting up the Component. Some examples of things you may want to do in `modify()` include setting up DOM event listeners, broadcasting events from the `this.events{}` collection, changing markup, or making AJAX calls.
-4. Return the object created from `Atomic.OOP`, completing the factory method
+2. The `Atomic.Component` creates a new Atomic Component. On the backend, the `needs`, `actors`, `events`, and `wiring` are added.
+  * `needs` is the dependencies this component relies on `needs: { FooComponent: 'path/to/foo/component' }`
+  * `actors` are any additional HTML nodes required for this Component `actors: { Foo: null, Bar: null, Baz: null }`
+  * `events` is a collection of events this object can generate `events: { SELECT: 'select' }`
+  * `wiring` is an array of functions to run in order to initialize the object. Every function receives three parameters: **next** (continues to the next wiring item), **needs** (a resolved collection of the needs object above), and **actors** (all actors that were defined on instantiation).
+4. Return the object created from `Atomic.Component`, completing the factory method
 5. Based on the environment, you can have your new Component stored in a variety of ways. `module` and `module.exports` are for CommonJS environments, `define` is for AMD scenarios, and `AtomicRegistry` is available to people who are just loading their files ahead of time in script tags.
 
 # How do I build a Composite?
-The following template can be used to build a Composite. It will look very similar to a Component, but with a few extra properties
+It's actually the same! "Composite" is just an organizational term. If you're using the `has:{}` or `actors:{}` properties, you should probably consider your object a composite. This helps consuming developers know how complex your object is.
 
-```js
-function factory() {
-  var Atomic = require('atomic'),
-      $ = require('jquery'),
-      SampleTemplate;
+Just use `Atomic.Composite({})` to create the composite. If the need arises, Composites may gain additional features that Components don't have.
 
-  SampleTemplate = Atomic.OOP.extend(Atomic.AbstractComposite, function (base) {
-    return {
-      has: {},
-      actors: [],
-      events: {},
-      modify: function (done, resolved, actors) {
-        done();
-      }
-    };
-  });
+# Reusable Wirings
+Wirings are reusable ways to add additional behaviors to an existing Atomic Component or Composite. Stick them in the `wirings` directory, include them via `Atomic.load`, and pass them as a parameter to `instanceObject.wireIn()`. Just like that, your reusable wiring will run at the end of the chain.
 
-  return SampleTemplate;
-}
-
-if (module && module.exports) {
-  module.exports = factory();
-}
-else if (define && define.amd) {
-  define(factory);
-}
-else if (this.AtomicRegistry) {
-  this.AtomicRegistry['composites/sampletemplate'] = factory;
-}
-```
-
-Let's break this one down too
-
-1. `events{}` is the same as in the Component
-2. `has{}` is a set of downloadable Components or Composites you want to have made available to your Composite during the `modify()` method. Define them like `has: { MyComponent: 'components/mycomponent' }`, and you'll see the results inside of `modify()`
-3. `actors[]` is a set of nodes inside of your primary element that may be needed for this Composite to work properly. For example, a "Carousel with Buttons" probably needs to know which nodes are carousels, which nodes are "next" buttons, and which buttons are "previous" buttons. A Composite author can make this known to a consuming developer by declaring `actors: ['Carousel', 'NextButtons', 'PreviousButtons']` which translates to "Give me something you want made into a Carousel, NextButtons, and PreviousButtons"
-4. `modify()` is the same is with a Component, but is given two new arguments. Call `done()` just like before when all setup is complete.
-  * All the items from `has{}` are downloaded and placed into the second parameter for modify, `resolved`
-  * All the actors a consuming developer set up for you are available in the third parameter for modify, `actors`
-
-# Building a Behavior
-B
+Want to make it run first? `instanceObject.wireIn(function, 0)` and it'll be inserted at the 0 indexed slot.
