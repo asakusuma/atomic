@@ -13,147 +13,124 @@ itself. Often times, developers will use a DOM Library such
 as YUI or jQuery to make the DOM operations easier.
 
 The Component below shows how to expose a public API to external
-items. Additionally, it shows how inside of onAttach(), smart
-node selection can be used to catch errant use cases.
+items. Additionally, it shows how inside of the wiring[]
+collection, you can make individual controls smarter and more
+reliable, including catching error cases.
 
-Lastly, the Component below supports a Behavior, known as
-SELECTABLE. If configured, the SELECTABLE behavior can add
-the ability to "click" on any element within the Carousel and
-extract data.
-
-This Component makes use of the constructor to set up some
-variables. It's important to call the base's constructor after
-you are done, otherwise there won't be an event system ready
-for you.
+This Component makes use of the wiring[] to set up some
+variables.
 */
 
 function factory() {
+  var $ = require('jquery');
+  var Atomic = require('atomic');
 
-  var Atomic = require('atomic'),
-      $ = require('jquery'),
-      Carousel;
+  // calls the Atomic Component constructor
+  return Atomic.Component({
 
-  /**
-   * The carousel is a component that contains a collection of
-   * html items, controlled by an API. Items in the carousel that are
-   * hidden are given classes of "atomic-hidden", while items in the
-   * carousel that are visible are given classes of "atomic-visible".
-   * It's up to the end-developer to create CSS classes that support
-   * these styles.
-   * @class Carousel
-   * @extends AbstractComponent
-   */
-  Carousel = Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {
-    return {
-      events: {
-        /**
-         * Triggered when the carousel has exceeded the max # of nodes
-         * @event Carousel#OUT_OF_BOUNDS_HIGH
-         */
-        OUT_OF_BOUNDS_HIGH: 'out_of_bounds_high',
-        /**
-         * Triggered when the carousel has attempted to go before the first node
-         * @event Carousel#OUT_OF_BOUNDS_LOW
-         */
-        OUT_OF_BOUNDS_LOW: 'out_of_bounds_low'
-      },
+    // no dependencies
+    needs: {},
 
-      behaviors: {
-        /**
-         * @property {Object} behaviors.SELECTABLE - makes elements of a carousel individually selectable
-         */
-        SELECTABLE: { namespace: 'Selectable', path: 'components/carousel/behaviors/selectable' }
-      },
+    // no additional nodes needed
+    actors: {},
 
-      init: function () {
-        this.index = 0;
-        base.prototype.init.apply(this, arguments);
-      },
-
+    // events
+    events: {
       /**
-       * Ran in response to a load() call externally
-       * remember to call done() when complete
-       * @method Carousel@modify
+       * Triggered when the carousel has exceeded the max # of nodes
+       * @event Carousel#OUT_OF_BOUNDS_HIGH
        */
-      modify: function (done) {
-        switch(this.ELEMENT.tagName.toLowerCase()) {
+      OUT_OF_BOUNDS_HIGH: 'out_of_bounds_high',
+      /**
+       * Triggered when the carousel has attempted to go before the first node
+       * @event Carousel#OUT_OF_BOUNDS_LOW
+       */
+      OUT_OF_BOUNDS_LOW: 'out_of_bounds_low'
+    },
+
+    // wiring functions to make this work
+    wiring: [
+      function(next, needs, actors) {
+        this.index = 0;
+        next();
+      },
+      function(next, needs, actors) {
+        switch(actors.element.tagName.toLowerCase()) {
         case 'ul':
-          this._nodes = $(this.ELEMENT).children('li');
+          this._nodes = $(actors.element).children('li');
           break;
         case 'div':
-          this._nodes = $(this.ELEMENT).children('div, span');
+          this._nodes = $(actors.element).children('div, span');
           break;
         default:
-          throw new Error('Unhandled node type for Carousel: '+this.ELEMENT.tagName);
+          throw new Error('Unhandled node type for Carousel: '+actors.element.tagName);
         }
 
         this._$nodes = $(this._nodes);
 
         this._setClasses();
 
-        done();
-      },
-
-      /**
-       * Advance the carousel to the next item
-       * @method Carousel#next
-       */
-      next: function () {
-        this.index++;
-        if (this.index > this._$nodes.size() - 1) {
-          // out of bounds
-          this.trigger(this.events.OUT_OF_BOUNDS_HIGH);
-          this.index = this._$nodes.size() - 1;
-        }
-        this._setClasses();
-      },
-
-      /**
-       * Return the carousel to the previous item
-       * @method Carousel#previous
-       */
-      previous: function () {
-        this.index--;
-        if (this.index < 0) {
-          // out of bounds
-          this.trigger(this.events.OUT_OF_BOUNDS_LOW);
-          this.index = 0;
-        }
-        this._setClasses();
-      },
-
-      /**
-       * Set the carousel to the first item in the collection
-       * @method Carousel#first
-       */
-      first: function () {
-        this.index = 0;
-        this._setClasses();
-      },
-
-      /**
-       * Set the carousel to the last item in the collection
-       * @method Carousel#lasr
-       */
-      last: function () {
-        this.index = this._$nodes.size() - 1;
-        this._setClasses();
-      },
-
-      /**
-       * Set the classes correctly based on the index
-       * @method Carousel#_setClasses
-       * @private
-       */
-      _setClasses: function () {
-        this._$nodes.removeClass(Atomic.CONSTANTS.classes.visible);
-        this._$nodes.removeClass(Atomic.CONSTANTS.classes.hidden);
-        this._$nodes.eq(this.index).addClass(Atomic.CONSTANTS.classes.visible);
+        next();
       }
-    };
-  });
+    ],
 
-  return Carousel;
+    /**
+     * Advance the carousel to the next item
+     * @method Carousel#next
+     */
+    next: function () {
+      this.index++;
+      if (this.index > this._$nodes.size() - 1) {
+        // out of bounds
+        this.trigger(this.events.OUT_OF_BOUNDS_HIGH);
+        this.index = this._$nodes.size() - 1;
+      }
+      this._setClasses();
+    },
+
+    /**
+     * Return the carousel to the previous item
+     * @method Carousel#previous
+     */
+    previous: function () {
+      this.index--;
+      if (this.index < 0) {
+        // out of bounds
+        this.trigger(this.events.OUT_OF_BOUNDS_LOW);
+        this.index = 0;
+      }
+      this._setClasses();
+    },
+
+    /**
+     * Set the carousel to the first item in the collection
+     * @method Carousel#first
+     */
+    first: function () {
+      this.index = 0;
+      this._setClasses();
+    },
+
+    /**
+     * Set the carousel to the last item in the collection
+     * @method Carousel#lasr
+     */
+    last: function () {
+      this.index = this._$nodes.size() - 1;
+      this._setClasses();
+    },
+
+    /**
+     * Set the classes correctly based on the index
+     * @method Carousel#_setClasses
+     * @private
+     */
+    _setClasses: function () {
+      this._$nodes.removeClass(Atomic.CONSTANTS.classes.visible);
+      this._$nodes.removeClass(Atomic.CONSTANTS.classes.hidden);
+      this._$nodes.eq(this.index).addClass(Atomic.CONSTANTS.classes.visible);
+    }
+  });
 }
 
 if (module && module.exports) {
@@ -163,5 +140,5 @@ else if (define && define.amd) {
   define(factory);
 }
 else if (this.AtomicRegistry) {
-  this.AtomicRegistry['components/carousel'] = factory;
+  this.AtomicRegistry['components/button'] = factory;
 }

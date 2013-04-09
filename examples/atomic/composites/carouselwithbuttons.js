@@ -7,10 +7,8 @@ ownership pattern between the Composite and the Components
 contained within.
 */
 function factory() {
-
-  var Atomic = require('atomic'),
-      $ = require('jquery'),
-      CarouselWithButtons;
+  var $ = require('jquery');
+  var Atomic = require('atomic');
 
   /**
    * The carousel with buttons is a mashery of carousel and buttons, and is
@@ -18,96 +16,75 @@ function factory() {
    * reusable "larger piece". In the class description, you should also explain
    * the contract expected by this object.
    *
-   * CarouselWithButtons expects the following nodes to exist within the
-   * top level element:
-   * - .carousel will be turned into a carousel Component
-   * - .next all references will be turned into buttons that advance the carousel
-   * - .prev all references will be turned into buttons that rewind the carousel
+   * CarouselWithButtons expects the following nodes to be defined in the actors{}
+   * configuration
+   * - Carousel: will be turned into a carousel Component
+   * - Next: all references will be turned into buttons that advance the carousel
+   * - Previous: all references will be turned into buttons that rewind the carousel
    *
    * @class CarouselWithButtons
-   * @extends AbstractComposite
    */
-  CarouselWithButtons = Atomic.OOP.extend(Atomic.AbstractComposite, function (base) {
-    return {
+  return Atomic.Composite({
+    needs: {
       /**
        * Declares dependencies used within this Composite
        * @requires components/carousel
        * @requires components/button
        */
-      has: {
-        Carousel: 'components/carousel',
-        Button: 'components/button'
-      },
+      Carousel: 'components/carousel',
+      Button: 'components/button'
+    },
 
-      /**
-       * Declares "actors", additional HTML Elements required
-       * usually all actors need to be fulfilled for a
-       * Composite to work correctly.
-       */
-      actors: ['Carousel', 'Next', 'Previous'],
+    /**
+     * Declares "actors", additional HTML Elements required
+     * usually all actors need to be fulfilled for a
+     * Composite to work correctly.
+     */
+    actors: {
+      Carousel: null,
+      Next: null,
+      Previous: null
+    },
 
-      // this Composite has no events unique to itself
-      events: {},
+    // this has no events of its own
+    events: {},
 
-      /**
-       * method ran in response to an external load() call
-       * @see AbstractComposite#load
-       */
-      modify: function (done, resolved, actors) {
-        var $el = $(this.ELEMENT),
-            Carousel = resolved.Carousel,
-            Button = resolved.Button,
-            carousel = new Carousel(actors.Carousel),
-            self = this;
+    /**
+     * these are the series of function(s) to be ran when the
+     * end developer calls load()
+     */
+    wiring: [
+      function(next, needs, actors) {
+        var c = new needs.Carousel(actors.Carousel);
+        var self = this;
+        var btn;
 
-        // expose a jQuery wrapped object
-        // While not required, this is a good practice if
-        // you want to reuse the jQuery object
-        this.$el = $el;
-
-        // We are comfortable as the composite maintainer
-        // with people maniuplaing the carousel directly
-        // via its public APIs and listening to its methods
-        // As a developer, you should ensure carousel has
-        // all the necessary events so that CarouselWithButtons
-        // can tell when its carousel changes.
-        this.carousel = carousel;
-
-        // Private members can help lend insights into
-        // the object's inner workings
-        // External groups shouldn't call these, but they may
-        // wish to console.log them
+        this.carousel = c;
         this._nextButtons = [];
-        this._prevButtons = [];
+        this._previousButtons = [];
 
-        // maybe we want to store the resolved object
-        // for other methods in CarouselWithButtons
-        this._Carousel = Carousel;
-
-        // gotta bind them all
-        // In order to improve debugging, remember to add
-        // these objects to the _nextButtons and _prevButtons
-        $.each(actors.Next, function (idx, nextEl) {
-          var btn = new Button(nextEl);
+        $.each(actors.Next, function(idx, el) {
+          btn = new needs.Button(el);
+          btn.on(btn.events.USE, function() {
+            c.next();
+          });
+          btn.load();
           self._nextButtons.push(btn);
-          carousel.bind(btn, btn.events.USE, 'next');
-          btn.load();
         });
-        $.each(actors.Previous, function (idx, prevEl) {
-          var btn = new Button(prevEl);
-          self._prevButtons.push(btn);
-          carousel.bind(btn, btn.events.USE, 'previous');
+        $.each(actors.Previous, function(idx, el) {
+          btn = new needs.Button(el);
+          btn.on(btn.events.USE, function() {
+            c.previous();
+          });
           btn.load();
+          self._previousButtons.push(btn);
         });
 
-        carousel.load(function () {
-          done();
-        });
+        c.load();
+        next();
       }
-    };
+    ]
   });
-
-  return CarouselWithButtons;
 }
 
 if (module && module.exports) {
@@ -117,5 +94,5 @@ else if (define && define.amd) {
   define(factory);
 }
 else if (this.AtomicRegistry) {
-  this.AtomicRegistry['composites/carouselwithbuttons'] = factory;
+  this.AtomicRegistry['composites/carosuelwithbuttons'] = factory;
 }

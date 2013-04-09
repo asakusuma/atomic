@@ -23,22 +23,25 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
     events: {},
 
     /**
-     * A key/object collection of behaviors
-     * These identify various behaviors that the implemented
-     * component supports.
-     *
-     * A behavior's object contains three properties, "namespace",
-     * "path", and "object".
-     *
-     * namespace: a local name for the string to assist in namespacing
-     * path: a path from the current component to the behavior
-     * object: the behavior object (can be used in place of "path")
-     *
-     * SELECTED: {namespace: 'selected', path: 'module/path'}
-     *
-     * @property {Object} AbstractComponent#behaviors
+     * A key/string collection of dependencies
+     * These are modules that the AbstractComponent can emit
+     * @property {Object} AbstractComponent#needs
      */
-    behaviors: {},
+    needs: {},
+
+    /**
+     * A key/string collection of roles and matching nodes
+     * These are nodes that compount components need to have in order to function
+     * @property {Object} AbstractComponent#actors
+     */
+    actors: {},
+
+    /**
+     * An array of async functions, responsible for "wiring" everything together
+     * This is where app logic resides
+     * @property {Array} AbstractComponent#wiring
+     */
+    wiring: [],
 
     /**
      * The initializer for a component
@@ -47,7 +50,7 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @constructor
      * @param {HTMLElement} el - an optional HTML element
      */
-    init: function (el) {
+    init: function (el, overrides) {
       if (el) {
         this.attach(el);
       }
@@ -143,42 +146,6 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
     },
 
     /**
-     * Confgure a behavior's binding object prior to augmentation
-     * Every Behavior attached via augment() must fulfill a contract
-     * in order to be successfully added. This contract looks at an
-     * object literal and its properties. The configure() method does
-     * its part by creating the configuration object needed at
-     * augmentation time
-     * @method AbstractComponent#configure
-     * @param {Object} definition - the definition object for the behavior
-     * @param {Object} configuration - the configuration to apply for a definition
-     */
-    configure: function (definition, configuration) {},
-
-    /**
-     * Remove a configuration object from this component
-     * @method AbstractComponent#removeConfiguration
-     * @param {Object} definition - a definition object to remove
-     */
-    removeConfiguration: function (definition) {},
-
-    /**
-     * Augment this Component with a Behavior
-     * Using the mapping from the this.behaviors collection, one
-     * or more Behaviors are loaded, and then their configurations
-     * are checked. The end result is a Behavior modifying this
-     * Component, adding Methods and Events to create new functionality.
-     *
-     * Augmenting is Asynchronous.
-     *
-     * @param {Object} variable - a number of augmentations to apply
-     * @param {Function} callback - a callback function when all augments are done
-     */
-    augment: function () {
-      var args = [].slice.call(arguments, 0);
-    },
-
-    /**
      * Provides an easy way to link an event and method
      * @method AbstractComponent#bind
      * @param {Object} eventing - an eventing object
@@ -216,18 +183,16 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
-      this.modify(cb);
-    },
-
-    /**
-     * Triggers when an element is loaded.
-     * @method AbstractComponent#onLoad
-     * @param {Object} done - invoke this callback when the modifying is complete
-     */
-    modify: function (done) {}
+      // get the needs keys, and Atomic.load them
+      // make a copy of the wiring array
+      // create continuation callback that...
+      //   invokes the next element in the array with a new continuation callback
+      //   if no next, then invoke cb()
+      // call the first wiring w/ continuation function
+      // signature: next, needs, actors
+    }
   };
 });
-
 
 if (module && module.exports) {
   module.exports = AbstractComponent;

@@ -11,9 +11,6 @@ Contains libraries external to Atomic, but are so fundamental, we must include t
 * Fiber - oop javascript system
 * EventEmitter2 - event system
 
-## modules/*
-Contains some sample modules which are copied to the release directory. Use them (or not), they are a powerful example of how you can begin rocking with Atomic.
-
 ## atomic.js
 This file holds all the insertions from the `atomic/*` directory.
 

@@ -21,47 +21,36 @@ nodes.
 */
 
 function factory() {
+  var $ = require('jquery');
+  var Atomic = require('atomic');
 
-  var Atomic = require('atomic'),
-      $ = require('jquery'),
-      Button;
+  // calls the Atomic Component constructor
+  return Atomic.Component({
 
-  /**
-   * The button is an Component that translates mouse behavior into
-   * a generic "use" method that can be listened to by other
-   * code.
-   * @class Button
-   * @extends AbstractComponent
-   */
-  Button = Atomic.OOP.extend(Atomic.AbstractComponent, function (base) {
-    return {
-      events: {
-        /**
-         * Triggered when the carousel has exceeded the max # of nodes
-         * @event Button#USE
-         */
-        USE: 'use'
-      },
+    // no dependencies
+    needs: {},
 
-      /**
-       * Ran in response to an external load() call
-       * This is where the HTML element can be modified
-       * call done() when all work is completed
-       * @method modify
-       */
-      modify: function (done) {
-        var $el = $(this.ELEMENT),
-            button = this;
+    // no additional nodes needed
+    actors: {},
 
-        $el.on('click', function () {
-          button.trigger(button.events.USE);
+    // events
+    events: {
+      USE: 'use'
+    },
+
+    // wiring functions to make this work
+    wiring: [
+      function(next, needs, actors) {
+        var self = this;
+        // actors.default is the default container, either an el passed
+        // to the constructor, or via attach()
+        $(actors.element).on('click', function() {
+          self.trigger(self.events.USE);
         });
-        done();
+        next();
       }
-    };
+    ]
   });
-
-  return Button;
 }
 
 if (module && module.exports) {

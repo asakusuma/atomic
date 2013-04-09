@@ -19,8 +19,6 @@
   var initialized = false;
 
   var AbstractComponent = null;
-  var AbstractBehavior = null;
-  var AbstractComposite = null;
   var CONSTANTS = null;
 
   var fiber = null;
@@ -116,27 +114,10 @@
   resetCjs();
 
   // --------------------------------------------------
-  // ABSTRACT BEHAVIOR
-  // --------------------------------------------------
-  //@@include('./atomic/abstractbehavior.js')
-  Atomic.AbstractBehavior = AbstractBehavior;
-
-  // --------------------------------------------------
-  // BUILT IN ATOMIC BEHAVIORS
-  // --------------------------------------------------
-  //@@include('./atomic/behaviors/composites/actors.js')
-
-  // --------------------------------------------------
   // ABSTRACT COMPONENT
   // --------------------------------------------------
   //@@include('./atomic/abstractcomponent.js')
   Atomic.AbstractComponent = AbstractComponent;
-
-  // --------------------------------------------------
-  // ABSTRACT COMPOSITE
-  // --------------------------------------------------
-  //@@include('./atomic/abstractcomposite.js')
-  Atomic.AbstractComposite = AbstractComposite;
 
   // assign public interface in window scope
   context.Atomic = Atomic;
