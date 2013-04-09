@@ -19,10 +19,10 @@ is used as a convienence, as modern jQuery uses a single
 document level listener as opposed to listeners on individual
 nodes.
 */
+var Atomic = require('atomic');
 
 function factory() {
   var $ = require('jquery');
-  var Atomic = require('atomic');
 
   // calls the Atomic Component constructor
   return Atomic.Component({
@@ -31,7 +31,7 @@ function factory() {
     needs: {},
 
     // no additional nodes needed
-    actors: {},
+    nodes: {},
 
     // events
     events: {
@@ -40,11 +40,11 @@ function factory() {
 
     // wiring functions to make this work
     wiring: [
-      function(next, needs, actors) {
+      function(next, needs, nodes) {
         var self = this;
-        // actors.default is the default container, either an el passed
+        // nodes._root is the default container, either an el passed
         // to the constructor, or via attach()
-        $(actors.element).on('click', function() {
+        $(nodes._root).on('click', function() {
           self.trigger(self.events.USE);
         });
         next();
@@ -52,13 +52,7 @@ function factory() {
     ]
   });
 }
+// you only need to set .id if you are using the "system" loader
+factory.id = 'components/button';
 
-if (module && module.exports) {
-  module.exports = factory();
-}
-else if (define && define.amd) {
-  define(factory);
-}
-else if (this.AtomicRegistry) {
-  this.AtomicRegistry['components/button'] = factory;
-}
+Atomic.export(module, define, factory);

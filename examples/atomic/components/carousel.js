@@ -20,10 +20,10 @@ reliable, including catching error cases.
 This Component makes use of the wiring[] to set up some
 variables.
 */
+var Atomic = require('atomic');
 
 function factory() {
   var $ = require('jquery');
-  var Atomic = require('atomic');
 
   // calls the Atomic Component constructor
   return Atomic.Component({
@@ -32,7 +32,7 @@ function factory() {
     needs: {},
 
     // no additional nodes needed
-    actors: {},
+    nodes: {},
 
     // events
     events: {
@@ -50,20 +50,18 @@ function factory() {
 
     // wiring functions to make this work
     wiring: [
-      function(next, needs, actors) {
+      function(next, needs, nodes) {
         this.index = 0;
-        next();
-      },
-      function(next, needs, actors) {
-        switch(actors.element.tagName.toLowerCase()) {
+
+        switch(nodes._root.tagName.toLowerCase()) {
         case 'ul':
-          this._nodes = $(actors.element).children('li');
+          this._nodes = $(nodes._root).children('li');
           break;
         case 'div':
-          this._nodes = $(actors.element).children('div, span');
+          this._nodes = $(nodes._root).children('div, span');
           break;
         default:
-          throw new Error('Unhandled node type for Carousel: '+actors.element.tagName);
+          throw new Error('Unhandled node type for Carousel: '+nodes._root.tagName);
         }
 
         this._$nodes = $(this._nodes);
@@ -132,13 +130,7 @@ function factory() {
     }
   });
 }
+// you only need to set .id if you are using the "system" loader
+factory.id = 'components/carousel';
 
-if (module && module.exports) {
-  module.exports = factory();
-}
-else if (define && define.amd) {
-  define(factory);
-}
-else if (this.AtomicRegistry) {
-  this.AtomicRegistry['components/button'] = factory;
-}
+Atomic.export(module, define, factory);

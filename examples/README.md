@@ -26,7 +26,7 @@ To keep everything cohesive, think of the Atomic ecosystem like this:
 
 * The AHI (Atomic HTML Interface) is just a HTML scanner that makes use of
 * The Composition interface to put together Components
-* All of which are created using an obvious Plain Old JavaScript (POJS) API
+* All of which are created using an obvious Plain Old JavaScript (POJS)
 
 # How do I build a Component?
 The following template can be used as a guide for creating a Component:
@@ -37,21 +37,16 @@ function factory() {
   var Atomic = require('atomic');
   return Atomic.Component({
     needs: {},
-    actors: {},
+    nodes: {},
     events: {},
-    wiring: []
+    wiring: [],
+    publicMethodOne: function() {},
+    publicMethodTwo: function() {}
   });
 }
+factory.id = 'sampleTemplate';
 
-if (module && module.exports) {
-  module.exports = factory();
-}
-else if (define && define.amd) {
-  define(factory);
-}
-else if (this.AtomicRegistry) {
-  this.AtomicRegistry['components/sampletemplate'] = factory;
-}
+Atomic.export(module, define, factory);
 ```
 
 So what's going on here?
@@ -63,7 +58,7 @@ So what's going on here?
   * `events` is a collection of events this object can generate `events: { SELECT: 'select' }`
   * `wiring` is an array of functions to run in order to initialize the object. Every function receives three parameters: **next** (continues to the next wiring item), **needs** (a resolved collection of the needs object above), and **actors** (all actors that were defined on instantiation).
 4. Return the object created from `Atomic.Component`, completing the factory method
-5. Based on the environment, you can have your new Component stored in a variety of ways. `module` and `module.exports` are for CommonJS environments, `define` is for AMD scenarios, and `AtomicRegistry` is available to people who are just loading their files ahead of time in script tags.
+5. Calling `Atomic.export` saves your Component into the proper namespace. If you gave your factory an `id`, it will make use of a global registry.
 
 # How do I build a Composite?
 It's actually the same! "Composite" is just an organizational term. If you're using the `has:{}` or `actors:{}` properties, you should probably consider your object a composite. This helps consuming developers know how complex your object is.
@@ -73,4 +68,4 @@ Just use `Atomic.Composite({})` to create the composite. If the need arises, Com
 # Reusable Wirings
 Wirings are reusable ways to add additional behaviors to an existing Atomic Component or Composite. Stick them in the `wirings` directory, include them via `Atomic.load`, and pass them as a parameter to `instanceObject.wireIn()`. Just like that, your reusable wiring will run at the end of the chain.
 
-Want to make it run first? `instanceObject.wireIn(function, 0)` and it'll be inserted at the 0 indexed slot.
+Want to make it run first? `instanceObject.wireIn(function, true)` and it'll be inserted at the first slot instead of the end of the wiring chain.

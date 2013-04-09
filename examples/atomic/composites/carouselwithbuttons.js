@@ -6,9 +6,10 @@ Composites are like Components, only there is an explcit
 ownership pattern between the Composite and the Components
 contained within.
 */
+var Atomic = require('atomic');
+
 function factory() {
   var $ = require('jquery');
-  var Atomic = require('atomic');
 
   /**
    * The carousel with buttons is a mashery of carousel and buttons, and is
@@ -16,7 +17,7 @@ function factory() {
    * reusable "larger piece". In the class description, you should also explain
    * the contract expected by this object.
    *
-   * CarouselWithButtons expects the following nodes to be defined in the actors{}
+   * CarouselWithButtons expects the following nodes to be defined in the nodes{}
    * configuration
    * - Carousel: will be turned into a carousel Component
    * - Next: all references will be turned into buttons that advance the carousel
@@ -36,11 +37,11 @@ function factory() {
     },
 
     /**
-     * Declares "actors", additional HTML Elements required
-     * usually all actors need to be fulfilled for a
+     * Declares "nodes", additional HTML Elements required
+     * usually all nodes need to be fulfilled for a
      * Composite to work correctly.
      */
-    actors: {
+    nodes: {
       Carousel: null,
       Next: null,
       Previous: null
@@ -54,8 +55,8 @@ function factory() {
      * end developer calls load()
      */
     wiring: [
-      function(next, needs, actors) {
-        var c = new needs.Carousel(actors.Carousel);
+      function(next, needs, nodes) {
+        var c = new needs.Carousel(nodes.Carousel);
         var self = this;
         var btn;
 
@@ -63,7 +64,7 @@ function factory() {
         this._nextButtons = [];
         this._previousButtons = [];
 
-        $.each(actors.Next, function(idx, el) {
+        $.each(nodes.Next, function(idx, el) {
           btn = new needs.Button(el);
           btn.on(btn.events.USE, function() {
             c.next();
@@ -71,7 +72,7 @@ function factory() {
           btn.load();
           self._nextButtons.push(btn);
         });
-        $.each(actors.Previous, function(idx, el) {
+        $.each(nodes.Previous, function(idx, el) {
           btn = new needs.Button(el);
           btn.on(btn.events.USE, function() {
             c.previous();
@@ -86,13 +87,7 @@ function factory() {
     ]
   });
 }
+// you only need to set .id if you are using the "system" loader
+factory.id = 'composites/carosuelwithbuttons';
 
-if (module && module.exports) {
-  module.exports = factory();
-}
-else if (define && define.amd) {
-  define(factory);
-}
-else if (this.AtomicRegistry) {
-  this.AtomicRegistry['composites/carosuelwithbuttons'] = factory;
-}
+Atomic.export(module, define, factory);
