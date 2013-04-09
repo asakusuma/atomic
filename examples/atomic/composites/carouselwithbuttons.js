@@ -117,5 +117,5 @@ else if (define && define.amd) {
   define(factory);
 }
 else if (this.AtomicRegistry) {
-  this.AtomicRegistry['components/carousel'] = factory;
+  this.AtomicRegistry['composites/carouselwithbuttons'] = factory;
 }

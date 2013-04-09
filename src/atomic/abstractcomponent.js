@@ -41,23 +41,6 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
     behaviors: {},
 
     /**
-     * A key/string collection of dependencies in this component
-     * If a given component depends on additional components in the
-     * ecosystem, they can be noted here. Listing components here
-     * instead of in require() statements at the top has several
-     * advantages
-     *
-     * - has{} dependencies are late-loaded resolved at load()
-     * - has{} dependencies are localized as a var in your modify() method
-     * - has{} dependencies are easily inspected using console.log
-     *
-     * Make the lives of people depending on you better. Use has{}
-     *
-     * @property {Object} AbstractComponent#has
-     */
-    has: {},
-
-    /**
      * The initializer for a component
      * The optional el, if provided, will then perform an attach on
      * your behalf.
@@ -240,10 +223,8 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * Triggers when an element is loaded.
      * @method AbstractComponent#onLoad
      * @param {Object} done - invoke this callback when the modifying is complete
-     * @param {Object} resolved - a collection of resolved dependencies
-     * @param {Object} roles - If you are a Composite, then you will get your roles
      */
-    modify: function (done, resolved, roles) {}
+    modify: function (done) {}
   };
 });
 

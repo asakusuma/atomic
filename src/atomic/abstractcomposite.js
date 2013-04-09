@@ -69,8 +69,8 @@ var AbstractComposite = Atomic.OOP.extend(AbstractComponent, function (base) {
      * Triggers when a Component is loaded.
      * @method AbstractComposite#modify
      * @param {Object} done - invoke this callback when the modifying is complete
-     * @param {Object} resolved - a collection of resolved dependencies
-     * @param {Object} actors - If you are a Composite, then you will get your actors
+     * @param {Object} resolved - a collection of resolved dependencies from has{}
+     * @param {Object} actors - A collection of objects fufilling the ACTORS behavior
      */
     modify: function (done, resolved, actors) {}
   };
