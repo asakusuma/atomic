@@ -12,13 +12,13 @@ component the ability to console.log()
 */
 $.ready(function () {
   Atomic.load(['jquery', 'components/Carousel', 'wirings/echo'],
-  function ($, Carousel, Echoer) {
+  function ($, Carousel, echoer) {
     var carousel;
     carousel = new Carousel($('#carousel'));
 
     // add some prebuilt reusable wiring
     // gives carousel an "echo" method
-    carousel.wireIn(Echoer);
+    carousel.wireIn(echoer(/* { optional config } */));
 
     // add an event, and add extra behavior
     carousel.addEvent('SELECT');
