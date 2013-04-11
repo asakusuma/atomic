@@ -72,3 +72,26 @@ Just use `Atomic.Composite({})` to create the composite. If the need arises, Com
 Wirings are reusable ways to add additional behaviors to an existing Atomic Component or Composite. Stick them in the `wirings` directory, include them via `Atomic.load`, and pass them as a parameter to `instanceObject.wireIn()`. Just like that, your reusable wiring will run at the end of the chain.
 
 Want to make it run first? `instanceObject.wireIn(function, true)` and it'll be inserted at the first slot instead of the end of the wiring chain.
+
+Here's a template for creating your own wirings:
+
+```js
+var Atomic = require('atomic');
+
+function factory() {
+  return function(config) {
+    return {
+      init: function(next, needs, nodes) {
+        // put your wiring code here
+      },
+      publicMethodOne: function() {},
+      publicMethodTwo: function() {},
+      propertyName: foo
+    };
+  };
+}
+// you only need to set .id if you are using the "system" loader
+factory.id = 'wirings/samplewiring';
+
+Atomic.export(module, define, factory);
+```
