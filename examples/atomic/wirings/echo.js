@@ -11,9 +11,12 @@ function factory() {
 
   return function(config) {
     return {
-      wire: function(next, needs, nodes) {
+      init: function(next, needs, nodes) {
         // reusable code goes here, it's invoked when a consuming
         // developer calls load()
+        // this === the component
+        var sample = config.configName;
+        next();
       },
       /**
        * This is a custom method. Anyone who wires in this object

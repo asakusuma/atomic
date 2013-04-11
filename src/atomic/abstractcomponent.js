@@ -138,11 +138,24 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * This triggers the specified event string, calling all
      * listeners that are subscribed to it.
      * @method AbstractComponent#trigger
-     * @param {String} - the event name
-     * @param {Object} variable - any additional arguments to pass in the event
+     * @param {String} name - the event name
+     * @param {Object} ... - any additional arguments to pass in the event
      */
     trigger: function () {
       var args = [].slice.call(arguments, 0);
+      var name = args.shift();
+    },
+
+    /**
+     * Broadcast a global event
+     * Trigger an event on the global event bus
+     * @method AbstractComponent#broadcast
+     * @param {String} name, the event name
+     * @param {Object} ... - any additional arguments to pass in the event
+     */
+    broadcast: function () {
+      var args = [].slice.call(arguments, 0);
+      var name = args.shift();
     },
 
     /**
