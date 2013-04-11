@@ -18,6 +18,9 @@ The Plain Old JavaScript (POJS) interfaces show how you would use regular ole Ja
 ## composite_* files
 The Composition API (Comps) shows how as an end developer, you would use a Composite. Since a Composite requires multiple "actors", you add them using the built in .composite.ACTORS behavior. These actors fulfill their roles in the Composite, and the composite will do whatever it needs to with those elements in order to build our your final object.
 
+## wiring_* files
+For both Components and Composites, additional and custom wiring can be added to provide new functionality. The wiring_* files show both a pre existing wiring and some custom wiring being added to a stock Carousel.
+
 ## html_* files
 The Atomic HTML Interface (AHI) is a plugin that when used allows you to scan your HTML for Atomic Components and Composites, creating them on demand. If you just want to write markup and have magic happen, perhaps this is for you. For users of JS frameworks, this is probably less desirable, and you may wish to fall back to the Comps or POJS interfaces.
 
