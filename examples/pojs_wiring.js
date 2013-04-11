@@ -27,7 +27,6 @@ $.ready(function () {
     carousel.addEvent('SELECT');
     carousel.wireIn({
       init: function(next, needs, nodes) {
-        var el = this.ELEMENT;
         $('li', $(carousel)).click(function(evt) {
           var out;
           out.url = $('a', this).attr('href');
@@ -35,14 +34,8 @@ $.ready(function () {
           carousel.trigger(carousel.events.SELECT, out);
           carousel.broadcast(carousel.events.SELECT, out);
         });
+        next();
       }
-    });
-
-    // uses a callback on load to listen after all wiring is done
-    carousel.load(function () {
-      carousel.on(carousel.events.SELECT, function(data) {
-        carousel.echo(data.url, data.ponies);
-      });
     });
 
   });

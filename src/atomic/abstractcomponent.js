@@ -10,12 +10,6 @@
 var AbstractComponent = Atomic.OOP.extend({}, function (base) {
   return {
     /**
-     * The element once attached, visible as this.ELEMENT throughout
-     * @property {HTMLElement} AbstractComponent#ELEMENT
-     */
-    ELEMENT: null,
-
-    /**
      * A key/string collection of events
      * These are events that the AbstractComponent can emit
      * @property {Object} AbstractComponent#events
@@ -32,9 +26,9 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
     /**
      * A key/string collection of roles and matching nodes
      * These are nodes that compount components need to have in order to function
-     * @property {Object} AbstractComponent#actors
+     * @property {Object} AbstractComponent#nodes
      */
-    actors: {},
+    nodes: {},
 
     /**
      * An array of async functions, responsible for "wiring" everything together
@@ -202,7 +196,7 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
       //   invokes the next element in the array with a new continuation callback
       //   if no next, then invoke cb()
       // call the first wiring w/ continuation function
-      // signature: next, needs, actors
+      // signature: next, needs, nodes
     },
 
     /**

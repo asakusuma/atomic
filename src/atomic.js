@@ -10,11 +10,7 @@
    * The global Atomic Object
    * @class Atomic
    */
-  var Atomic = {
-    behaviors: {
-      composites: {}
-    }
-  };
+  var Atomic = {};
   var oldAtomic = context.Atomic;
   var initialized = false;
 

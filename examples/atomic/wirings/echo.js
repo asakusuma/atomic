@@ -7,8 +7,6 @@ This is a sample wiring. Go ahead and include it and add "echo" methods
 var Atomic = require('atomic');
 
 function factory() {
-  var $ = require('jquery');
-
   return function(config) {
     return {
       init: function(next, needs, nodes) {
@@ -16,6 +14,8 @@ function factory() {
         // developer calls load()
         // this === the component
         var sample = config.configName;
+        this.echo('Initialized with the config of ' + sample);
+
         next();
       },
       /**
