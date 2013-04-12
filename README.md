@@ -5,7 +5,7 @@ Atomic is a DOM Library Agnostic solution for creating a better HTML element. Th
 
 Why would you choose Atomic?
 * **No DOM Library Opinion** You're not bound to jQuery, YUI, Ender, or anything
-* **Small** < 9999kb **SIZE TBD**
+* **Small** < 999kb **SIZE TBD**
 * **Simple** enhance an element, put them together, that's it
 * **Works with AMD and CJS Loaders** You can use any loader strategy you'd like
 
