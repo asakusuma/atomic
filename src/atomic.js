@@ -25,7 +25,7 @@
   var exports;
   var process;
 
-  Atomic.Config = context.ATOMIC_CONFIG || {};
+  Atomic.config = context.ATOMIC_CONFIG || {};
   Atomic.initConfig = function() {};
 
   /**
@@ -96,6 +96,8 @@
   //@@include('./constants.js')
   Atomic._.CONSTANTS = CONSTANTS;
 
+  // TODO: Q Library here
+
   // --------------------------------------------------
   // FIBER
   // --------------------------------------------------
@@ -114,7 +116,7 @@
   // ABSTRACT COMPONENT
   // --------------------------------------------------
   //@@include('./atomic/abstractcomponent.js')
-  Atomic.AbstractComponent = AbstractComponent;
+  Atomic._.AbstractComponent = AbstractComponent;
 
   // --------------------------------------------------
   // FACTORIES

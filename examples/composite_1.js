@@ -21,5 +21,7 @@ $.ready(function () {
         Previous: $('.prev', $carousel)
       }
     });
+
+    cwb.load();
   });
 });

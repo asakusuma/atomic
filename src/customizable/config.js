@@ -1,3 +1,5 @@
+/*global ATOMIC_CONFIG:true */
+
 /**
  * Atomic configuration
  * important URL stuff would go here
@@ -12,3 +14,5 @@ var ATOMIC_CONFIG = {
     xdSwf: null
   }
 };
+
+ATOMIC_CONFIG = ATOMIC_CONFIG;
