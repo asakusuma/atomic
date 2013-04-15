@@ -10,7 +10,9 @@
    * The global Atomic Object
    * @class Atomic
    */
-  var Atomic = {};
+  var Atomic = {
+    _: {}
+  };
   var oldAtomic = context.Atomic;
   var initialized = false;
 
@@ -25,7 +27,6 @@
 
   Atomic.Config = context.ATOMIC_CONFIG || {};
   Atomic.initConfig = function() {};
-  Atomic.Libs = {};
 
   /**
    * Create a "CommonJS" environment. This lets us
@@ -93,20 +94,20 @@
   // CONSTANTS
   // --------------------------------------------------
   //@@include('./constants.js')
-  Atomic.CONSTANTS = CONSTANTS;
+  Atomic._.CONSTANTS = CONSTANTS;
 
   // --------------------------------------------------
   // FIBER
   // --------------------------------------------------
   //@@include('./lib/fiber.js')
-  Atomic.OOP = context.Fiber.noConflict();
+  Atomic._.Fiber = context.Fiber.noConflict();
 
   // --------------------------------------------------
   // EVENT EMITTER 2
   // --------------------------------------------------
   cjsHarness();
   //@@include('./lib/eventemitter2.js')
-  Atomic.CustomEvent = module.exports;
+  Atomic._.EventEmitter = module.exports;
   resetCjs();
 
   // --------------------------------------------------
@@ -114,6 +115,12 @@
   // --------------------------------------------------
   //@@include('./atomic/abstractcomponent.js')
   Atomic.AbstractComponent = AbstractComponent;
+
+  // --------------------------------------------------
+  // FACTORIES
+  // --------------------------------------------------
+  //@@include('./atomic/component.js')
+  //@@include('./atomic/composite.js')
 
   // assign public interface in window scope
   context.Atomic = Atomic;

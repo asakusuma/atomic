@@ -7,7 +7,7 @@
  * components to create Composites.
  * @class AbstractComponent
  */
-var AbstractComponent = Atomic.OOP.extend({}, function (base) {
+var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
   return {
     /**
      * A key/string collection of events
@@ -45,6 +45,11 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {HTMLElement} el - an optional HTML element
      */
     init: function (el, overrides) {
+      this._eventEmitter = new Atomic._.EventEmitter({
+        wildcard: true,
+        newListener: false,
+        maxListeners: 20
+      });
       if (el) {
         this.attach(el);
       }
@@ -62,7 +67,10 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {String} name - the event name
      * @param {Function} fn - the callback function
      */
-    on: function (name, fn) {},
+    on: function (name, fn) {
+      this._eventEmitter.on(name, fn);
+      return this;
+    },
 
     /**
      * Remove an event added via on
@@ -70,21 +78,30 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {String} name - the name to remove callbacks from
      * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
      */
-    off: function (name, fn /* optional */) {},
+    off: function (name, fn /* optional */) {
+      this._eventEmitter.off(name, fn);
+      return this;
+    },
 
     /**
      * Listen to all events emitted from this Component
      * @method AbstractComponent#onAny
      * @param {Function} fn - a function to fire on all events
      */
-    onAny: function (fn) {},
+    onAny: function (fn) {
+      this._eventEmitter.onAny(fn);
+      return this;
+    },
 
     /**
      * Remove a listener from the "listen to everything" group
      * @method AbstractComponent#offAny
      * @param {Function} fn - the callback to remove
      */
-    offAny: function (fn) {},
+    offAny: function (fn) {
+      this._eventEmitter.offAny(fn);
+      return this;
+    },
 
     /**
      * Queue a callback to run once, and then remove itself
@@ -92,7 +109,10 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {String} name - the event name
      * @param {Function} fn - the callback function
      */
-    onOnce: function (name, fn) {},
+    onOnce: function (name, fn) {
+      this._eventEmitter.onOnce(name, fn);
+      return this;
+    },
 
     /**
      * Queue a callback to run X times, and then remove itself
@@ -101,14 +121,20 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {Number} count - a number of times to invoke the callback
      * @param {Function} fn - the callback function
      */
-    onMany: function (name, count, fn) {},
+    onMany: function (name, count, fn) {
+      this._eventEmitter.onMany(name, count, fn);
+      return this;
+    },
 
     /**
      * Remove all of the listeners from the given namespace
      * @method AbstractComponent#offAll
      * @param {String} name - the event name
      */
-    offAll: function (name) {},
+    offAll: function (name) {
+      this._eventEmitter.offAll(name);
+      return this;
+    },
 
     /**
      * set the maximum number of listeners this component can support
@@ -118,14 +144,21 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @method AbstractComponent#setMaxListeners
      * @param {Number} count - the max number of listeners
      */
-    setMaxListeners: function (count) {},
+    setMaxListeners: function (count) {
+      this._eventEmitter.setMaxListeners(count);
+      return this;
+    },
 
     /**
      * Get a list of all the current listeners
      * @method AbstractComponent#listeners
-     * @returns {Object}
+     * @returns {Array}
      */
-    listeners: function () {},
+    listeners: function (name) {
+      var anyListeners = this._eventEmitter.listenersAny();
+      var listeners = this._eventEmitter.listeners(name);
+      return listeners.concat(anyListeners);
+    },
 
     /**
      * Trigger an event
@@ -137,7 +170,8 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      */
     trigger: function () {
       var args = [].slice.call(arguments, 0);
-      var name = args.shift();
+      this._eventEmitter.emit.apply(this._eventEmitter, args);
+      return this;
     },
 
     /**
@@ -149,7 +183,8 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      */
     broadcast: function () {
       var args = [].slice.call(arguments, 0);
-      var name = args.shift();
+      Atomic._.eventEmitter.emit.apply(Atomic._.eventEmitter, args);
+      return this;
     },
 
     /**
@@ -159,7 +194,15 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {String} eventName - the name of the event to listen to
      * @param {String|Function} method - the method to invoke. If a string, resolves under this.*
      */
-    bind: function (eventing, eventName, method) {},
+    bind: function (eventing, eventName, method) {
+      if (typeof method === 'string') {
+        eventing.on(eventName, this[method]);
+      }
+      else {
+        eventing.on(eventName, method);
+      }
+      return this;
+    },
 
     /**
      * Remove a bind() operation
@@ -168,20 +211,28 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {String} eventName - optional. an event name to unsubscribe from
      * @param {String|Function} method - optional. the method to remove. If a string, resolves under this.*
      */
-    unbind: function (eventing, eventName, method) {},
+    unbind: function (eventing, eventName, method) {
+      if (typeof method === 'string') {
+        eventing.off(eventName, this[method]);
+      }
+      else if (typeof method === 'function') {
+        eventing.off(eventName, method);
+      }
+      else {
+        eventing.off(eventName);
+      }
+      return this;
+    },
 
     /**
      * Attach an element to this Component
      * @method AbstractComponent#attach
      * @param {HTMLElement} el - an HTML element to attach
      */
-    attach: function (el) {},
-
-    /**
-     * Detatch an element from this Component
-     * @method AbstractComponent#detatch
-     */
-    detatch: function () {},
+    attach: function (el) {
+      this.nodes._root = el;
+      return this;
+    },
 
     /**
      * Load the Component, resolve all dependencies
@@ -197,6 +248,7 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
       //   if no next, then invoke cb()
       // call the first wiring w/ continuation function
       // signature: next, needs, nodes
+      return this;
     },
 
     /**
@@ -208,14 +260,19 @@ var AbstractComponent = Atomic.OOP.extend({}, function (base) {
      * @param {Function} fn - a functon to run in response to load
      * @param {Number} idx - optional. A 0-index slot for inserting the wiring
      */
-    wireIn: function(fn, idx) {},
+    wireIn: function(fn, idx) {
+      return this;
+    },
 
     /**
      * Add an additional event to this Component
      * @method AbstractComponent#addEvent
      * @param {String} name - the event name. Stored as NAME for usage
      */
-    addEvent: function(name) {}
+    addEvent: function(name) {
+      this.events[name] = name;
+      return this;
+    }
   };
 });
 
