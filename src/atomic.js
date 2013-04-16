@@ -13,8 +13,6 @@
   var Atomic = {
     _: {}
   };
-  var oldAtomic = context.Atomic;
-  var initialized = false;
 
   var AbstractComponent = null;
   var CONSTANTS = null;
@@ -57,59 +55,11 @@
     process = undefined;
   }
 
-  /**
-   * prevent conflicts with an existing variable
-   * if it is named "Atomic". Returns the current
-   * Atomic reference
-   * @method Atomic.noConflict
-   * @return Object - the current Atomic reference
-   */
-  Atomic.noConflict = function () {
-    var thisAtomic = context.Atomic;
-    context.Atomic = oldAtomic;
-    return thisAtomic;
-  };
-
-  /**
-   * load the specified dependencies, then run the callback
-   * with the dependencies as arguments. This abstracts
-   * away any loader framework implementations
-   * @method Atomic.load
-   * @param Array depend - an array of dependencies
-   * @param Function then - a callback to run with dependencies as arguments
-   */
-  Atomic.load = function(depend, then) {
-    if (!initialized) {
-      Atomic.initConfig();
-      initialized = true;
-    }
-
-    // USE THE SPECIFIED LOADER's ASYNC INTERFACE
-    // AND ON COMPLETION, RUN THE CALLBACK FUNCTION
-    // WITH DEPENDENCIES ENUMERATED
-
-  };
-
-  /**
-   * A basic proxy function. Makes it easier to wrap functionality
-   * @method Atomic.proxy
-   * @param {Function} fn - the function to wrap
-   * @param {Object} scope - the scope to apply fn within
-   * @returns {Function}
-   */
-  Atomic.proxy = function(fn, scope) {
-    return function() {
-      fn.apply(scope, arguments);
-    };
-  };
-
   // --------------------------------------------------
   // CONSTANTS
   // --------------------------------------------------
   //@@include('./constants.js')
   Atomic._.CONSTANTS = CONSTANTS;
-
-  // TODO: Q Library here
 
   // --------------------------------------------------
   // FIBER
@@ -126,6 +76,14 @@
   resetCjs();
 
   // --------------------------------------------------
+  // Q
+  // --------------------------------------------------
+  cjsHarness();
+  //@@include('./lib/q.js')
+  Atomic._.Q = module.exports;
+  resetCjs();
+
+  // --------------------------------------------------
   // ABSTRACT COMPONENT
   // --------------------------------------------------
   //@@include('./atomic/abstractcomponent.js')
@@ -136,6 +94,11 @@
   // --------------------------------------------------
   //@@include('./atomic/component.js')
   //@@include('./atomic/composite.js')
+
+  // --------------------------------------------------
+  // PUBLIC INTERFACE
+  // --------------------------------------------------
+  //@@include('./atomic/public.js')
 
   // assign public interface in window scope
   context.Atomic = Atomic;

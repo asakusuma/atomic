@@ -9,14 +9,12 @@ var Atomic = require('atomic');
 function factory() {
   return function(config) {
     return {
-      init: function(next, needs, nodes) {
+      init: function(needs, nodes) {
         // reusable code goes here, it's invoked when a consuming
         // developer calls load()
         // this === the component
         var sample = config.configName;
         this.echo('Initialized with the config of ' + sample);
-
-        next();
       },
       /**
        * This is a custom method. Anyone who wires in this object

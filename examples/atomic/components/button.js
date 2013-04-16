@@ -40,14 +40,13 @@ function factory() {
 
     // wiring functions to make this work
     wiring: [
-      function(next, needs, nodes) {
+      function(needs, nodes) {
         var self = this;
         // nodes._root is the default container, either an el passed
         // to the constructor, or via attach()
         $(nodes._root).on('click', function() {
           self.trigger(self.events.USE);
         });
-        next();
       }
     ]
   });

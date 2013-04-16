@@ -55,7 +55,7 @@ function factory() {
      * end developer calls load()
      */
     wiring: [
-      function(next, needs, nodes) {
+      function(needs, nodes) {
         var c = new needs.Carousel(nodes.Carousel);
         var self = this;
         var btn;
@@ -82,7 +82,6 @@ function factory() {
         });
 
         c.load();
-        next();
       }
     ]
   });

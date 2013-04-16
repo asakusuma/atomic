@@ -50,7 +50,7 @@ function factory() {
 
     // wiring functions to make this work
     wiring: [
-      function(next, needs, nodes) {
+      function(needs, nodes) {
         this.index = 0;
 
         switch(nodes._root.tagName.toLowerCase()) {
@@ -67,8 +67,6 @@ function factory() {
         this._$nodes = $(this._nodes);
 
         this._setClasses();
-
-        next();
       }
     ],
 
