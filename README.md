@@ -77,3 +77,12 @@ You got it. The examples/ directory shows how you can use Atomic in many differe
 
 * files starting with pojs_* are the `plain old JavaScript` apis. Backbone, jQuery, it doesn't matter. Make Components and use them.
 * files starting with magic_* are the `magic HTML interface` apis. Make some Components straight from your markup? Sure, if that's your thing!
+
+# Built on Greatness
+* [Q.js](https://github.com/kriskowal/q) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
+* [Fiber](https://github.com/linkedin/Fiber) for OOP sugar internally
+* [Eventemitter2](https://github.com/hij1nx/EventEmitter2) for a standalone event system
+
+# By cool people
+* Founding Team: Jakob Heuser, Eric Rowell, Jimmy Chan, Ryan Blunden, Asa Kusuma, Eugene O'Neill, Branden Thompson
+* Contributors: [View the Contributor List](https://github.com/Jakobo/atomic/contributors)
