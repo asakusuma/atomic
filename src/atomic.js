@@ -90,6 +90,19 @@
 
   };
 
+  /**
+   * A basic proxy function. Makes it easier to wrap functionality
+   * @method Atomic.proxy
+   * @param {Function} fn - the function to wrap
+   * @param {Object} scope - the scope to apply fn within
+   * @returns {Function}
+   */
+  Atomic.proxy = function(fn, scope) {
+    return function() {
+      fn.apply(scope, arguments);
+    };
+  };
+
   // --------------------------------------------------
   // CONSTANTS
   // --------------------------------------------------

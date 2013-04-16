@@ -224,6 +224,15 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
       return this;
     },
 
+    // TODO: Doc and explain
+    // replace an existing function with a new
+    // method, then call the original method
+    // if you got a function for arg 1, loop through
+    // the this[] collection. Strings are far faster
+    // as we can go write to wrapping
+    before: function(method, fn) {},
+    after: function(method, fn) {},
+
     /**
      * Attach an element to this Component
      * @method AbstractComponent#attach
