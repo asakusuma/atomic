@@ -8,7 +8,7 @@ module.exports = function (grunt) {
       main:         './dist/atomic-__ATOMIC__VERSION__/atomic.js',
       main_min:     './dist/atomic-__ATOMIC__VERSION__/atomic.min.js',
       license:      './dist/atomic-__ATOMIC__VERSION__/LICENSE',
-      readme:       './dist/atomic-__ATOMIC__VERSION__/README.markdown'
+      readme:       './dist/atomic-__ATOMIC__VERSION__/README.md'
     },
     anonymous_header: '!(function(context, undefined){\n',
     anonymous_footer: '\n;context.Atomic.version = "__ATOMIC__VERSION__";\n})(this);',
@@ -54,6 +54,24 @@ module.exports = function (grunt) {
     },
 
     /**
+     * copy: copy files that need no modification
+     */
+    copy: {
+      atomic: {
+        files: [
+          {src: './tmp/atomic.js', dest: '<%=output_files.main %>', filter: 'isFile'},
+          {src: './tmp/atomic.min.js', dest: '<%=output_files.main_min %>', filter: 'isFile'}
+        ]
+      },
+      text: {
+        files: [
+          {src: ['./LICENSE'], dest: '<%= output_files.license %>', filter: 'isFile'},
+          {src: ['./README.md'], dest: '<%= output_files.readme %>', filter: 'isFile'}
+        ]
+      }
+    },
+
+    /**
      * jshint: perform jshint operations on the code base
      */
     jshint: {
@@ -68,6 +86,23 @@ module.exports = function (grunt) {
           ]
         },
         jshintrc: './.jshintrc'
+      }
+    },
+
+    /**
+     * uglify: compress code while preserving key identifiers
+     */
+    uglify: {
+      options: {
+        // banner: '<%= atomic_header %>\n',
+        mangle: {
+          except: ['require', 'define', 'Fiber', 'undefined']
+        }
+      },
+      atomic: {
+        files: {
+          './tmp/atomic.min.js': [ './tmp/atomic.js' ]
+        }
       }
     },
 
@@ -91,8 +126,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-include-replace');
-  // grunt.loadNpmTasks('grunt-contrib-uglify');
-  // grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   // grunt.loadNpmTasks('grunt-contrib-compress');
   // grunt.loadNpmTasks('grunt-contrib-concat');
   // grunt.loadNpmTasks('grunt-contrib-qunit');
@@ -102,9 +137,13 @@ module.exports = function (grunt) {
     'jshint',
     'shell:tag',
     'includereplace:atomic',
-    // uglify
-    // save to dist directory
+    'uglify:atomic',
+    'copy:atomic',
+    'copy:text',
     'clean:tmp'
   ]);
+
+  // grunt.registerTask('test', []);
+  // grunt.registerTask('release', []);
 
 };
