@@ -133,7 +133,7 @@ module.exports = function (grunt) {
   // grunt.loadNpmTasks('grunt-contrib-qunit');
   // grunt.loadNpmTasks('grunt-express');
 
-  grunt.registerTask('default', [
+  grunt.registerTask('build', [
     'jshint',
     'shell:tag',
     'includereplace:atomic',
@@ -146,4 +146,5 @@ module.exports = function (grunt) {
   // grunt.registerTask('test', []);
   // grunt.registerTask('release', []);
 
+  grunt.registerTask('default', ['build']);
 };
