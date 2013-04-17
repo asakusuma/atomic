@@ -27,6 +27,23 @@
   Atomic.initConfig = function() {};
 
   /**
+   * Copy one objects properties into another
+   * @method Atomic.augment
+   * @param {Object} src - the source to supplement with new things
+   * @param {Object} target - the thing to copy from
+   * @returns {Object} the resulting object. `src` is updated by reference
+   * @private
+   */
+  Atomic.augment = function(src, target) {
+    for (var name in target) {
+      if (target.hasOwnProperty(name)) {
+        src[name] = target;
+      }
+    }
+    return src;
+  };
+
+  /**
    * Create a "CommonJS" environment. This lets us
    * include a library directly, without having to alter
    * the original code. We can then collect the contents
@@ -96,9 +113,10 @@
   //@@include('./atomic/composite.js')
 
   // --------------------------------------------------
-  // PUBLIC INTERFACE
+  // PUBLIC INTERFACES
   // --------------------------------------------------
   //@@include('./atomic/public.js')
+  //@@include('./atomic/events.js')
 
   // assign public interface in window scope
   context.Atomic = Atomic;

@@ -183,7 +183,7 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
      */
     broadcast: function () {
       var args = [].slice.call(arguments, 0);
-      Atomic._.eventEmitter.emit.apply(Atomic._.eventEmitter, args);
+      Atomic.trigger.apply(Atomic, args);
       return this;
     },
 
