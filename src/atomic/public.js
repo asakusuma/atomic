@@ -67,6 +67,22 @@ Atomic.augment(Atomic, {
   },
 
   /**
+   * Wrap a function with a new function.
+   * Makes it easier to inject pointcuts or change the
+   * behavior of a function
+   * @method Atomic.wrap
+   * @param {Function} fn - the function to wrap
+   * @param {Function} wrapper - the function to wrap "fn" in. Gets "fn" as its first argument
+   */
+  wrap: function(fn, wrapper) {
+    return function() {
+      var args = [].slice.apply(arguments);
+      args.unshift(fn);
+      wrapper.apply(window, args);
+    };
+  },
+
+  /**
    * Creates the ability to call Promises from within the
    * wiring functions. This keeps us from having to pass
    * in control functions, instead making everything
