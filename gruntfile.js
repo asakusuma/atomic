@@ -91,9 +91,8 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-include-replace');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-copy');
-
+  // grunt.loadNpmTasks('grunt-contrib-uglify');
+  // grunt.loadNpmTasks('grunt-contrib-copy');
   // grunt.loadNpmTasks('grunt-contrib-compress');
   // grunt.loadNpmTasks('grunt-contrib-concat');
   // grunt.loadNpmTasks('grunt-contrib-qunit');
