@@ -9,7 +9,7 @@
   /**
   * factory method that returns a component class
   * @method Atomic.Component
-  * @private
+  * @param {Object} config
   */
   // TODO: need to extend AbstractComponent via Fiber
   Atomic.Component = function(config) {
@@ -49,6 +49,7 @@
   * when the component is instantiated.  All of the other methods will be added to
   * the constructor prototype
   * @method _processWiring
+  * @param {Function} constructor
   * @param {Object} wiring object literal
   * @private
   */
