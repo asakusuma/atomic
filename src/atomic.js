@@ -11,7 +11,8 @@
    * @class Atomic
    */
   var Atomic = {
-    _: {}
+    _: {},
+    loader: {}
   };
 
   var AbstractComponent = null;
@@ -109,8 +110,7 @@
   // --------------------------------------------------
   // FACTORIES
   // --------------------------------------------------
-  //@@include('./atomic/component.js')
-  //@@include('./atomic/composite.js')
+  //@@include('./atomic/factory.js')
 
   // --------------------------------------------------
   // PUBLIC INTERFACES

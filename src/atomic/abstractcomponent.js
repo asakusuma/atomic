@@ -33,9 +33,10 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
     /**
      * An array of async functions, responsible for "wiring" everything together
      * This is where app logic resides
-     * @property {Array} AbstractComponent#wiring
+     * @property {Array} AbstractComponent#_inits
+     * @private
      */
-    wiring: [],
+    _inits: [],
 
     /**
      * The initializer for a component
@@ -270,6 +271,7 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
      * @param {Number} idx - optional. A 0-index slot for inserting the wiring
      */
     wireIn: function(fn, idx) {
+      // DECORATES INSTANCES (not prototype)
       return this;
     },
 

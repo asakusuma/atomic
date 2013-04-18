@@ -43,14 +43,20 @@ Atomic.augment(Atomic, {
    * @param Function then - a callback to run with dependencies as arguments
    */
   load: function(depend, then) {
+    var result = null;
     if (!Atomic_load_initialized) {
-      Atomic.initConfig();
-      Atomic_load_initialized = true;
+      Q.when(Atomic.loader.init(), function() {
+        Atomic_load_initialized = true;
+        Q.when(Atomic.loader.load(depend), function(needs) {
+          then.apply(context, needs);
+        });
+      });
     }
-
-    // USE THE SPECIFIED LOADER's ASYNC INTERFACE
-    // AND ON COMPLETION, RUN THE CALLBACK FUNCTION
-    // WITH DEPENDENCIES ENUMERATED
+    else {
+      Q.when(Atomic.loader.load(depend), function(needs) {
+        then.apply(context, needs);
+      });
+    }
   },
 
   /**
@@ -83,6 +89,21 @@ Atomic.augment(Atomic, {
   },
 
   /**
+   * Get the keys of an object
+   * @method Atomic.keys
+   */
+  keys: function(obj) {
+    var name;
+    var keys;
+    for (name in obj) {
+      if (obj.hasOwnProperty(name)) {
+        keys[keys.length] = name;
+      }
+    }
+    return keys;
+  },
+
+  /**
    * Creates the ability to call Promises from within the
    * wiring functions. This keeps us from having to pass
    * in control functions, instead making everything
@@ -90,10 +111,10 @@ Atomic.augment(Atomic, {
    * library's promise, which will convert to a Q promise
    * in the Atomic ecosystem.
    * @param {Object} promise - optional. a promise from another framework
-   * @method Atomic.promise
+   * @method Atomic.deferred
    * @returns Q.Defer
    */
-  promise: function(promise) {
+  deferred: function(promise) {
     if (promise) {
       return getQ().when(promise);
     }
