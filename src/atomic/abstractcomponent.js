@@ -235,11 +235,35 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
     // if you got a function for arg 1, loop through
     // the this[] collection. Strings are far faster
     // as we can go write to wrapping
+    // Eric: then why allow it?  we should require a method string
+
+    /**
+     * augment a method by executing a custom function before executing a method
+     * @method AbstractComponent#before
+     * @param {String} method - method to augment
+     * @param {Function} fn - custom function to execute before executing the method
+     */
     before: function(method, fn) {
-      // TODO: erowell
+      var that = this;
+      this[method] = function() {
+        fn.call(that);
+        that[method].apply(that, arguments);
+      };
+      return this;
     },
+    /**
+     * augment a method by executing a custom function after executing a method
+     * @method AbstractComponent#before
+     * @param {String} method - method to augment
+     * @param {Function} fn - custom function to execute after executing the method
+     */
     after: function(method, fn) {
-      // TODO: erowell
+      var that = this;
+      this[method] = function() {
+        that[method].apply(that, arguments);
+        fn.call(that);
+      };
+      return this;
     },
 
     /**
