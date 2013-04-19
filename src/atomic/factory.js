@@ -33,7 +33,7 @@ Atomic._.Factory = function(objLiteral) {
 
   // wiring loop
   for (var i = 0, len = wiring.length; i < len; i++) {
-    Atomic._.Factory.wireIn(objProto, wiring[i], false);
+    Atomic.AbstractComponent.prototype.wireIn.call(objProto, wiring[i], false);
   }
 
   // all public methods, properties, etc
@@ -45,36 +45,4 @@ Atomic._.Factory = function(objLiteral) {
   }
 
   return returnObj;
-};
-
-function addInit(obj, func, addFront) {
-  if (addFront) {
-    obj._inits.unshift(func);
-  }
-  else {
-    obj._inits.push(func);
-  }
-}
-
-Atomic._.Factory.wireIn(obj, wiring, addFront) {
-  var name;
-
-  // wiring can be set to a single function which defaults
-  // to an initializer
-  if (typeof wiring === 'function') {
-    addInit(obj, wiring, addFront);
-  }
-  // wiring can also be an object literal.  In this case, iterate through
-  // the keys, add the init function, and append the other methods to the
-  // class prototype
-  else {
-    for (name in wiring) {
-      if (wiring.hasOwnProperty(name)) {
-        if (name === 'init') {
-          addInit(obj, wiring[name], addFront);
-        }
-        obj[name] = wiring[name];
-      }
-    }
-  }
 };

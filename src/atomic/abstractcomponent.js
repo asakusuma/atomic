@@ -284,7 +284,26 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
      *  by default, addFront is false
      */
     wireIn: function(fn, addFront) {
-      Atomic._.Factory.wireIn(this, fn, addFront);
+      var name;
+
+      // wiring can be set to a single function which defaults
+      // to an initializer
+      if (typeof wiring === 'function') {
+        addInit(this, wiring, addFront);
+      }
+      // wiring can also be an object literal.  In this case, iterate through
+      // the keys, add the init function, and append the other methods to the
+      // class prototype
+      else {
+        for (name in wiring) {
+          if (wiring.hasOwnProperty(name)) {
+            if (name === 'init') {
+              addInit(this, wiring[name], addFront);
+            }
+            this[name] = wiring[name];
+          }
+        }
+      }
       return this;
     },
 
@@ -302,4 +321,14 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
 
 if (module && module.exports) {
   module.exports = AbstractComponent;
+}
+
+// private functions
+function addInit(obj, func, addFront) {
+  if (addFront) {
+    obj._inits.unshift(func);
+  }
+  else {
+    obj._inits.push(func);
+  }
 }
