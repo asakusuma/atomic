@@ -140,8 +140,11 @@ module.exports = function (grunt) {
     'uglify:atomic',
     'copy:atomic',
     'copy:text',
+    // copy:config.js (TODO: jchan)
     'clean:tmp'
   ]);
+
+  // TODO: jchan (venus launcher)
 
   // grunt.registerTask('test', []);
   // grunt.registerTask('release', []);

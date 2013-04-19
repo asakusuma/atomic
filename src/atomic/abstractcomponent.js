@@ -60,7 +60,11 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
      * Destroy the object
      * @method AbstractComponent#destroy
      */
-    destroy: function () {},
+    destroy: function () {
+      // TODO: akusuma
+      // remove the el, set a flag that says this is destroyed
+      // so erowell can stop wiring chain
+    },
 
     /**
      * Listen for events emitted by the Component

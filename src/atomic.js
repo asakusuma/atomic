@@ -12,7 +12,10 @@
    */
   var Atomic = {
     _: {},
-    loader: {}
+    loader: {
+      init: function() {},
+      load: function(){}
+    }
   };
 
   var AbstractComponent = null;
@@ -25,7 +28,6 @@
   var process;
 
   Atomic.config = context.ATOMIC_CONFIG || {};
-  Atomic.initConfig = function() {};
 
   /**
    * Copy one objects properties into another
