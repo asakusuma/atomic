@@ -1,15 +1,15 @@
 /*global Atomic:true */
 
 Atomic.Component = function(objLiteral) {
-  return Atomic._.Generator(objLiteral);
+  return Atomic._.Factory(objLiteral);
 };
 
 Atomic.Composite = function(objLiteral) {
-  return Atomic._.Generator(objLiteral);
+  return Atomic._.Factory(objLiteral);
 };
 
 // Composite Factory
-Atomic._.Generator = function(objLiteral) {
+Atomic._.Factory = function(objLiteral) {
   // needs, nodes, events, and wiring
   var name;
   var current;
@@ -33,20 +33,7 @@ Atomic._.Generator = function(objLiteral) {
 
   // wiring loop
   for (var i = 0, len = wiring.length; i < len; i++) {
-    current = wiring[i];
-    if (typeof current === 'function') {
-      objProto._inits.push(current);
-    }
-    else {
-      for (name in wiring[i]) {
-        if (wiring[i].hasOwnProperty(name)) {
-          if (name === 'init') {
-            objProto._inits.push(current);
-          }
-          objProto[name] = wiring[i][name];
-        }
-      }
-    }
+    Atomic._.Factory.wireIn(objProto, wiring[i], false);
   }
 
   // all public methods, properties, etc
@@ -58,4 +45,36 @@ Atomic._.Generator = function(objLiteral) {
   }
 
   return returnObj;
+};
+
+function addInit(obj, func, addFront) {
+  if (addFront) {
+    obj._inits.unshift(func);
+  }
+  else {
+    obj._inits.push(func);
+  }
+}
+
+Atomic._.Factory.wireIn(obj, wiring, addFront) {
+  var name;
+
+  // wiring can be set to a single function which defaults
+  // to an initializer
+  if (typeof wiring === 'function') {
+    addInit(obj, wiring, addFront);
+  }
+  // wiring can also be an object literal.  In this case, iterate through
+  // the keys, add the init function, and append the other methods to the
+  // class prototype
+  else {
+    for (name in wiring) {
+      if (wiring.hasOwnProperty(name)) {
+        if (name === 'init') {
+          addInit(obj, wiring[name], addFront);
+        }
+        obj[name] = wiring[name];
+      }
+    }
+  }
 };

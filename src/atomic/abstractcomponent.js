@@ -276,12 +276,15 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
      * can be provided, allowing you to insert your wiring wherever you
      * need to.
      * @method AbstractComponent#wireIn
-     * @param {Function} fn - a functon to run in response to load
-     * @param {Number} idx - optional. A 0-index slot for inserting the wiring
+     * @param {Function|Object} fn - a functon to run in response to load, or an object
+     *  literal containing an init function to be executed with load(), and public methods
+     *  to decorate the generated component class
+     * @param {Boolean} addFront if false, add the wiring to the end of the
+     *  wirings array. If true, add the wiring at the beginning of the array.
+     *  by default, addFront is false
      */
-    wireIn: function(fn, idx) {
-      // TODO: erowell
-      // DECORATES INSTANCES (not prototype)
+    wireIn: function(fn, addFront) {
+      Atomic._.Factory.wireIn(this, fn, addFront);
       return this;
     },
 
