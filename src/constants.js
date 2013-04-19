@@ -1,10 +1,5 @@
 // constants.js
-var CONSTANTS = {
-  classes: {
-    hidden: 'atomic-hidden',
-    visible: 'atomic-visible'
-  }
-};
+var CONSTANTS = {};
 
 // js hint requires var to be used
 CONSTANTS = CONSTANTS;

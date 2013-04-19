@@ -25,6 +25,9 @@ var Atomic = require('atomic');
 function factory() {
   var $ = require('jquery');
 
+  var HIDDEN = 'carousel-hidden';
+  var VISIBLE = 'carousel-visible';
+
   // calls the Atomic Component constructor
   return Atomic.Component({
 
@@ -122,9 +125,9 @@ function factory() {
      * @private
      */
     _setClasses: function () {
-      this._$nodes.removeClass(Atomic.CONSTANTS.classes.visible);
-      this._$nodes.removeClass(Atomic.CONSTANTS.classes.hidden);
-      this._$nodes.eq(this.index).addClass(Atomic.CONSTANTS.classes.visible);
+      this._$nodes.removeClass(VISIBLE);
+      this._$nodes.removeClass(HIDDEN);
+      this._$nodes.eq(this.index).addClass(VISIBLE);
     }
   });
 }

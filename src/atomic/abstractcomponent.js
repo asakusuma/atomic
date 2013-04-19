@@ -231,8 +231,12 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
     // if you got a function for arg 1, loop through
     // the this[] collection. Strings are far faster
     // as we can go write to wrapping
-    before: function(method, fn) {},
-    after: function(method, fn) {},
+    before: function(method, fn) {
+      // TODO: erowell
+    },
+    after: function(method, fn) {
+      // TODO: erowell
+    },
 
     /**
      * Attach an element to this Component
@@ -257,7 +261,8 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
       //   invokes the next element in the array with a new continuation callback
       //   if no next, then invoke cb()
       // call the first wiring w/ continuation function
-      // signature: next, needs, nodes
+      // signature: needs, nodes
+      // TODO: jheuser
       return this;
     },
 
@@ -271,6 +276,7 @@ var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
      * @param {Number} idx - optional. A 0-index slot for inserting the wiring
      */
     wireIn: function(fn, idx) {
+      // TODO: erowell
       // DECORATES INSTANCES (not prototype)
       return this;
     },
