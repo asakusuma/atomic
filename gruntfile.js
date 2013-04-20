@@ -7,6 +7,7 @@ module.exports = function (grunt) {
     output_files: {
       main:         './dist/atomic-__ATOMIC__VERSION__/atomic.js',
       main_min:     './dist/atomic-__ATOMIC__VERSION__/atomic.min.js',
+      config:      './dist/atomic-__ATOMIC__VERSION__/config.js',
       license:      './dist/atomic-__ATOMIC__VERSION__/LICENSE',
       readme:       './dist/atomic-__ATOMIC__VERSION__/README.md'
     },
@@ -67,6 +68,11 @@ module.exports = function (grunt) {
         files: [
           {src: ['./LICENSE'], dest: '<%= output_files.license %>', filter: 'isFile'},
           {src: ['./README.md'], dest: '<%= output_files.readme %>', filter: 'isFile'}
+        ]
+      },
+      config: {
+        files: [
+          {src: ['./src/config/config.js'], dest: '<%= output_files.config %>', filter: 'isFile'}
         ]
       }
     },
@@ -140,7 +146,7 @@ module.exports = function (grunt) {
     'uglify:atomic',
     'copy:atomic',
     'copy:text',
-    // copy:config.js (TODO: jchan)
+    'copy:config',
     'clean:tmp'
   ]);
 
