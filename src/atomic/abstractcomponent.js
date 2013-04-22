@@ -57,13 +57,16 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Destroy the object
+     * Destroy the object, removing DOM element and event bindings
      * @method AbstractComponent#destroy
      */
     destroy: function () {
-      // TODO: akusuma
-      // remove the el, set a flag that says this is destroyed
-      // so erowell can stop wiring chain
+      this._isDestroyed = true;
+      this.offAny();
+      if(this.nodes._root.parentNode) {
+        this.nodes._root.parentNode.removeChild(this.nodes._root);
+      }
+      this.removeAllListeners();
     },
 
     /**
