@@ -7,7 +7,7 @@
  * components to create Composites.
  * @class AbstractComponent
  */
-var AbstractComponent = Atomic._.Fiber.extend({}, function (base) {
+var AbstractComponent = Atomic._.Fiber.extend(function (base) {
   return {
     /**
      * A key/string collection of events

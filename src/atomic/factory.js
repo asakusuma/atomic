@@ -21,7 +21,7 @@ Atomic._.Factory = function(objLiteral) {
   var reserved = {'needs':1, 'nodes':1, 'events':1, 'wiring':1};
 
   // currently, we aren't doing anything fancy here
-  var returnObj = Atomic._.Fiber.extend(Atomic._.AbstractComponent, function(base) {
+  var returnObj = Atomic._.AbstractComponent.extend(function(base) {
     return {};
   });
 

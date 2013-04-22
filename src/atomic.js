@@ -92,7 +92,7 @@
   // --------------------------------------------------
   cjsHarness();
   //@@include('./lib/eventemitter2.js')
-  Atomic._.EventEmitter = module.exports;
+  Atomic._.EventEmitter = module.exports.EventEmitter2;
   resetCjs();
 
   // --------------------------------------------------
@@ -124,9 +124,9 @@
   context.Atomic = Atomic;
 })(this);
 
-if (define && define.amd) {
+if (typeof define === 'function' && define.amd) {
   define('atomic', this.Atomic);
 }
-if (module && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = this.Atomic;
 }

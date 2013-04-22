@@ -51,6 +51,26 @@ module.exports = function (grunt) {
             next();
           }
         }
+      },
+      venus: {
+        command: ['if [ -e node_modules/venus/bin/venus ] && command -v phantomjs >/dev/null;',
+                  'then node node_modules/venus/bin/venus run -t "tests/spec" -n;',
+                  'else echo "cant find venus in node_modules and/or cant find phantomJS. ',
+                             'Run npm install and run npm install -g phantomjs";',
+                  'fi'].join(' '),
+        options: {
+          stdout: true
+        }
+
+      },
+      venus_browser: {
+        command: ['if [ -e node_modules/venus/bin/venus ];',
+                  'then node node_modules/venus/bin/venus run -t "tests/spec";',
+                  'else echo "cant find venus in node_modules. Run npm install";',
+                  'fi'].join(' '),
+        options: {
+          stdout: true
+        }
       }
     },
 
@@ -150,9 +170,11 @@ module.exports = function (grunt) {
     'clean:tmp'
   ]);
 
-  // TODO: jchan (venus launcher)
-
-  // grunt.registerTask('test', []);
+  // Using Venus via a shell command for now
+  // requires npm install -g phantomjs
+  grunt.registerTask('test', [
+    'shell:venus'
+  ]);
   // grunt.registerTask('release', []);
 
   grunt.registerTask('default', ['build']);
