@@ -1,6 +1,5 @@
 /*
  * @venus-Library mocha
- * @venus-include ../../src/atomic.js
  * @venus-fixure atomic.fixture.html
  */
 

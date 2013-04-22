@@ -31,7 +31,8 @@
     default: [
       '../../src/lib/fiber.js',
       '../../src/lib/eventemitter2.js',
-      '../../src/lib/q.js'
+      '../../src/lib/q.js',
+      '../../src/atomic.js'
     ]
   }
 
