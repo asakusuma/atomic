@@ -33,7 +33,7 @@ Atomic._.Factory = function(objLiteral) {
 
   // wiring loop
   for (var i = 0, len = wiring.length; i < len; i++) {
-    Atomic.AbstractComponent.prototype.wireIn.call(objProto, wiring[i], false);
+    Atomic._.AbstractComponent.prototype.wireIn.call(objProto, wiring[i], false);
   }
 
   // all public methods, properties, etc

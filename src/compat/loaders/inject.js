@@ -10,9 +10,6 @@ if (Atomic.Config.system === 'inject') {
   Atomic.augment(Atomic.loader, {
     init: function() {
       context.Inject.setModuleRoot(Atomic.Config.inject.modules);
-      context.define('atomic', [], function() {
-        return Atomic;
-      });
       if (Atomic.Config.inject.resolver && typeof Atomic.Config.inject.resolver === 'function') {
         context.Inject.addRule(/.*/, {
           path: function(path) {

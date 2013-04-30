@@ -149,16 +149,15 @@ module.exports = function (grunt) {
     /**
      * express: runs our server for examples
      */
-   express: {
-     example: {
-       options: {
-         port: 4000,
-         bases: 'examples',
-         debug: true,
-         server: path.resolve('./examples/server.js')
-       }
-     }
-   }
+    express: {
+      example: {
+        options: {
+          port: 4000,
+          debug: true,
+          server: path.resolve('./server.js')
+        }
+      }
+    }
   });
 
   // load NPM tasks
@@ -190,7 +189,7 @@ module.exports = function (grunt) {
     'shell:venus'
   ]);
 
-  grunt.registerTask('example', [
+  grunt.registerTask('server', [
     'express:example',
     'express-keepalive'
   ]);

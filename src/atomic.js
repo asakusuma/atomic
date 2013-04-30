@@ -1,5 +1,3 @@
-/*global define:true, module:true */
-
 // atomic.js
 (function(context, undefined) {
   if (context.Atomic) {
@@ -11,10 +9,12 @@
    * @class Atomic
    */
   var Atomic = {
-    _: {},
+    _: {
+      requires: {} // used when no module loader is enabled
+    },
     loader: {
-      init: function() {},
-      load: function(){}
+      init: null,
+      load: null
     }
   };
 
@@ -26,6 +26,9 @@
   var module;
   var exports;
   var process;
+
+  // inside of this file, no define calls can be made
+  var define = null;
 
   Atomic.config = context.ATOMIC_CONFIG || {};
 
@@ -40,7 +43,7 @@
   Atomic.augment = function(src, target) {
     for (var name in target) {
       if (target.hasOwnProperty(name)) {
-        src[name] = target;
+        src[name] = target[name];
       }
     }
     return src;
@@ -84,8 +87,10 @@
   // --------------------------------------------------
   // FIBER
   // --------------------------------------------------
+  cjsHarness();
   //@@include('./lib/fiber.js')
-  Atomic._.Fiber = context.Fiber.noConflict();
+  Atomic._.Fiber = module.exports;
+  resetCjs();
 
   // --------------------------------------------------
   // EVENT EMITTER 2
@@ -123,10 +128,3 @@
   // assign public interface in window scope
   context.Atomic = Atomic;
 })(this);
-
-if (typeof define === 'function' && define.amd) {
-  define('atomic', this.Atomic);
-}
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = this.Atomic;
-}

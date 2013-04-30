@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Atomic Template</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  <body>
+
+    <h1>Welcome to Atomic</h1>
+    <p>This test page shows how to use the Atomic Starter Pack with jQuery to quickly create reusable components at any scale</p>
+
+    <h2>A Module Loader</h2>
+    <p>First, we need a module loader. Any module loader can be used that is AMD or CommonJS compliant. While we endorse Inject, we've also ran this with RequireJS and curl, so go crazy! To use a loader, implement <code>Atomic.loader.init</code> as a function that initializes and configures your loader, and <code>Atomic.loader.load</code> as a function that does the load for you.<p>
+
+    <p>Or, just steal the one you want from dist/loaders, and change the variables</p>
+
+    <pre><code>
+TBD FINAL CODE
+    </code></pre>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/atomic.js"></script>
+    <script type="text/javascript">
+      Atomic.augment(Atomic.loader, {
+        modules: {},
+        save: function(id, module) {
+          Atomic.loader.modules[id] = module;
+        },
+        init: function() {
+          window.require = function(name) {
+            return Atomic.loader.modules[name];
+          };
+          window.module = null;
+          window.define = null;
+          Atomic.loader.save('jquery', window.jQuery);
+          Atomic.loader.save('atomic', window.Atomic);
+        },
+        load: function(deps) {
+          var results = {};
+          for (var i = 0, len = deps.length; i < len; i++) {
+            results[deps[i]] = Atomic.loader.modules[deps[i]];
+          }
+          return results;
+        }
+      });
+      Atomic.load(['atomic']); // sanity check and triggers init
+    </script>
+    <script type="text/javascript" src="/examples/atomic/components/button.js"></script>
+
+
+    <h2>A "page.js"</h2>
+    <p>When we talk about "page.js", we refer to an implementation JavaScript file, much like you probably have on an existing page. If you're using jQuery, you are probably also using a call to <code>$(document).ready()</code>. Your Atomic code can sit in there.</p>
+
+    <p>Take a look at <a href="page.js">our page.js file</a> which will be referencing throughout this example page.</p>
+
+    <h2>Carousel</h2>
+
+    <h2>Carousel With Buttons</h2>
+
+    <h2>Infinite Scrolling Carousel With Buttons</h2>
+
+  </body>
+</html>

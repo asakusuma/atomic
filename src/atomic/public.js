@@ -1,4 +1,4 @@
-/*global Atomic:true, context:true, Q:true */
+/*global Atomic:true, context:true */
 
 /**
  * This file contains the public Atomic APIs. Anything
@@ -11,14 +11,14 @@
  * testing the public functions
  */
 function getQ() {
-  return Q;
+  return Atomic._.Q;
 }
 
 // holds the previous Atomic reference
 var Atomic_noConflict_oldAtomic = context.Atomic;
 
 // holds the initialized state of the framework
-var Atomic_load_initialized = false;
+var Atomic_load_promise = null;
 
 Atomic.augment(Atomic, {
   /**
@@ -43,20 +43,29 @@ Atomic.augment(Atomic, {
    * @param Function then - a callback to run with dependencies as arguments
    */
   load: function(depend, then) {
-    var result = null;
-    if (!Atomic_load_initialized) {
-      Q.when(Atomic.loader.init(), function() {
-        Atomic_load_initialized = true;
-        Q.when(Atomic.loader.load(depend), function(needs) {
-          then.apply(context, needs);
-        });
-      });
+    var deferred = Atomic.deferred();
+
+    // wrap the callback if it exists
+    if (typeof then === 'function') {
+      deferred.then(then);
     }
-    else {
-      Q.when(Atomic.loader.load(depend), function(needs) {
-        then.apply(context, needs);
+
+    // if not initialized, init, and then do the load step
+    Atomic_load_promise = Atomic_load_promise || Atomic.when(Atomic.loader.init());
+
+    // when initialization is complete, then call load
+    // on load, resolve the primary promise
+    Atomic_load_promise.then(function() {
+      Atomic.when(Atomic.loader.load(depend))
+      .then(function(needs) {
+        return deferred.resolve(needs);
       });
-    }
+    }, function(reason) {
+      throw new Error('Unable to initialize: '+reason);
+    });
+
+    // return the promise
+    return deferred.promise;
   },
 
   /**
@@ -96,7 +105,7 @@ Atomic.augment(Atomic, {
    * in the Atomic ecosystem.
    * @param {Object} promise - optional. a promise from another framework
    * @method Atomic.deferred
-   * @returns Q.Defer
+   * @returns {Object} Promise
    */
   deferred: function(promise) {
     if (promise) {
@@ -104,6 +113,51 @@ Atomic.augment(Atomic, {
     }
     else {
       return getQ().defer();
+    }
+  },
+
+  /**
+   * Convert a function value or promise return into
+   * a promise. Very useful when you don't know if the function
+   * is going to return a promise. This way, it's always a
+   * promise, all of the time
+   * @method Atomic.when
+   * @param {Function|Object} the item you want to convert to a promise
+   * @returns {Object} Promise
+   */
+  when: function(whennable) {
+    var deferred = Atomic.deferred();
+    getQ().when.call(getQ(), whennable, function(resolveResult) {
+      return deferred.resolve(resolveResult);
+    }, function(rejectResult) {
+      return deferred.reject(rejectResult);
+    });
+    return deferred.promise;
+  },
+
+  /**
+   * Export a module for CommonJS or AMD loaders
+   * @method Atomic.export
+   * @param {Object} mod - commonJS module object
+   * @param {Object} def - AMD define function
+   * @param {Function} factory - the defining factory for module or exports
+   */
+  export: function(mod, def, factory) {
+    if (mod && mod.exports) {
+      mod.exports = factory();
+    }
+    else if (def && def.amd) {
+      def(factory.id, factory);
+    }
+    else if (Atomic.loader && Atomic.loader.save) {
+      Atomic.loader.save(factory.id, factory());
+    }
+    else {
+      window[factory.id] = factory();
+    }
+
+    if (factory.window && window) {
+      window[factory.window] = factory();
     }
   }
 });
