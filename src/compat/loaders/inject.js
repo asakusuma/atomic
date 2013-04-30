@@ -1,40 +1,44 @@
-/*global Atomic:true, context:true */
+/*global Atomic:true, Inject:true, define:true */
 
-// INJECT
-// http://www.injectjs.com
-if (Atomic.Config.system === 'inject') {
-  if (!context.Inject) {
-    throw new Error('Inject is not available in the global window scope');
-  }
+Atomic.augment(Atomic.loader, {
 
-  Atomic.augment(Atomic.loader, {
-    init: function() {
-      context.Inject.setModuleRoot(Atomic.Config.inject.modules);
-      if (Atomic.Config.inject.resolver && typeof Atomic.Config.inject.resolver === 'function') {
-        context.Inject.addRule(/.*/, {
-          path: function(path) {
-            return Atomic.Config.inject.resolver(path);
-          }
-        });
-      }
-    },
-    load: function(deps) {
-      var results = [];
-      var deferred = Atomic.deferred();
-      context.require(deps, function(require) {
-        try {
-          for (var i = 0, len = deps.length; i < len; i++) {
-            results[results.length] = require(deps[i]);
-          }
-        }
-        catch(e) {
-          return deferred.reject(e);
-        }
+  moduleRoot:   'YOUR_BASE_URL_HERE', // Set this to your base URL for modules
+  devMode:      true,                 // if true, no caching will be enabled
 
-        return deferred.resolve(results);
-      });
-
-      return deferred.promise;
+  // ====== Do not edit below this line ======
+  // ==========================================================================
+  init: function() {
+    if (!Inject) {
+      throw new Error('Inject must be defined on the page');
     }
-  });
-}
+
+    Inject.setModuleRoot(Atomic.loader.moduleRoot);
+
+    if (Atomic.loader.devMode) {
+      Inject.setExpires(0);
+    }
+
+    define('atomic', [], window.Atomic);
+  },
+  load: function(deps) {
+    var results = {};
+    var deferred = Atomic.deferred();
+
+    deps.unshift('require');
+    require(deps, function(require) {
+      try {
+        for (var i = 0, len = deps.length; i < len; i++) {
+          results[deps[i]] = require(deps[i]);
+        }
+
+        deferred.resolve(results);
+      }
+      catch(e) {
+        deferred.reject(e);
+      }
+    });
+
+    return deferred.promise;
+  }
+});
+Atomic.load(['atomic']); // sanity check and triggers init
