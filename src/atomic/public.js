@@ -49,6 +49,9 @@ Atomic.augment(Atomic, {
     if (typeof then === 'function') {
       deferred.then(then);
     }
+    else {
+      depend = [].slice.call(arguments, 0);
+    }
 
     // if not initialized, init, and then do the load step
     Atomic_load_promise = Atomic_load_promise || Atomic.when(Atomic.loader.init());

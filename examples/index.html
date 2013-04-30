@@ -17,7 +17,7 @@
   </head>
   <body>
 
-    <script src="scripts/jquery-1.9.js"></script>
+    <script src="scripts/jquery-1.9.1.js"></script>
     <script type="text/javascript" src="/atomic.js"></script>
 
     <h1>Welcome to Atomic</h1>
@@ -54,11 +54,17 @@
           return results;
         }
       });
-      Atomic.load(['atomic']); // sanity check and triggers init
+      Atomic.load('atomic'); // sanity check and triggers init
     </script>
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
-    <script type="text/javascript" src="atomic/components/button.js"></script>
+    <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
+    <script type="text/javascript">
+    Atomic.load('components/button')
+    .then(function(deps) {
+      console.log(deps);
+    });
+    </script>
 
 
     <h2>A "page.js"</h2>
