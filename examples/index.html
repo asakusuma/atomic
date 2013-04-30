@@ -23,10 +23,35 @@
     <h2>A Module Loader</h2>
     <p>First, we need a module loader. Any module loader can be used that is AMD or CommonJS compliant. While we endorse Inject, we've also ran this with RequireJS and curl, so go crazy! To use a loader, implement <code>Atomic.loader.init</code> as a function that initializes and configures your loader, and <code>Atomic.loader.load</code> as a function that does the load for you.<p>
 
-    <p>Or, just steal the one you want from dist/loaders, and change the variables</p>
+    <p>Or, just steal the one you want from dist/loaders, and change the variables. For simplicity, we're using the "none" loader, which requires you to put everything you want into a script tag. Keep in mind that dependencies in this version aren't managed for you.</p>
 
     <pre><code>
-TBD FINAL CODE
+Atomic.augment(Atomic.loader, {
+  modules: {},
+  save: function(id, module) {
+    Atomic.loader.modules[id] = module;
+  },
+  init: function() {
+    window.require = function(name) {
+      return Atomic.loader.modules[name];
+    };
+    window.module = null;
+    window.define = null;
+
+    if (window.jQuery) {
+      Atomic.loader.save('jquery', window.jQuery);
+    }
+    Atomic.loader.save('atomic', window.Atomic);
+  },
+  load: function(deps) {
+    var results = {};
+    for (var i = 0, len = deps.length; i < len; i++) {
+      results[deps[i]] = Atomic.loader.modules[deps[i]];
+    }
+    return results;
+  }
+});
+Atomic.load(['atomic']); // sanity check and triggers init
     </code></pre>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="/atomic.js"></script>
@@ -42,7 +67,10 @@ TBD FINAL CODE
           };
           window.module = null;
           window.define = null;
-          Atomic.loader.save('jquery', window.jQuery);
+
+          if (window.jQuery) {
+            Atomic.loader.save('jquery', window.jQuery);
+          }
           Atomic.loader.save('atomic', window.Atomic);
         },
         load: function(deps) {

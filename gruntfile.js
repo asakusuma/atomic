@@ -7,9 +7,10 @@ module.exports = function (grunt) {
     output_files: {
       main:         './dist/atomic-__ATOMIC__VERSION__/atomic.js',
       main_min:     './dist/atomic-__ATOMIC__VERSION__/atomic.min.js',
-      config:      './dist/atomic-__ATOMIC__VERSION__/config.js',
+      config:       './dist/atomic-__ATOMIC__VERSION__/config.js',
       license:      './dist/atomic-__ATOMIC__VERSION__/LICENSE',
-      readme:       './dist/atomic-__ATOMIC__VERSION__/README.md'
+      readme:       './dist/atomic-__ATOMIC__VERSION__/README.md',
+      starterPack:  './dist/atomic-__ATOMIC__VERSION__/starter_pack/'
     },
     anonymous_header: '!(function(context, undefined){\n',
     anonymous_footer: '\n;context.Atomic.version = "__ATOMIC__VERSION__";\n})(this);',
@@ -93,6 +94,11 @@ module.exports = function (grunt) {
       config: {
         files: [
           {src: ['./src/config/config.js'], dest: '<%= output_files.config %>', filter: 'isFile'}
+        ]
+      },
+      starterPack: {
+        files: [
+          {expand: true, cwd: './starter_pack/', src: ['**'], dest: '<%= output_files.starterPack %>'}
         ]
       }
     },
@@ -180,6 +186,7 @@ module.exports = function (grunt) {
     'copy:atomic',
     'copy:text',
     'copy:config',
+    'copy:starterPack',
     'clean:tmp'
   ]);
 
