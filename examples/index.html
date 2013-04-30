@@ -28,6 +28,25 @@
 
     <p>Or, just steal the one you want from dist/loaders, and change the variables. For simplicity, we're using the "none" loader, which requires you to put everything you want into a script tag. Keep in mind that dependencies in this version aren't managed for you.</p>
 
+    <p>When we talk about "page.js", we refer to an implementation JavaScript file, much like you probably have on an existing page. If you're using jQuery, you are probably also using a call to <code>$(document).ready()</code>. Your Atomic code can sit in there.</p>
+
+    <p>Take a look at <a href="page.js">our page.js file</a> which will be referencing throughout this example page.</p>
+
+
+    <h2>Examples</h2>
+
+    <h3>Button with Echo Wiring</h3>
+
+    <button id="myButton">Click me!</button>
+
+    <h3>Carousel</h3>
+
+    <h3>Carousel With Buttons</h2>
+
+    <h3>Infinite Scrolling Carousel With Buttons</h3>
+
+
+
     <script type="text/javascript">
       Atomic.augment(Atomic.loader, {
         modules: {},
@@ -59,24 +78,34 @@
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
     <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
+    <script type="text/javascript" src="scripts/atomic/wirings/echo.js"></script>
     <script type="text/javascript">
-    Atomic.load('components/button')
-    .then(function(deps) {
-      console.log(deps);
+
+    // Button with Echo wiring
+    Atomic.load('components/button', 'wirings/echo')
+    .then(function(ctx) {
+      console.log('context object =');
+      console.log(ctx);
+
+      // components
+      var Button = ctx['components/button'];
+
+      // wirings
+      var Echo = ctx['wirings/echo'];
+
+      // build the button and add echo wiring
+      var button = new Button(document.getElementById('myButton'));
+      button.wireIn(Echo);
+
+      // TODO: we need to implement load()
+      button.load();
+
+
+
+
+
     });
     </script>
-
-
-    <h2>A "page.js"</h2>
-    <p>When we talk about "page.js", we refer to an implementation JavaScript file, much like you probably have on an existing page. If you're using jQuery, you are probably also using a call to <code>$(document).ready()</code>. Your Atomic code can sit in there.</p>
-
-    <p>Take a look at <a href="page.js">our page.js file</a> which will be referencing throughout this example page.</p>
-
-    <h2>Carousel</h2>
-
-    <h2>Carousel With Buttons</h2>
-
-    <h2>Infinite Scrolling Carousel With Buttons</h2>
 
   </body>
 </html>
