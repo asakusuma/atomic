@@ -1,5 +1,5 @@
 // gruntfile.js
-// var path = require('path');
+var path = require('path');
 
 module.exports = function (grunt) {
 
@@ -144,7 +144,21 @@ module.exports = function (grunt) {
         src: './src/atomic.js',
         dest: './tmp'
       }
-    }
+    },
+
+    /**
+     * express: runs our server for examples
+     */
+   express: {
+     example: {
+       options: {
+         port: 4000,
+         bases: 'examples',
+         debug: true,
+         server: path.resolve('./examples/server.js')
+       }
+     }
+   }
   });
 
   // load NPM tasks
@@ -154,10 +168,10 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-include-replace');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-express');
   // grunt.loadNpmTasks('grunt-contrib-compress');
   // grunt.loadNpmTasks('grunt-contrib-concat');
   // grunt.loadNpmTasks('grunt-contrib-qunit');
-  // grunt.loadNpmTasks('grunt-express');
 
   grunt.registerTask('build', [
     'jshint',
@@ -174,6 +188,11 @@ module.exports = function (grunt) {
   // requires npm install -g phantomjs
   grunt.registerTask('test', [
     'shell:venus'
+  ]);
+
+  grunt.registerTask('example', [
+    'express:example',
+    'express-keepalive'
   ]);
   // grunt.registerTask('release', []);
 
