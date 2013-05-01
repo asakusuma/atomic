@@ -305,7 +305,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       // dynamically create promise chain
       var inits = this._inits,
           len = inits.length,
-          when = Atomic.when(this._inits[0].call(this)),
+          when = Atomic.when(inits[0].call(this)),
           then;
 
       for (var n = 1; n < len; n++) {
