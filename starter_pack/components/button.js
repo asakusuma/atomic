@@ -35,18 +35,23 @@ function factory() {
 
     // events
     events: {
+      // TODO from Eric: I know that 'click' isn't used here because we want to
+      // include tap events as well.  But USE is very strange.
       USE: 'use'
     },
 
     // wiring functions to make this work
     wiring: [
-      function(needs, nodes) {
+      function() {
         var self = this;
         // nodes._root is the default container, either an el passed
         // to the constructor, or via attach()
-        $(nodes._root).on('click', function() {
+        $(this.nodes._root).on('click', function() {
           self.trigger(self.events.USE);
+          console.log('clicked');
         });
+
+        console.log('Initialized Button component');
       }
     ]
   });

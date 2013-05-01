@@ -10,11 +10,7 @@ function factory() {
   return function(config) {
     return {
       init: function(needs, nodes) {
-        // reusable code goes here, it's invoked when a consuming
-        // developer calls load()
-        // this === the component
-        var sample = config.configName;
-        this.echo('Initialized with the config of ' + sample);
+        this.echo('Initialized Echo wiring');
       },
       /**
        * This is a custom method. Anyone who wires in this object

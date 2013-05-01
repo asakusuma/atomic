@@ -25,7 +25,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
 
     /**
      * A key/string collection of roles and matching nodes
-     * These are nodes that compount components need to have in order to function
+     * These are nodes that components need to have in order to function
      * @property {Object} AbstractComponent#nodes
      */
     nodes: {},
@@ -279,6 +279,8 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       return this;
     },
 
+
+
     /**
      * Load the Component, resolve all dependencies
      * calls the ready method
@@ -294,7 +296,23 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       // call the first wiring w/ continuation function
       // signature: needs, nodes
       // TODO: jheuser
-      return this;
+
+      // Question from Eric: why do we need to pass needs and nodes?  They
+      // are accessible via this.needs and this.nodes from the wirings func
+
+      // TODO: need to address dependencies with Atomic.load()
+
+      // dynamically create promise chain
+      var inits = this._inits,
+          len = inits.length,
+          when = Atomic.when(this._inits[0].call(this)),
+          then;
+
+      for (var n = 1; n < len; n++) {
+        then = Atomic.when(inits[n].call(this));
+        when.then(then);
+        when = then;
+      }
     },
 
     /**
@@ -327,7 +345,9 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
             if (name === 'init') {
               addInit(this, wiring[name], addFront);
             }
-            this[name] = wiring[name];
+            else {
+              this[name] = wiring[name];
+            }
           }
         }
       }

@@ -84,9 +84,6 @@
     // Button with Echo wiring
     Atomic.load('components/button', 'wirings/echo')
     .then(function(ctx) {
-      console.log('context object =');
-      console.log(ctx);
-
       // components
       var Button = ctx['components/button'];
 
@@ -95,15 +92,10 @@
 
       // build the button and add echo wiring
       var button = new Button(document.getElementById('myButton'));
-      button.wireIn(Echo);
+      button.wireIn(Echo());
 
-      // TODO: we need to implement load()
       button.load();
-
-
-
-
-
+      button.echo('The echo wiring works!');
     });
     </script>
 
