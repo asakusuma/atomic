@@ -313,6 +313,8 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
         when.then(then);
         when = then;
       }
+
+      return this;
     },
 
     /**
