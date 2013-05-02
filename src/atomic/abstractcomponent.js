@@ -247,10 +247,11 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {Function} fn - custom function to execute before executing the method
      */
     before: function(method, fn) {
+      var old = this[method];
       var that = this;
       this[method] = function() {
         fn.call(that);
-        that[method].apply(that, arguments);
+        old.apply(that, arguments);
       };
       return this;
     },
@@ -261,9 +262,10 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {Function} fn - custom function to execute after executing the method
      */
     after: function(method, fn) {
+      var old = this[method];
       var that = this;
       this[method] = function() {
-        that[method].apply(that, arguments);
+        old.apply(that, arguments);
         fn.call(that);
       };
       return this;
@@ -305,16 +307,16 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       // dynamically create promise chain
       var inits = this._inits,
           len = inits.length,
-          when = Atomic.when(inits[0].call(this)),
-          then;
+          promise = Atomic.when(inits[0].call(this)),
+          nextPromise;
 
       for (var n = 1; n < len; n++) {
-        then = Atomic.when(inits[n].call(this));
-        when.then(then);
-        when = then;
+        nextPromise = Atomic.when(inits[n].call(this));
+        promise.then(nextPromise);
+        promise = nextPromise;
       }
 
-      return this;
+      return promise;
     },
 
     /**

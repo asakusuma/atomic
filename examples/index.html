@@ -90,15 +90,16 @@
 
       button.load()
       .then(function() {
-        // for (var methodName in button) {
-        //   if (typeof button[methodName] === 'function' && methodName !== 'echo') {
-        //     button.before(methodName, (function(name) {
-        //       return function() {
-        //         button.echo('calling '+name);
-        //       };
-        //     }(methodName)));
-        //   }
-        // }
+        for (var methodName in button) {
+          if (button.hasOwnProperty(methodName) && typeof button[methodName] === 'function' && methodName !== 'echo') {
+            console.log(methodName);
+            button.before(methodName, (function(name) {
+              return function() {
+                button.echo('calling '+name);
+              };
+            }(methodName)));
+          }
+        }
         button.warn('The echo wiring works! (What have we done?)');
       });
     }));
