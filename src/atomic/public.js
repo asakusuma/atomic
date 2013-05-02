@@ -85,6 +85,32 @@ Atomic.augment(Atomic, {
   },
 
   /**
+   * Take a function (which takes 1 arg) and return a function that takes
+   * N args, where N is the length of the object or array in arguments[0]
+   * @method Atomic.expand
+   * @param {Function} fn - the function to expand
+   * @returns {Function} a function that takes N args
+   */
+  expand: function(fn) {
+    return function(args) {
+      var key;
+      var expanded = [];
+      if (Object.prototype.toString.call(args) === '[object Array]') {
+        expanded = args;
+      }
+      else {
+        for (key in args) {
+          if (args.hasOwnProperty(key)) {
+            expanded.push(args[key]);
+          }
+        }
+      }
+
+      fn.apply(fn, expanded);
+    };
+  },
+
+  /**
    * Get the keys of an object
    * @method Atomic.keys
    */

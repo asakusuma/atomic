@@ -18,6 +18,10 @@ function factory() {
        */
       echo: function(msg) {
         console.log(msg);
+      },
+
+      warn: function(msg) {
+        console.warn(msg);
       }
     };
   };
