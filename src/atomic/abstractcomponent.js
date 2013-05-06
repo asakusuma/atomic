@@ -1,5 +1,15 @@
 /*global Atomic:true */
 
+// private functions
+function addInit(obj, func, addFront) {
+  if (addFront) {
+    obj._inits.unshift(func);
+  }
+  else {
+    obj._inits.push(func);
+  }
+}
+
 /**
  * AbstractComponent a template for creating Components in Atomic
  * Components are the lego blocks of Atomic. They emit events
@@ -250,7 +260,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       var old = this[method];
       var that = this;
       this[method] = function() {
-        fn.call(that);
+        fn.apply(that, arguments);
         old.apply(that, arguments);
       };
       return this;
@@ -266,7 +276,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       var that = this;
       this[method] = function() {
         old.apply(that, arguments);
-        fn.call(that);
+        fn.apply(that, arguments);
       };
       return this;
     },
@@ -334,6 +344,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      */
     wireIn: function(wiring, addFront) {
       var name;
+      var nodesName;
 
       // wiring can be set to a single function which defaults
       // to an initializer
@@ -345,12 +356,25 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       // class prototype
       else {
         for (name in wiring) {
-          if (wiring.hasOwnProperty(name)) {
-            if (name === 'init') {
-              addInit(this, wiring[name], addFront);
+          if (name === 'events') {
+            Atomic.augment(this.events, wiring[name]);
+          }
+          else if (name === 'nodes') {
+            for (nodesName in wiring.nodes) {
+              if (this.nodes[nodesName]) {
+                continue; // we do not overwrite if the Implementor has defined
+              }
+              this.nodes[nodesName] = wiring.nodes[nodesName];
             }
-            else {
-              this[name] = wiring[name];
+          }
+          else {
+            if (wiring.hasOwnProperty(name)) {
+              if (name === 'init') {
+                addInit(this, wiring[name], addFront);
+              }
+              else {
+                this[name] = wiring[name];
+              }
             }
           }
         }
@@ -372,14 +396,4 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
 
 if (module && module.exports) {
   module.exports = AbstractComponent;
-}
-
-// private functions
-function addInit(obj, func, addFront) {
-  if (addFront) {
-    obj._inits.unshift(func);
-  }
-  else {
-    obj._inits.push(func);
-  }
 }
