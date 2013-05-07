@@ -27,11 +27,11 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     events: {},
 
     /**
-     * A key/string collection of dependencies
-     * These are modules that the AbstractComponent can emit
-     * @property {Object} AbstractComponent#needs
+     * An array of dependencies this module needs to run
+     * These are modules the implementning component needs
+     * @property {Array} AbstractComponent#needs
      */
-    needs: {},
+    needs: [],
 
     /**
      * A key/string collection of roles and matching nodes
@@ -312,21 +312,45 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       // Question from Eric: why do we need to pass needs and nodes?  They
       // are accessible via this.needs and this.nodes from the wirings func
 
-      // TODO: need to address dependencies with Atomic.load()
+      // Reply from Jakob: this.needs isn't actually the resolved objects because
+      // they are loaded at this step. We could overwrite this.needs, but that
+      // could be confusing to the end developer
 
-      // dynamically create promise chain
-      var inits = this._inits,
-          len = inits.length,
-          promise = Atomic.when(inits[0].call(this)),
-          nextPromise;
+      var deferred = Atomic.deferred();
+      var self = this;
+      var nodes = {};
 
-      for (var n = 1; n < len; n++) {
-        nextPromise = Atomic.when(inits[n].call(this));
-        promise.then(nextPromise);
-        promise = nextPromise;
+      for (var name in this.nodes) {
+        if (this.nodes.hasOwnProperty(name)) {
+          nodes[name] = this.nodes[name];
+        }
       }
 
-      return promise;
+      Atomic.load(this.needs)
+      .then(function(needs) {
+        // dynamically create promise chain
+        var inits = self._inits,
+            len = inits.length,
+            promise = Atomic.when(inits[0].call(self, needs, nodes)),
+            nextPromise;
+
+        for (var n = 1; n < len; n++) {
+          nextPromise = Atomic.when(inits[n].call(self, needs, nodes));
+          promise.then(nextPromise);
+          promise = nextPromise;
+        }
+
+        if (cb) {
+          promise.then(cb);
+        }
+      })
+      .then(function() {
+        deferred.resolve();
+      }, function(err) {
+        deferred.reject(err);
+      });
+
+      return deferred.promise;
     },
 
     /**

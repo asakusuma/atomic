@@ -101,11 +101,11 @@
   resetCjs();
 
   // --------------------------------------------------
-  // Q
+  // WHEN.JS Promises/A+
   // --------------------------------------------------
   cjsHarness();
-  //@@include('./lib/q.js')
-  Atomic._.Q = module.exports;
+  //@@include('./lib/when.js')
+  Atomic._.When = module.exports;
   resetCjs();
 
   // --------------------------------------------------

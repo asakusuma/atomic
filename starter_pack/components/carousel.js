@@ -12,17 +12,16 @@ default, Components do not depend on anything other than Atomic
 itself. Often times, developers will use a DOM Library such
 as YUI or jQuery to make the DOM operations easier.
 
-The Component below is one of the simplest Components one can
-make. It exposes a generic "USE" event, which is the result
-of translating click events on the element itself. jQuery
-is used as a convienence, as modern jQuery uses a single
-document level listener as opposed to listeners on individual
-nodes.
+The Carousel Component provides an API for manipulating a
+"current" class on a collection of nodes, defined as the
+Items in nodes:{}.
 */
 var Atomic = require('atomic');
 
 function factory() {
   var $ = require('jquery');
+
+  var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
   return Atomic.Component({
@@ -31,23 +30,48 @@ function factory() {
     needs: {},
 
     // no additional nodes needed
-    nodes: {},
+    nodes: {
+      Items: null
+    },
 
     // events
     events: {
-      // TODO from Eric: I know that 'click' isn't used here because we want to
-      // include tap events as well.  But USE is very strange.
-      USE: 'use'
+      END: 'end',
+      FIRST: 'first'
     },
 
     // wiring functions to make this work
     wiring: function(needs, nodes) {
       var self = this;
-      // nodes._root is the default container, either an el passed
-      // to the constructor, or via attach()
-      $(nodes._root).on('click', function() {
-        self.trigger(self.events.USE);
-      });
+      this.index = 0;
+      this.$items = $(nodes.Items);
+      this.go(this.index);
+    },
+
+    go: function(to) {
+      if (to < 0 || to > this.$items.length - 1) {
+        return this;
+      }
+      this.index = to;
+      this.$items.removeClass(CURRENT_CLASS);
+      this.$items.eq(this.index).addClass(CURRENT_CLASS);
+      return this;
+    },
+
+    first: function() {
+      return this.go(0);
+    },
+
+    last: function() {
+      return this.go(this.$items.length - 1);
+    },
+
+    next: function() {
+      return this.go(this.index + 1);
+    },
+
+    previous: function() {
+      return this.go(this.index - 1);
     }
   });
 }

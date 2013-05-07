@@ -16,10 +16,6 @@
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body>
-
-    <script src="scripts/jquery-1.9.1.js"></script>
-    <script type="text/javascript" src="/atomic.js"></script>
-
     <h1>Welcome to Atomic</h1>
     <p>This test page shows how to use the Atomic Starter Pack with jQuery to quickly create reusable components at any scale</p>
 
@@ -45,65 +41,16 @@
 
     <h3>Infinite Scrolling Carousel With Buttons</h3>
 
-
-
-    <script type="text/javascript">
-      Atomic.augment(Atomic.loader, {
-        modules: {},
-        save: function(id, module) {
-          Atomic.loader.modules[id] = module;
-        },
-        init: function() {
-          window.require = function(name) {
-            return Atomic.loader.modules[name];
-          };
-          window.module = null;
-          window.define = null;
-
-          if (window.jQuery) {
-            Atomic.loader.save('jquery', window.jQuery);
-          }
-          Atomic.loader.save('atomic', window.Atomic);
-        },
-        load: function(deps) {
-          var results = {};
-          for (var i = 0, len = deps.length; i < len; i++) {
-            results[deps[i]] = Atomic.loader.modules[deps[i]];
-          }
-          return results;
-        }
-      });
-      Atomic.load('atomic'); // sanity check and triggers init
-    </script>
+    <!-- a global jquery, the latest built atomic.js, and the "none" loader -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/atomic.js"></script>
+    <script type="text/javascript" src="/src/compat/loaders/none.js"></script>
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
     <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
-    <script type="text/javascript" src="scripts/atomic/wirings/echo.js"></script>
-    <script type="text/javascript">
+    <script type="text/javascript" src="scripts/atomic/wirings/debugtracer.js"></script>
 
-    // Button with Echo wiring
-    Atomic.load('components/button', 'wirings/echo')
-    .then(Atomic.expand(function(Button, Echo) {
-      // build the button and add echo wiring
-      var button = new Button(document.getElementById('myButton'));
-      button.wireIn(Echo());
-
-      button.load()
-      .then(function() {
-        for (var methodName in button) {
-          if (button.hasOwnProperty(methodName) && typeof button[methodName] === 'function' && methodName !== 'echo') {
-            console.log(methodName);
-            button.before(methodName, (function(name) {
-              return function() {
-                button.echo('calling '+name);
-              };
-            }(methodName)));
-          }
-        }
-        button.warn('The echo wiring works! (What have we done?)');
-      });
-    }));
-    </script>
-
+    <!-- our page specific JavaScript -->
+    <script type="text/javascript" src="scripts/page.js"></script>
   </body>
 </html>

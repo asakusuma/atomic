@@ -21,8 +21,15 @@ Atomic.augment(Atomic.loader, {
     var results = {};
     for (var i = 0, len = deps.length; i < len; i++) {
       results[deps[i]] = Atomic.loader.modules[deps[i]];
+
+      if (typeof results[deps[i]] === 'undefined') {
+        throw new Error('Unable to load: ' + deps[i]);
+      }
     }
     return results;
   }
 });
-Atomic.load(['atomic']); // sanity check and triggers init
+
+// triggers an init, as the "none" loader needs to provide its own
+// "require" function
+Atomic.load(['atomic']);

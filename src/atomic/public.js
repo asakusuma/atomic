@@ -7,18 +7,18 @@
  */
 
 /**
- * A helper method to return the Q object. Aids in unit
+ * A helper method to return the When object. Aids in unit
  * testing the public functions
  */
-function getQ() {
-  return Atomic._.Q;
+function getWhen() {
+  return Atomic._.When;
 }
 
 // holds the previous Atomic reference
 var Atomic_noConflict_oldAtomic = context.Atomic;
 
 // holds the initialized state of the framework
-var Atomic_load_promise = null;
+var Atomic_load_initialized = false;
 
 Atomic.augment(Atomic, {
   /**
@@ -39,32 +39,44 @@ Atomic.augment(Atomic, {
    * with the dependencies as arguments. This abstracts
    * away any loader framework implementations
    * @method Atomic.load
-   * @param Array depend - an array of dependencies
+   * @param Array depend - an array of dependencies or a list of dependencies
    * @param Function then - a callback to run with dependencies as arguments
    */
-  load: function(depend, then) {
+  load: function() {
     var deferred = Atomic.deferred();
+    var args = [].slice.call(arguments, 0);
 
     // wrap the callback if it exists
-    if (typeof then === 'function') {
-      deferred.then(then);
+    if (typeof args[args.length - 1] === 'function') {
+      deferred.promise.then(args[args.length - 1]);
+      args.pop();
     }
-    else {
-      depend = [].slice.call(arguments, 0);
+
+    // if 2+ args, no need to expand further
+    if (args.length === 1) {
+      args = args[0];
     }
 
     // if not initialized, init, and then do the load step
-    Atomic_load_promise = Atomic_load_promise || Atomic.when(Atomic.loader.init());
+    var initPromise = null;
+    if (Atomic_load_initialized) {
+      initPromise = Atomic.when(true);
+    }
+    else {
+      Atomic_load_initialized = true;
+      initPromise = Atomic.when(Atomic.loader.init());
+    }
 
     // when initialization is complete, then call load
     // on load, resolve the primary promise
-    Atomic_load_promise.then(function() {
-      Atomic.when(Atomic.loader.load(depend))
-      .then(function(needs) {
-        return deferred.resolve(needs);
-      });
+    initPromise
+    .then(function() {
+      return Atomic.when(Atomic.loader.load(args));
+    })
+    .then(function(needs) {
+      return deferred.resolve(needs);
     }, function(reason) {
-      throw new Error('Unable to initialize: '+reason);
+      return deferred.reject(reason);
     });
 
     // return the promise
@@ -130,7 +142,7 @@ Atomic.augment(Atomic, {
    * wiring functions. This keeps us from having to pass
    * in control functions, instead making everything
    * synchronous by default. You may also pass it another
-   * library's promise, which will convert to a Q promise
+   * library's promise, which will convert to a promise
    * in the Atomic ecosystem.
    * @param {Object} promise - optional. a promise from another framework
    * @method Atomic.deferred
@@ -138,10 +150,10 @@ Atomic.augment(Atomic, {
    */
   deferred: function(promise) {
     if (promise) {
-      return getQ().when(promise);
+      return getWhen()(promise);
     }
     else {
-      return getQ().defer();
+      return getWhen().defer();
     }
   },
 
@@ -156,7 +168,7 @@ Atomic.augment(Atomic, {
    */
   when: function(whennable) {
     var deferred = Atomic.deferred();
-    getQ().when.call(getQ(), whennable, function(resolveResult) {
+    getWhen()(whennable, function(resolveResult) {
       return deferred.resolve(resolveResult);
     }, function(rejectResult) {
       return deferred.reject(rejectResult);
@@ -187,6 +199,44 @@ Atomic.augment(Atomic, {
 
     if (factory.window && window) {
       window[factory.window] = factory();
+    }
+  },
+
+  /**
+   * the Atomic thrower is a function you can use to handle rejection
+   * of promises. It's easier than writing your own, and will output
+   * to console.error as a last resort
+   * @method Atomic.thrower
+   * @param {Object} err - the error from a rejection
+   */
+  thrower: function(err) {
+    /*global console:true */
+
+    // if exception, try to get the stack
+    var msg = '';
+    var stack = '';
+
+    if (typeof err === 'object') {
+      if (err.message) {
+        msg = err.message;
+      }
+      else if (err.toString) {
+        msg = err.toString();
+      }
+
+      if (err.stack) {
+        stack = err.stack;
+      }
+      else if (err.stacktrace) {
+        stack = err.stacktrace;
+      }
+    }
+    else if (typeof err === 'string') {
+      msg = err;
+    }
+
+    if (console && console.error) {
+      console.error(msg + '\n' + stack);
     }
   }
 });

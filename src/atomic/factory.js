@@ -27,13 +27,19 @@ Atomic._.Factory = function(objLiteral) {
 
   var objProto = returnObj.prototype;
 
+  // needs, nodes, and events
   Atomic.augment(objProto.needs, needs);
   Atomic.augment(objProto.nodes, nodes);
   Atomic.augment(objProto.events, events);
 
   // wiring loop
-  for (var i = 0, len = wiring.length; i < len; i++) {
-    Atomic._.AbstractComponent.prototype.wireIn.call(objProto, wiring[i], false);
+  if (typeof wiring === 'function') {
+    Atomic._.AbstractComponent.prototype.wireIn.call(objProto, wiring, false);
+  }
+  else {
+    for (var i = 0, len = wiring.length; i < len; i++) {
+      Atomic._.AbstractComponent.prototype.wireIn.call(objProto, wiring[i], false);
+    }
   }
 
   // all public methods, properties, etc
