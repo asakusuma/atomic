@@ -56,6 +56,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an optional HTML element
      */
     init: function (el, overrides) {
+      this._inits = [];
       this._eventEmitter = new Atomic._.EventEmitter({
         wildcard: true,
         newListener: false,
@@ -214,7 +215,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      */
     bind: function (eventing, eventName, method) {
       if (typeof method === 'string') {
-        eventing.on(eventName, this[method]);
+        eventing.on(eventName, Atomic.proxy(this[method], this));
       }
       else {
         eventing.on(eventName, method);
@@ -331,18 +332,17 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
         // dynamically create promise chain
         var inits = self._inits,
             len = inits.length,
-            promise = Atomic.when(inits[0].call(self, needs, nodes)),
-            nextPromise;
+            promise = Atomic.when(inits[0].call(self, needs, nodes));
 
         for (var n = 1; n < len; n++) {
-          nextPromise = Atomic.when(inits[n].call(self, needs, nodes));
-          promise.then(nextPromise);
-          promise = nextPromise;
+          promise = promise.then(inits[n].call(self, needs, nodes));
         }
 
         if (cb) {
           promise.then(cb);
         }
+
+        return promise;
       })
       .then(function() {
         deferred.resolve();

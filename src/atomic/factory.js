@@ -18,37 +18,36 @@ Atomic._.Factory = function(objLiteral) {
   var events = objLiteral.events || {};
   var wiring = objLiteral.wiring || [];
 
-  var reserved = {'needs':1, 'nodes':1, 'events':1, 'wiring':1};
+  var reserved = {'needs':1, 'nodes':1, 'events':1, 'wiring':1, 'init':1};
 
   // currently, we aren't doing anything fancy here
   var returnObj = Atomic._.AbstractComponent.extend(function(base) {
-    return {};
+    var extraMethods = {};
+    for (var name in objLiteral) {
+      if (!objLiteral.hasOwnProperty(name) || reserved[name]) {
+        continue;
+      }
+      extraMethods[name] = objLiteral[name];
+    }
+
+    extraMethods.init = function() {
+      base.init.apply(this, arguments);
+      Atomic.augment(this.needs, needs);
+      Atomic.augment(this.nodes, nodes);
+      Atomic.augment(this.events, events);
+
+      if (typeof wiring === 'function') {
+        this.wireIn(wiring);
+      }
+      else {
+        for (var i = 0, len = wiring.length; i < len; i++) {
+          this.wireIn(wiring[i]);
+        }
+      }
+    };
+
+    return extraMethods;
   });
-
-  var objProto = returnObj.prototype;
-
-  // needs, nodes, and events
-  Atomic.augment(objProto.needs, needs);
-  Atomic.augment(objProto.nodes, nodes);
-  Atomic.augment(objProto.events, events);
-
-  // wiring loop
-  if (typeof wiring === 'function') {
-    Atomic._.AbstractComponent.prototype.wireIn.call(objProto, wiring, false);
-  }
-  else {
-    for (var i = 0, len = wiring.length; i < len; i++) {
-      Atomic._.AbstractComponent.prototype.wireIn.call(objProto, wiring[i], false);
-    }
-  }
-
-  // all public methods, properties, etc
-  for (name in objLiteral) {
-    if (reserved[name]) {
-      continue;
-    }
-    objProto[name] = objLiteral[name];
-  }
 
   return returnObj;
 };

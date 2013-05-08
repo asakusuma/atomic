@@ -31,13 +31,23 @@
 
     <h2>Examples</h2>
 
-    <h3>Button with Echo Wiring</h3>
+    <h3>Button with Debugger Wiring</h3>
 
-    <button id="myButton">Click me!</button>
-
-    <h3>Carousel</h3>
+    <button id="my-button">Click me!</button>
 
     <h3>Carousel With Buttons</h2>
+    <style>
+    li.current {
+      background: #fcc;
+    }
+    </style>
+    <ul id="carousel">
+      <li>one</li>
+      <li>two</li>
+      <li>three</li>
+    </ul>
+    <button id="carousel-prev">Previous</button>
+    <button id="carousel-next">Next</button>
 
     <h3>Infinite Scrolling Carousel With Buttons</h3>
 
@@ -48,6 +58,7 @@
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
     <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
+    <script type="text/javascript" src="scripts/atomic/components/carousel.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/debugtracer.js"></script>
 
     <!-- our page specific JavaScript -->

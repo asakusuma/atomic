@@ -42,7 +42,6 @@ function factory() {
 
     // wiring functions to make this work
     wiring: function(needs, nodes) {
-      var self = this;
       this.index = 0;
       this.$items = $(nodes.Items);
       this.go(this.index);
@@ -76,6 +75,6 @@ function factory() {
   });
 }
 // you only need to set .id if you are using the "system" loader
-factory.id = 'components/button';
+factory.id = 'components/carousel';
 
 Atomic.export(module, define, factory);

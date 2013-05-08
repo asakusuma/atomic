@@ -3,6 +3,9 @@
 Atomic.augment(Atomic.loader, {
   modules: {},
   save: function(id, module) {
+    if (Atomic.loader.modules[id]) {
+      throw new Error('module already exists: ' + id);
+    }
     Atomic.loader.modules[id] = module;
   },
   init: function() {
@@ -19,6 +22,11 @@ Atomic.augment(Atomic.loader, {
   },
   load: function(deps) {
     var results = {};
+
+    if (!deps) {
+      return results;
+    }
+
     for (var i = 0, len = deps.length; i < len; i++) {
       results[deps[i]] = Atomic.loader.modules[deps[i]];
 
