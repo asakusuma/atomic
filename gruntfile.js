@@ -111,6 +111,7 @@ module.exports = function (grunt) {
         files: {
           src: [
             './gruntfile.js',
+            './examples/scripts/**/*.js',
             './src/atomic/*.js',
             './src/compat/*.js',
             './src/customizable/*.js',
