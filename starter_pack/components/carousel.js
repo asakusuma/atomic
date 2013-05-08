@@ -25,6 +25,8 @@ function factory() {
 
   // calls the Atomic Component constructor
   return Atomic.Component({
+    // a common name to assist in debugging
+    name: 'SamplePack Carousel by @jakobo',
 
     // no dependencies
     needs: {},

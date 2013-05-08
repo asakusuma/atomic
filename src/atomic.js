@@ -37,13 +37,18 @@
    * @method Atomic.augment
    * @param {Object} src - the source to supplement with new things
    * @param {Object} target - the thing to copy from
-   * @returns {Object} the resulting object. `src` is updated by reference
+   * @returns {Object} the resulting object. `src` is updated by reference when using objects
    * @private
    */
   Atomic.augment = function(src, target) {
-    for (var name in target) {
-      if (target.hasOwnProperty(name)) {
-        src[name] = target[name];
+    if (Object.prototype.toString.call(src) === '[object Array]') {
+      src = src.concat(target);
+    }
+    else {
+      for (var name in target) {
+        if (target.hasOwnProperty(name)) {
+          src[name] = target[name];
+        }
       }
     }
     return src;

@@ -20,15 +20,22 @@ function addInit(obj, func, addFront) {
 var AbstractComponent = Atomic._.Fiber.extend(function (base) {
   return {
     /**
+     * A simple ID to be overridden. Useful in debugging
+     * @property {String} AbstractComponent#name
+     */
+    name: 'AbstractComponent. Override me to improve debugging',
+
+    /**
      * A key/string collection of events
      * These are events that the AbstractComponent can emit
+     * Overriden with an instance variable during the constructor
      * @property {Object} AbstractComponent#events
      */
     events: {},
 
     /**
      * An array of dependencies this module needs to run
-     * These are modules the implementning component needs
+     * These are modules the implementing component needs
      * @property {Array} AbstractComponent#needs
      */
     needs: [],
@@ -36,17 +43,15 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     /**
      * A key/string collection of roles and matching nodes
      * These are nodes that components need to have in order to function
+     * Overriden with an instance variable during the constructor
      * @property {Object} AbstractComponent#nodes
      */
     nodes: {},
 
-    /**
-     * An array of async functions, responsible for "wiring" everything together
-     * This is where app logic resides
-     * @property {Array} AbstractComponent#_inits
-     * @private
-     */
-    _inits: [],
+    // to be overriden on the instance level
+    _inits: null,
+    _eventEmitter: null,
+    config: null,
 
     /**
      * The initializer for a component
@@ -56,13 +61,81 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an optional HTML element
      */
     init: function (el, overrides) {
+      var name, nodes, events;
+
+      /**
+       * An array of async functions, responsible for "wiring" everything together
+       * This is where app logic resides
+       * @property {Array} AbstractComponent#_inits
+       * @private
+       */
+      this._inits = [];
+
+      /** 
+       * A configuration for this instance of the object
+       * contains any unknown key/value pairs passed into the
+       * constructor
+       * @property {Object} AbstractComponent#config
+       */
+      this.config = {};
+
+      // localize the nodes variable BEFORE the user starts configuring
+      nodes = this.nodes;
+      this.nodes = {};
+      for (name in nodes) {
+        if (nodes.hasOwnProperty(name)) {
+          this.nodes[name] = nodes[name];
+        }
+      }
+
+      // localize the events variable BEFORE the user starts configuring
+      events = this.events;
+      this.events = {};
+      for (name in events) {
+        if (events.hasOwnProperty(name)) {
+          this.events[name] = events[name];
+        }
+      }
+
+      // create an eventEmitter on this instance
       this._eventEmitter = new Atomic._.EventEmitter({
         wildcard: true,
         newListener: false,
         maxListeners: 20
       });
+
+      // attach the el
       if (el) {
         this.attach(el);
+      }
+
+      // handle overrides
+      if (overrides) {
+        for (name in overrides) {
+          if (!overrides.hasOwnProperty(name)) {
+            continue;
+          }
+          if (typeof(this[name]) === 'function') {
+            // can't override a function here
+            continue;
+          }
+          else if (name.indexOf('_') === 0) {
+            // can't override a _ property here
+            continue;
+          }
+          else if (name === 'needs' || name === 'events' || name === 'config') {
+            // needs and events should be wired in. config is just silly
+            continue;
+          }
+          else if (name === 'nodes') {
+            // nodes are augmented
+            this.nodes = Atomic.augment(this.nodes, overrides.nodes);
+          }
+          else {
+            // everything else is assigned to config
+            this.config[name] = overrides[name];
+          }
+        }
       }
     },
 
@@ -242,14 +315,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       return this;
     },
 
-    // TODO: Doc and explain
-    // replace an existing function with a new
-    // method, then call the original method
-    // if you got a function for arg 1, loop through
-    // the this[] collection. Strings are far faster
-    // as we can go write to wrapping
-    // Eric: then why allow it?  we should require a method string
-
     /**
      * augment a method by executing a custom function before executing a method
      * @method AbstractComponent#before
@@ -265,6 +330,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       };
       return this;
     },
+
     /**
      * augment a method by executing a custom function after executing a method
      * @method AbstractComponent#before
@@ -291,8 +357,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       return this;
     },
 
-
-
     /**
      * Load the Component, resolve all dependencies
      * calls the ready method
@@ -300,21 +364,12 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
-      // get the needs keys, and Atomic.load them
-      // make a copy of the wiring array
-      // create continuation callback that...
-      //   invokes the next element in the array with a new continuation callback
-      //   if no next, then invoke cb()
-      // call the first wiring w/ continuation function
-      // signature: needs, nodes
-      // TODO: jheuser
-
       // Question from Eric: why do we need to pass needs and nodes?  They
       // are accessible via this.needs and this.nodes from the wirings func
 
       // Reply from Jakob: this.needs isn't actually the resolved objects because
       // they are loaded at this step. We could overwrite this.needs, but that
-      // could be confusing to the end developer
+      // could be confusing to the end developer who's trying to inspect the object
 
       var deferred = Atomic.deferred();
       var self = this;
@@ -329,19 +384,46 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       Atomic.load(this.needs)
       .then(function(needs) {
         // dynamically create promise chain
-        var inits = self._inits,
+        // inits[0] runs automatically
+        var wiringDeferred = Atomic.deferred(),
+            inits = self._inits,
             len = inits.length,
-            promise = Atomic.when(inits[0].call(self, needs, nodes));
+            promise = Atomic.when(inits[0].call(self, needs, nodes)),
+            createWiringCall;
 
+        // creates a call to a wiring function. Done outside of the
+        // wiring for-loop
+        createWiringCall = function(fn) {
+          return function() {
+            // run only on then() resolution to prevent premature
+            // resolution of the promise chain
+            fn.call(self, needs, nodes);
+          };
+        };
+
+        // replace itself with a new promise
         for (var n = 1; n < len; n++) {
-          promise = promise.then(inits[n].call(self, needs, nodes));
+          promise = promise.then(createWiringCall(inits[n]));
         }
 
+        // if there is a callback, we can then handle it
+        // by attaching it to the end of the promise chain
         if (cb) {
-          promise.then(cb);
+          promise = promise.then(cb);
         }
 
-        return promise;
+        // set resolution for the internal promise
+        promise.then(function() {
+          wiringDeferred.resolve();
+        }, function(err) {
+          wiringDeferred.reject(err);
+        });
+
+        // return the promise to the outer function
+        // if we hit a throw(), it'll automatically bubble out
+        // to the outer promise layer thanks to the promise chain
+        // above
+        return wiringDeferred.promise;
       })
       .then(function() {
         deferred.resolve();
