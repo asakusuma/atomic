@@ -114,7 +114,10 @@ module.exports = function (grunt) {
             './src/atomic/*.js',
             './src/compat/*.js',
             './src/customizable/*.js',
-            './src/*.js'
+            './starter_pack/**/*.js',
+            './src/*.js',
+            './tests/spec/**/*.js',
+            './server.js'
           ]
         },
         jshintrc: './.jshintrc'
