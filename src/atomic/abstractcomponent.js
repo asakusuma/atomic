@@ -56,7 +56,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an optional HTML element
      */
     init: function (el, overrides) {
-      this._inits = [];
       this._eventEmitter = new Atomic._.EventEmitter({
         wildcard: true,
         newListener: false,

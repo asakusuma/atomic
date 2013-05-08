@@ -13,41 +13,42 @@ Atomic._.Factory = function(objLiteral) {
   // needs, nodes, events, and wiring
   var name;
   var current;
+  var extraMethods = {};
   var needs = objLiteral.needs || {};
   var nodes = objLiteral.nodes || {};
   var events = objLiteral.events || {};
   var wiring = objLiteral.wiring || [];
 
-  var reserved = {'needs':1, 'nodes':1, 'events':1, 'wiring':1, 'init':1};
+  var reserved = {'needs':0, 'nodes':0, 'events':0, 'wiring':1, 'init':1};
 
   // currently, we aren't doing anything fancy here
-  var returnObj = Atomic._.AbstractComponent.extend(function(base) {
-    var extraMethods = {};
-    for (var name in objLiteral) {
-      if (!objLiteral.hasOwnProperty(name) || reserved[name]) {
-        continue;
-      }
-      extraMethods[name] = objLiteral[name];
-    }
+  var component = Atomic._.AbstractComponent.extend(function(base) {
+    return {
+      init: function() {
+        base.init.apply(this, arguments);
 
-    extraMethods.init = function() {
-      base.init.apply(this, arguments);
-      Atomic.augment(this.needs, needs);
-      Atomic.augment(this.nodes, nodes);
-      Atomic.augment(this.events, events);
-
-      if (typeof wiring === 'function') {
-        this.wireIn(wiring);
-      }
-      else {
-        for (var i = 0, len = wiring.length; i < len; i++) {
-          this.wireIn(wiring[i]);
+        if (typeof wiring === 'function') {
+          this.wireIn(wiring);
+        }
+        else if (wiring) {
+          for (var i = 0, len = wiring.length; i < len; i++) {
+            this.wireIn(wiring[i]);
+          }
         }
       }
     };
+  });
 
+  // add all other extras
+  for (name in objLiteral) {
+    if (!objLiteral.hasOwnProperty(name) || reserved[name]) {
+      continue;
+    }
+    extraMethods[name] = objLiteral[name];
+  }
+  Atomic._.Fiber.mixin(component, function(base) {
     return extraMethods;
   });
 
-  return returnObj;
+  return component;
 };
