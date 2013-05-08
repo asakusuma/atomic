@@ -348,6 +348,24 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
+     * Wrap a method with a new function
+     * The new function gets the old function as its first parameter
+     * @method AbstractComponent#wrap
+     * @param {String} method - method to augment
+     * @param {Function} fn - custom function to execute. Gets the original function as the first arg
+     */
+    wrap: function(method, fn) {
+      var old = Atomic.proxy(this[method], this);
+      var that = this;
+      this[method] = function() {
+        var args = [].slice.call(arguments, 0);
+        args.unshift(old);
+        fn.apply(that, args);
+      };
+      return this;
+    },
+
+    /**
      * Attach an element to this Component
      * @method AbstractComponent#attach
      * @param {HTMLElement} el - an HTML element to attach

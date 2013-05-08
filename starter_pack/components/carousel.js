@@ -45,18 +45,22 @@ function factory() {
     // wiring functions to make this work
     wiring: function(needs, nodes) {
       this.index = 0;
-      this.$items = $(nodes.Items);
+      this._$items = $(nodes.Items);
       this.go(this.index);
     },
 
     go: function(to) {
-      if (to < 0 || to > this.$items.length - 1) {
+      if (to < 0 || to > this.size() - 1) {
         return this;
       }
       this.index = to;
-      this.$items.removeClass(CURRENT_CLASS);
-      this.$items.eq(this.index).addClass(CURRENT_CLASS);
+      this._$items.removeClass(CURRENT_CLASS);
+      this._$items.eq(this.index).addClass(CURRENT_CLASS);
       return this;
+    },
+
+    size: function() {
+      return this._$items.length;
     },
 
     first: function() {
@@ -64,7 +68,7 @@ function factory() {
     },
 
     last: function() {
-      return this.go(this.$items.length - 1);
+      return this.go(this.size() - 1);
     },
 
     next: function() {

@@ -33,3 +33,35 @@ Atomic.load('components/button', 'components/carousel')
     console.log('The Carousel with Buttons has been loaded');
   }, Atomic.thrower);
 }), Atomic.thrower);
+
+// Carousel with Buttons that Wraps
+Atomic.load('components/button', 'components/carousel')
+.then(Atomic.expand(function(Button, Carousel) {
+  var next = new Button(document.getElementById('carousel-wraps-next'));
+  var prev = new Button(document.getElementById('carousel-wraps-prev'));
+  var carousel = new Carousel(document.getElementById('carousel-wraps'));
+
+  carousel.nodes.Items = document.getElementById('carousel-wraps').getElementsByTagName('li');
+
+  // example of an inline wiring to add wrapping functionality
+  carousel.wireIn(function(needs, nodes) {
+    carousel.wrap('go', function(go, to) {
+      if (to < 0) {
+        to = this.size() - 1;
+      }
+      else if(to > this.size() - 1) {
+        to = 0;
+      }
+      return go(to);
+    });
+  });
+
+  carousel.load()
+  .then(next.load())
+  .then(prev.load())
+  .then(function() {
+    carousel.bind(next, next.events.USE, 'next');
+    carousel.bind(prev, prev.events.USE, 'previous');
+    console.log('The Carousel with Buttons (Wrapping) has been loaded');
+  }, Atomic.thrower);
+}), Atomic.thrower);
