@@ -13,8 +13,7 @@ itself. Often times, developers will use a DOM Library such
 as YUI or jQuery to make the DOM operations easier.
 
 The Carousel Component provides an API for manipulating a
-"current" class on a collection of nodes, defined as the
-Items in nodes:{}.
+"current" class on a collection of nodes
 */
 var Atomic = require('atomic');
 
@@ -32,9 +31,7 @@ function factory() {
     needs: {},
 
     // no additional nodes needed
-    nodes: {
-      Items: null
-    },
+    nodes: {},
 
     // events
     events: {
@@ -45,7 +42,7 @@ function factory() {
     // wiring functions to make this work
     wiring: function(needs, nodes) {
       this.index = 0;
-      this._$items = $(nodes.Items);
+      this._$items = $(nodes._root.children);
       this.go(this.index);
     },
 
