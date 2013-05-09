@@ -29,17 +29,17 @@ function factory() {
     name: 'SamplePack Carousel by @jakobo',
 
     // no dependencies
-    needs: {},
+    needs: [],
 
     // no additional nodes needed
     nodes: {
-      Items: null
+      Items: 'The items in the carousel'
     },
 
     // events
     events: {
-      END: 'end',
-      FIRST: 'first'
+      END: 'Fired when the carousel reaches the end',
+      FIRST: 'Fired when the carousel reaches the front'
     },
 
     // wiring functions to make this work

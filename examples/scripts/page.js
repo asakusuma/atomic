@@ -22,7 +22,7 @@ Atomic.load('components/button', 'components/carousel')
   var prev = new Button(document.getElementById('carousel-prev'));
   var carousel = new Carousel(document.getElementById('carousel'));
 
-  carousel.nodes.Items = document.getElementById('carousel').getElementsByTagName('li');
+  carousel.assign(carousel.nodes.Items, document.getElementById('carousel').getElementsByTagName('li'));
 
   carousel.load()
   .then(next.load())
@@ -41,7 +41,7 @@ Atomic.load('components/button', 'components/carousel')
   var prev = new Button(document.getElementById('carousel-wraps-prev'));
   var carousel = new Carousel(document.getElementById('carousel-wraps'));
 
-  carousel.nodes.Items = document.getElementById('carousel-wraps').getElementsByTagName('li');
+  carousel.assign(carousel.nodes.Items, document.getElementById('carousel-wraps').getElementsByTagName('li'));
 
   // example of an inline wiring to add wrapping functionality
   carousel.wireIn(function(needs, nodes) {

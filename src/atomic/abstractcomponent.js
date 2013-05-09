@@ -26,14 +26,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     name: 'AbstractComponent. Override me to improve debugging',
 
     /**
-     * A key/string collection of events
-     * These are events that the AbstractComponent can emit
-     * Overriden with an instance variable during the constructor
-     * @property {Object} AbstractComponent#events
-     */
-    events: {},
-
-    /**
      * An array of dependencies this module needs to run
      * These are modules the implementing component needs
      * @property {Array} AbstractComponent#needs
@@ -41,17 +33,57 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     needs: [],
 
     /**
-     * A key/string collection of roles and matching nodes
-     * These are nodes that components need to have in order to function
-     * Overriden with an instance variable during the constructor
+     * A key/string collection of nodes and their purpose
+     * These are nodes that components need to have in order to function.
+     * This object is overriden with an instance variable during the constructor
      * @property {Object} AbstractComponent#nodes
      */
     nodes: {},
 
-    // to be overriden on the instance level
-    _inits: null,
+    /**
+     * A key/string collection of events
+     * These are events that the AbstractComponent can emit
+     * Overriden with an instance variable during the constructor
+     * @property {Object} AbstractComponent#events
+     */
+    events: {},
+
+    /** 
+     * A configuration for this instance of the object
+     * contains any unknown key/value pairs passed into the
+     * constructor
+     * @property {Object} AbstractComponent#config
+     */
+    config: {},
+
+    /**
+     * An array of async functions, responsible for "wiring" everything together
+     * This is where app logic resides
+     * @property {Array} AbstractComponent#_inits
+     * @private
+     */
+    _inits: [],
+
+    /**
+     * A collection of assigned nodes
+     * @property {Object} AbstractComponent#_assigned
+     * @private
+     */
+    _assigned: {},
+
+    /**
+     * A local event emitter
+     * @property {EventEmitter} AbstractComponent#_eventEmitter
+     * @private
+     */
     _eventEmitter: null,
-    config: null,
+
+    /**
+     * Has this object been destroyed
+     * @property {Boolean} AbstractComponent#_isDestroyed
+     * @private
+     */
+    _isDestroyed: false,
 
     /**
      * The initializer for a component
@@ -59,50 +91,41 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * your behalf.
      * @constructor
      * @param {HTMLElement} el - an optional HTML element
+     * @param {Object} overrides - any configuration overrides to provide to this object
      */
     init: function (el, overrides) {
       var name, nodes, events;
 
-      /**
-       * An array of async functions, responsible for "wiring" everything together
-       * This is where app logic resides
-       * @property {Array} AbstractComponent#_inits
-       * @private
-       */
+      // set inits, assigned, etc all to local instance-level variables
       this._inits = [];
-
-      /** 
-       * A configuration for this instance of the object
-       * contains any unknown key/value pairs passed into the
-       * constructor
-       * @property {Object} AbstractComponent#config
-       */
+      this._assigned = {};
       this.config = {};
+      this._eventEmitter = new Atomic._.EventEmitter({
+        wildcard: true,
+        newListener: false,
+        maxListeners: 20
+      });
 
       // localize the nodes variable BEFORE the user starts configuring
       nodes = this.nodes;
       this.nodes = {};
       for (name in nodes) {
         if (nodes.hasOwnProperty(name)) {
-          this.nodes[name] = nodes[name];
+          this.nodes['_' + name] = nodes[name];
+          this.nodes[name] = name;
         }
       }
 
       // localize the events variable BEFORE the user starts configuring
       events = this.events;
       this.events = {};
+      this._aboutEvents = {};
       for (name in events) {
         if (events.hasOwnProperty(name)) {
-          this.events[name] = events[name];
+          this.events['_' + name] = events[name];
+          this.events[name] = name;
         }
       }
-
-      // create an eventEmitter on this instance
-      this._eventEmitter = new Atomic._.EventEmitter({
-        wildcard: true,
-        newListener: false,
-        maxListeners: 20
-      });
 
       // attach the el
       if (el) {
@@ -124,7 +147,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
             continue;
           }
           else if (name === 'needs' || name === 'events' || name === 'config') {
-            // needs and events should be wired in. config is just silly
+            // needs and events should be wired in. using config for this is just silly
             continue;
           }
           else if (name === 'nodes') {
@@ -137,6 +160,16 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
           }
         }
       }
+    },
+
+    /**
+     * Assign a node to the component.nodes collection
+     * @method AbstractComponent#assign
+     * @param {String} name - the node to assign. Use a component.nodes reference
+     * @param {HTMLElement} el - an element to assign to the role.
+     */
+    assign: function(name, el) {
+      this._assigned[name] = el;
     },
 
     /**
@@ -371,7 +404,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an HTML element to attach
      */
     attach: function (el) {
-      this.nodes._root = el;
+      this._assigned._root = el;
       return this;
     },
 
@@ -393,9 +426,9 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
       var self = this;
       var nodes = {};
 
-      for (var name in this.nodes) {
-        if (this.nodes.hasOwnProperty(name)) {
-          nodes[name] = this.nodes[name];
+      for (var name in this._assigned) {
+        if (this._assigned.hasOwnProperty(name)) {
+          nodes[name] = this._assigned[name];
         }
       }
 
@@ -487,7 +520,8 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
               if (this.nodes[nodesName]) {
                 continue; // we do not overwrite if the Implementor has defined
               }
-              this.nodes[nodesName] = wiring.nodes[nodesName];
+              this.nodes['_' + name] = wiring.nodes[nodesName];
+              this.nodes[nodesName] = nodesName;
             }
           }
           else {
