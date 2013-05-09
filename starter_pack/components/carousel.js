@@ -44,18 +44,18 @@ function factory() {
 
     // wiring functions to make this work
     wiring: function(needs, nodes) {
-      this.index = 0;
+      this._index = 0;
       this._$items = $(nodes.Items);
-      this.go(this.index);
+      this.go(this._index);
     },
 
     go: function(to) {
       if (to < 0 || to > this.size() - 1) {
         return this;
       }
-      this.index = to;
+      this._index = to;
       this._$items.removeClass(CURRENT_CLASS);
-      this._$items.eq(this.index).addClass(CURRENT_CLASS);
+      this._$items.eq(this._index).addClass(CURRENT_CLASS);
       return this;
     },
 
@@ -72,11 +72,11 @@ function factory() {
     },
 
     next: function() {
-      return this.go(this.index + 1);
+      return this.go(this._index + 1);
     },
 
     previous: function() {
-      return this.go(this.index - 1);
+      return this.go(this._index - 1);
     }
   });
 }
