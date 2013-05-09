@@ -170,6 +170,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      */
     assign: function(name, el) {
       this._assigned[name] = el;
+      return this;
     },
 
     /**
@@ -183,6 +184,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
         this.nodes._root.parentNode.removeChild(this.nodes._root);
       }
       this.removeAllListeners();
+      return null;
     },
 
     /**
