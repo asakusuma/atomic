@@ -39,19 +39,31 @@ function factory() {
       FIRST: 'Fired when the carousel reaches the front'
     },
 
-    // wiring functions to make this work
+    /**
+     * Main wiring function. Creates internal index and items collections
+     */
     wiring: function(needs, nodes) {
-      this._nodes = nodes;
       this._index = 0;
       this._$items = null;
       this.refresh();
       this.go(this._index);
     },
 
+    /**
+     * refresh the list of nodes inside of this component
+     * if you change the DOM structure
+     * @method Carousel#refresh
+     */
     refresh: function() {
-      this._$items = $(this.nodes._root.children);
+      this._$items = $(this._nodes._root).children();
+      return this;
     },
 
+    /**
+     * Go to a specific item in the collection
+     * @method Carousel#go
+     * @param {Number} to - the index to advance to
+     */
     go: function(to) {
       if (to < 0 || to > this.size() - 1) {
         return this;
@@ -62,22 +74,42 @@ function factory() {
       return this;
     },
 
+    /** 
+     * return the reported size of the carousel's items
+     * @method Carousel#size
+     */
     size: function() {
-      return this._$items.length;
+      return this._$items.size();
     },
 
+    /**
+     * Go to the first item in the carousel collection
+     * @method Carousel#first
+     */
     first: function() {
       return this.go(0);
     },
 
+    /**
+     * Go to the last item in the carousel collection
+     * @method Carousel#last
+     */
     last: function() {
       return this.go(this.size() - 1);
     },
 
+    /**
+     * Go to the next item in the carousel collection
+     * @method Carousel#next
+     */
     next: function() {
       return this.go(this._index + 1);
     },
 
+    /**
+     * Go to the previous item in the carousel collection
+     * @method Carousel#previous
+     */
     previous: function() {
       return this.go(this._index - 1);
     }

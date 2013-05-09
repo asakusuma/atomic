@@ -1,4 +1,4 @@
-/*global require:true, module:true, define: true, console:true */
+/*global Atomic:true, require:true, module:true, define: true, console:true */
 
 /**
 * fetch wiring.  Makes it really easy to fetch chunks of HTML and inject
@@ -22,33 +22,59 @@ function factory() {
     return {
       init: function(needs, nodes) {
         console.log('Initialized Fetch wiring');
-      },
-      fetch: function(oParams, oCallback, replace){
-        var that = this,
-            url = endpoint + '?',
-            deferred = Atomic.deferred(),
-            key;
 
-        // build url
-        if (oParams) {
-          for (key in oParams) {
-            url += key + '=' + oParams[key] + '&';
-          }
-        }
-        url += 'r=' + ((Math.random() * 999999999) | 0);
+        /**
+         * Adds a fetch method to a component
+         * the fetch method can retrieve parameterized content
+         * and optionally replace or append to an existing node
+         * @method Wiring#fetch
+         * @for AbstractComponent
+         * @param {Object} params - url parameters for the request
+         * @param {Boolean} replace - if true, the node's content will be replaced
+         * @param {Object} callbacks - YUI style callbacks object. Appended to the promise
+         * @returns Atomic.deferred
+         */
+        this.fetch = function(params, replace, callbacks) {
+          var $ = require('jquery'),
+              deferred = Atomic.deferred(),
+              url = endpoint + '?',
+              key;
 
-        // async request
-        $.ajax({
-          url: url
-        }).done(function(response) {
-          if (replace) {
-              that.nodes._root.innerHTML = response;
+          if (callbacks) {
+            if (callbacks.success) {
+              deferred.promise.then(callbacks.success);
+            }
+            if (callbacks.error) {
+              deferred.promise.then(null, callbacks.error);
+            }
           }
-          else {
-              that.nodes._root.innerHTML += response;
+
+          // build url
+          if (params) {
+            for (key in params) {
+              url += key + '=' + params[key] + '&';
+            }
           }
-          oCallback.success();
-        });
+          url += 'r=' + (Math.random() * 999999999);
+
+          // async request
+          $.ajax({
+            url: url
+          }).success(function(response) {
+            if (replace) {
+              nodes._root.innerHTML = response;
+            }
+            else {
+              nodes._root.innerHTML += response;
+            }
+            deferred.resolve();
+          })
+          .error(function(err) {
+            deferred.reject(err);
+          });
+
+          return deferred.promise;
+        };
       }
     };
   };

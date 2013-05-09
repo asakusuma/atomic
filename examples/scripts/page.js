@@ -99,14 +99,14 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
     carousel.fetch({
       offset: 4,
       count: 10
-    }, {
+    }, false, {
       success: function() {
         carousel.refresh();
       },
       failure: function() {
         console.log('wtf happened?');
       }
-    }, false);
+    });
 
   }, Atomic.thrower);
 }), Atomic.thrower);
