@@ -74,9 +74,13 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
   // TODO: should we define a standard naming practice to help diffferentiate
   //   Components vs wirings?  maybe wirings could start with an underscore? Eric
 
+  // target in configuration, or in .nodes
   carousel.wireIn(fetch({
+    // into: '#jquery.selector', // <= option 1
+    // append: true,
     endpoint: 'data.html'
   }));
+  // carousel.nodes.FetchInto = $('#target.container'); // <= option 2
 
   carousel.load()
   .then(next.load())
@@ -91,13 +95,14 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
     carousel.fetch({
       offset: 4,
       count: 10
-    });
-
-    // do it again for fun
-    carousel.fetch({
-      offset: 4,
-      count: 10
-    });
+    }, {
+      success: function() {
+        carousel.refresh();
+      },
+      failure: function() {
+        console.log('wtf happened?');
+      }
+    }, false);
 
   }, Atomic.thrower);
 }), Atomic.thrower);

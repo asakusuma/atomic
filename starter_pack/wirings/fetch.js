@@ -3,36 +3,44 @@
 /**
 * fetch wiring.  Makes it really easy to fetch chunks of HTML and inject
 * the response into a document
+* @param {Object} config
+* @param {Object} oCallback object literal that contains success and failure functions
 */
 function factory() {
   return function(config) {
     config = config || {};
+
     var endpoint = config.endpoint;
 
     return {
       init: function(needs, nodes) {
         console.log('Initialized Fetch wiring');
       },
-      fetch: function(params){
+      fetch: function(oParams, oCallback, replace){
         var that = this,
-            url = endpoint,
+            url = endpoint + '?',
+            deferred = Atomic.deferred(),
             key;
 
-        if (params) {
-          url += '?';
-          for (key in params) {
-            url += key + '=' + params[key] + '&';
+        // build url
+        if (oParams) {
+          for (key in oParams) {
+            url += key + '=' + oParams[key] + '&';
           }
         }
+        url += 'r=' + ((Math.random() * 999999999) | 0);
 
-        console.log('requesting ' + url + '...');
-
+        // async request
         $.ajax({
           url: url
         }).done(function(response) {
-          console.log('successful response');
-          // add response to Items
-          that.nodes._root.innerHTML += response;
+          if (replace) {
+              that.nodes._root.innerHTML = response;
+          }
+          else {
+              that.nodes._root.innerHTML += response;
+          }
+          oCallback.success();
         });
       }
     };

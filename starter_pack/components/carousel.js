@@ -42,8 +42,13 @@ function factory() {
     // wiring functions to make this work
     wiring: function(needs, nodes) {
       this.index = 0;
-      this._$items = $(nodes._root.children);
+      this._nodes = nodes;
+      this.refresh();
       this.go(this.index);
+    },
+
+    refresh: function() {
+      this._$items = $(this.nodes._root.children);
     },
 
     go: function(to) {
