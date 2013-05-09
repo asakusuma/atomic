@@ -6,6 +6,13 @@
 * @param {Object} config
 * @param {Object} oCallback object literal that contains success and failure functions
 */
+// TODO: Now that I've implemented this, I'm unsure if it's needed as a wiring.
+// it feels more like a utility method.  It doesn't even have an initializer.  Perhaps
+// the value of wirings becomes more evident when they:
+// 1) have initializers
+// 2) add multiple methods
+// 3) require static nodes
+// Eric
 function factory() {
   return function(config) {
     config = config || {};
