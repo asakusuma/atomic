@@ -17,7 +17,7 @@ The Carousel Component provides an API for manipulating a
 */
 var Atomic = require('atomic');
 
-function factory() {
+function definition() {
   var $ = require('jquery');
 
   var CURRENT_CLASS = 'current';
@@ -42,7 +42,7 @@ function factory() {
     /**
      * Main wiring function. Creates internal index and items collections
      */
-    wiring: function(needs, nodes) {
+    wiring: function() {
       this._index = 0;
       this._$items = null;
       this.refresh();
@@ -55,7 +55,7 @@ function factory() {
      * @method Carousel#refresh
      */
     refresh: function() {
-      this._$items = $(this._nodes._root).children();
+      this._$items = $(this.nodes()._root).children();
       return this;
     },
 
@@ -116,6 +116,6 @@ function factory() {
   });
 }
 // you only need to set .id if you are using the "system" loader
-factory.id = 'components/carousel';
+definition.id = 'components/carousel';
 
-Atomic.export(module, define, factory);
+Atomic.export(module, define, definition);

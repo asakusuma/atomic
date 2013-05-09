@@ -30,7 +30,7 @@ function factory() {
     name: 'SamplePack Button by @jakobo',
 
     // no dependencies
-    needs: {},
+    needs: ['wirings/echo'],
 
     // no additional nodes needed
     nodes: {},
@@ -39,15 +39,15 @@ function factory() {
     events: {
       // TODO from Eric: I know that 'click' isn't used here because we want to
       // include tap events as well.  But USE is very strange.
-      USE: 'use'
+      USE: 'Triggered when the button is used'
     },
 
     // wiring functions to make this work
-    wiring: function(needs, nodes) {
+    wiring: function() {
       var self = this;
       // nodes._root is the default container, either an el passed
       // to the constructor, or via attach()
-      $(nodes._root).on('click', function() {
+      $(self.nodes()._root).on('click', function() {
         self.trigger(self.events.USE);
       });
     }

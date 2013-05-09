@@ -8,10 +8,13 @@ var Atomic = require('atomic');
 function definition() {
   return function(config) {
     return {
-      init: function(needs, nodes) {
+      init: function() {
         var ignore = {
           before: 1,
-          after: 1
+          after: 1,
+          needs: 1,
+          nodes: 1,
+          events: 1
         };
         var self = this;
         var tracerId = 0;

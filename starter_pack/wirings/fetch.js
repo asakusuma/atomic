@@ -20,65 +20,65 @@ function factory() {
     var endpoint = config.endpoint;
 
     return {
-      init: function(needs, nodes) {
+      init: function() {
         console.log('Initialized Fetch wiring');
+      },
+      /**
+       * Adds a fetch method to a component
+       * the fetch method can retrieve parameterized content
+       * and optionally replace or append to an existing node
+       * @method Wiring#fetch
+       * @for AbstractComponent
+       * @param {Object} params - url parameters for the request
+       * @param {Boolean} replace - if true, the node's content will be replaced
+       * @param {Object} callbacks - YUI style callbacks object. Appended to the promise
+       * @returns Atomic.deferred
+       */
+      fetch: function(params, replace, callbacks) {
+        var $ = require('jquery'),
+            self = this,
+            deferred = Atomic.deferred(),
+            url = endpoint + '?',
+            key;
 
-        /**
-         * Adds a fetch method to a component
-         * the fetch method can retrieve parameterized content
-         * and optionally replace or append to an existing node
-         * @method Wiring#fetch
-         * @for AbstractComponent
-         * @param {Object} params - url parameters for the request
-         * @param {Boolean} replace - if true, the node's content will be replaced
-         * @param {Object} callbacks - YUI style callbacks object. Appended to the promise
-         * @returns Atomic.deferred
-         */
-        this.fetch = function(params, replace, callbacks) {
-          var $ = require('jquery'),
-              deferred = Atomic.deferred(),
-              url = endpoint + '?',
-              key;
-
-          if (callbacks) {
-            if (callbacks.success) {
-              deferred.promise.then(callbacks.success);
-            }
-            if (callbacks.error) {
-              deferred.promise.then(null, callbacks.error);
-            }
+        if (callbacks) {
+          if (callbacks.success) {
+            deferred.promise.then(callbacks.success);
           }
-
-          // build url
-          if (params) {
-            for (key in params) {
-              url += key + '=' + params[key] + '&';
-            }
+          if (callbacks.error) {
+            deferred.promise.then(null, callbacks.error);
           }
-          url += 'r=' + (Math.random() * 999999999);
+        }
 
-          // async request
-          $.ajax({
-            url: url
-          }).success(function(response) {
-            if (replace) {
-              nodes._root.innerHTML = response;
-            }
-            else {
-              nodes._root.innerHTML += response;
-            }
-            deferred.resolve();
-          })
-          .error(function(err) {
-            deferred.reject(err);
-          });
+        // build url
+        if (params) {
+          for (key in params) {
+            url += key + '=' + params[key] + '&';
+          }
+        }
+        url += 'r=' + (Math.random() * 999999999);
 
-          return deferred.promise;
-        };
+        // async request
+        $.ajax({
+          url: url
+        }).success(function(response) {
+          if (replace) {
+            self.nodes()._root.innerHTML = response;
+          }
+          else {
+            self.nodes()._root.innerHTML += response;
+          }
+          deferred.resolve();
+        }).error(function(err) {
+          deferred.reject(err);
+        });
+
+        return deferred.promise;
       }
     };
   };
 }
+
 // you only need to set .id if you are using the "system" loader
 factory.id = 'wirings/fetch';
 

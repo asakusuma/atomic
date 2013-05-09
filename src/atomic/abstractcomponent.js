@@ -10,6 +10,93 @@ function addInit(obj, func, addFront) {
   }
 }
 
+function isArray(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
+// component.events   <= get all the events
+// component.events() <= get the resolved version of the events
+// component.needs    <= get the needs array of the component
+// component.needs()  <= get the resolved needs
+//                    or get a specific need needs('str')
+//                    or set a specific need needs('str', val)
+function localize(obj, type, storesResolved) {
+  var local = obj[type],
+      i = 0,
+      len,
+      name,
+      locked = true,
+      storage = {};
+
+  // replace with a function
+  obj[type] = function(str, value) {
+    var out = {};
+
+    // set
+    if (str && typeof value !== 'undefined' && storesResolved && !locked) {
+      storage[str] = value;
+      return obj;
+    }
+
+    // get
+    if (str) {
+      return storage[str];
+    }
+
+    // all
+    for (var name in storage) {
+      if (storage.hasOwnProperty(name)) {
+        out[name] = storage[name];
+      }
+    }
+
+    return out;
+  };
+
+  // prevent additional writes
+  obj[type]._unlock = function() {
+    locked = false;
+  };
+  obj[type]._lock = function() {
+    locked = true;
+  };
+
+  // behaves like array. toString() will use JSON if available
+  obj[type].prototype = [];
+  obj[type].toString = function() {
+    if (isArray(local)) {
+      return local.toString();
+    }
+
+    var out = [];
+    for (var name in local) {
+      if (local.hasOwnProperty(name) && name.indexOf('_') !== 0) {
+        out[out.length] = name;
+      }
+    }
+
+    return (JSON) ? JSON.stringify(out) : out.toString();
+  };
+
+  // write into initial storage and back onto the object
+  if (isArray(local)) {
+    for (i = 0, len = local.length; i < len; i++) {
+      obj[type][i] = local[i];
+      storage[local[i]] = null;
+    }
+  }
+  else {
+    for (name in local) {
+      if (local.hasOwnProperty(name)) {
+        obj[type][i++] = name;
+        obj[type]['_' + name] = local[name];
+        obj[type][name] = name;
+        storage[name] = name;
+      }
+    }
+  }
+}
+
 /**
  * AbstractComponent a template for creating Components in Atomic
  * Components are the lego blocks of Atomic. They emit events
@@ -94,7 +181,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {Object} overrides - any configuration overrides to provide to this object
      */
     init: function (el, overrides) {
-      var name, nodes, events;
+      var name;
 
       // set inits, assigned, etc all to local instance-level variables
       this._inits = [];
@@ -106,26 +193,11 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
         maxListeners: 20
       });
 
-      // localize the nodes variable BEFORE the user starts configuring
-      nodes = this.nodes;
-      this.nodes = {};
-      for (name in nodes) {
-        if (nodes.hasOwnProperty(name)) {
-          this.nodes['_' + name] = nodes[name];
-          this.nodes[name] = name;
-        }
-      }
-
-      // localize the events variable BEFORE the user starts configuring
-      events = this.events;
-      this.events = {};
-      this._aboutEvents = {};
-      for (name in events) {
-        if (events.hasOwnProperty(name)) {
-          this.events['_' + name] = events[name];
-          this.events[name] = name;
-        }
-      }
+      // localize the nodes/events/needs variable BEFORE the user starts configuring
+      // nodes and needs can accept overwriting
+      localize(this, 'nodes', true);
+      localize(this, 'events');
+      localize(this, 'needs', true);
 
       // attach the el
       if (el) {
@@ -169,7 +241,9 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an element to assign to the role.
      */
     assign: function(name, el) {
-      this._assigned[name] = el;
+      this.nodes._unlock();
+      this.nodes(name, el);
+      this.nodes._lock();
       return this;
     },
 
@@ -406,7 +480,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an HTML element to attach
      */
     attach: function (el) {
-      this._assigned._root = el;
+      this.assign('_root', el);
       return this;
     },
 
@@ -426,22 +500,23 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
 
       var deferred = Atomic.deferred();
       var self = this;
-      var nodes = {};
 
-      for (var name in this._assigned) {
-        if (this._assigned.hasOwnProperty(name)) {
-          nodes[name] = this._assigned[name];
-        }
-      }
-
-      Atomic.load(this.needs)
+      Atomic.load(Atomic.keys(this.needs()))
       .then(function(needs) {
+        // populate needs resolution into the this.needs()
+        self.needs._unlock();
+        for (var name in needs) {
+          if (needs.hasOwnProperty(name)) {
+            self.needs(name, needs[name]);
+          }
+        }
+        self.needs._lock();
         // dynamically create promise chain
         // inits[0] runs automatically
         var wiringDeferred = Atomic.deferred(),
             inits = self._inits,
             len = inits.length,
-            promise = Atomic.when(inits[0].call(self, needs, nodes)),
+            promise = Atomic.when(inits[0].call(self)),
             createWiringCall;
 
         // creates a call to a wiring function. Done outside of the
@@ -450,7 +525,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
           return function() {
             // run only on then() resolution to prevent premature
             // resolution of the promise chain
-            fn.call(self, needs, nodes);
+            fn.call(self);
           };
         };
 

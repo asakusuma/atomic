@@ -128,7 +128,7 @@ Atomic.augment(Atomic, {
    */
   keys: function(obj) {
     var name;
-    var keys;
+    var keys = [];
     for (name in obj) {
       if (obj.hasOwnProperty(name)) {
         keys[keys.length] = name;
