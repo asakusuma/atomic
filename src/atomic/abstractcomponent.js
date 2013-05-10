@@ -65,17 +65,17 @@ function localize(obj, type, storesResolved) {
   obj[type].prototype = [];
   obj[type].toString = function() {
     if (isArray(local)) {
-      return local.toString();
+      return local.join('\n');
     }
 
     var out = [];
     for (var name in local) {
       if (local.hasOwnProperty(name) && name.indexOf('_') !== 0) {
-        out[out.length] = name;
+        out[out.length] = type+'.'+name + ': ' + local[name];
       }
     }
 
-    return (JSON) ? JSON.stringify(out) : out.toString();
+    return out.join('\n');
   };
 
   // write into initial storage and back onto the object
@@ -91,7 +91,7 @@ function localize(obj, type, storesResolved) {
         obj[type][i++] = name;
         obj[type]['_' + name] = local[name];
         obj[type][name] = name;
-        storage[name] = name;
+        storage[name] = (storesResolved) ? null : name;
       }
     }
   }
@@ -135,7 +135,7 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      */
     events: {},
 
-    /** 
+    /**
      * A configuration for this instance of the object
      * contains any unknown key/value pairs passed into the
      * constructor

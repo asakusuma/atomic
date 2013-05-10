@@ -30,7 +30,7 @@ function factory() {
     name: 'SamplePack Button by @jakobo',
 
     // no dependencies
-    needs: ['wirings/echo'],
+    needs: [],
 
     // no additional nodes needed
     nodes: {},

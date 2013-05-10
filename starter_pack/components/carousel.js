@@ -74,7 +74,7 @@ function definition() {
       return this;
     },
 
-    /** 
+    /**
      * return the reported size of the carousel's items
      * @method Carousel#size
      */
