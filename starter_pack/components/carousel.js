@@ -34,8 +34,8 @@ The Carousel Component provides an API for manipulating a
 var Atomic = require('atomic');
 
 function definition() {
+  // useful constants in this control
   var $ = require('jquery');
-
   var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
@@ -51,12 +51,14 @@ function definition() {
 
     // events
     events: {
-      END: 'Fired when the carousel reaches the end',
-      FIRST: 'Fired when the carousel reaches the front'
+      END: 'Fired when the carousel reaches the end: function()',
+      FIRST: 'Fired when the carousel reaches the front: function()',
+      CHANGE: 'Fired when the carousel changes state: function(lastValue, newValue)'
     },
 
     /**
      * Main wiring function. Creates internal index and items collections
+     * @method Carousel#wiring
      */
     wiring: function() {
       this._index = 0;
@@ -84,9 +86,32 @@ function definition() {
       if (to < 0 || to > this.size() - 1) {
         return this;
       }
-      this._index = to;
+
+      // trigger our events
+      if (to === 0) {
+        this.trigger(this.events.FIRST);
+      }
+      else if (to === this.size() - 1) {
+        this.trigger(this.events.LAST);
+      }
+
+      return this._paint(to);
+    },
+
+    /**
+     * "repaints" the carousel, changing the selected class
+     * @method Carousel#_paint
+     * @private
+     * @param {Number} at - the index to change to
+     * @returns this
+     */
+    _paint: function(at) {
+      var lastValue = this._index;
+
+      this._index = at;
       this._$items.removeClass(CURRENT_CLASS);
       this._$items.eq(this._index).addClass(CURRENT_CLASS);
+      this.trigger(this.events.CHANGE, lastValue, at);
       return this;
     },
 
@@ -134,4 +159,4 @@ function definition() {
 // you only need to set .id if you are using the "system" loader
 definition.id = 'components/carousel';
 
-Atomic.export(module, define, definition);
+return Atomic.export(module, define, definition);

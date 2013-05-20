@@ -36,6 +36,8 @@ var Atomic_noConflict_oldAtomic = context.Atomic;
 // holds the initialized state of the framework
 var Atomic_load_initialized = false;
 
+var Atomic_amd_optimized = false;
+
 Atomic.augment(Atomic, {
   /**
    * prevent conflicts with an existing variable
@@ -48,6 +50,16 @@ Atomic.augment(Atomic, {
     var thisAtomic = context.Atomic;
     context.Atomic = Atomic_noConflict_oldAtomic;
     return thisAtomic;
+  },
+
+  /**
+   * Set the pre-optimized flag for Atomic. If you have
+   * used an AMD optimizer before running Atomic, you
+   * should use this, as all your modules are going to
+   * be properly named.
+   */
+  amdOptimized: function() {
+    Atomic_amd_optimized = true;
   },
 
   /**
@@ -200,22 +212,25 @@ Atomic.augment(Atomic, {
    * @param {Function} factory - the defining factory for module or exports
    */
   export: function(mod, def, factory) {
-    if (mod && mod.exports) {
-      mod.exports = factory();
+    var ranFactory = null;
+
+    if (mod && mod.exports || Atomic_amd_optimized) {
+      ranFactory = factory();
+      mod.exports = ranFactory;
     }
     else if (def && def.amd) {
-      def(factory.id, factory);
+      def(factory);
     }
     else if (Atomic.loader && Atomic.loader.save) {
-      Atomic.loader.save(factory.id, factory());
+      ranFactory = factory();
+      Atomic.loader.save(factory.id, ranFactory);
     }
     else {
-      window[factory.id] = factory();
+      ranFactory = factory();
+      window[factory.id] = ranFactory;
     }
 
-    if (factory.window && window) {
-      window[factory.window] = factory();
-    }
+    return ranFactory;
   },
 
   /**

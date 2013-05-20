@@ -72,4 +72,4 @@ function factory() {
 // you only need to set .id if you are using the "system" loader
 factory.id = 'components/button';
 
-Atomic.export(module, define, factory);
+return Atomic.export(module, define, factory);

@@ -56,4 +56,4 @@ function definition() {
   };
 }
 definition.id = 'wirings/debugtracer';
-Atomic.export(module, define, definition);
+return Atomic.export(module, define, definition);
