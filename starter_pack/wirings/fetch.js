@@ -98,4 +98,4 @@ function factory() {
 // you only need to set .id if you are using the "system" loader
 factory.id = 'wirings/fetch';
 
-return Atomic.export(module, define, factory);
+Atomic.export(module, define, factory);

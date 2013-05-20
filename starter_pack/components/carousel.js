@@ -159,4 +159,4 @@ function definition() {
 // you only need to set .id if you are using the "system" loader
 definition.id = 'components/carousel';
 
-return Atomic.export(module, define, definition);
+Atomic.export(module, define, definition);
