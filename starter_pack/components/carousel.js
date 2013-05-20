@@ -69,8 +69,10 @@ function definition() {
 
     /**
      * refresh the list of nodes inside of this component
-     * if you change the DOM structure
+     * if you change the DOM structure, you will use this
+     * method to update the component
      * @method Carousel#refresh
+     * @returns this
      */
     refresh: function() {
       this._$items = $(this.nodes()._root).children();
@@ -81,6 +83,7 @@ function definition() {
      * Go to a specific item in the collection
      * @method Carousel#go
      * @param {Number} to - the index to advance to
+     * @returns this
      */
     go: function(to) {
       if (to < 0 || to > this.size() - 1) {
@@ -95,7 +98,8 @@ function definition() {
         this.trigger(this.events.LAST);
       }
 
-      return this._paint(to);
+      this._paint(to);
+      return this;
     },
 
     /**

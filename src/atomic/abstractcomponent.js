@@ -507,13 +507,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
-      // Question from Eric: why do we need to pass needs and nodes?  They
-      // are accessible via this.needs and this.nodes from the wirings func
-
-      // Reply from Jakob: this.needs isn't actually the resolved objects because
-      // they are loaded at this step. We could overwrite this.needs, but that
-      // could be confusing to the end developer who's trying to inspect the object
-
       var deferred = Atomic.deferred();
       var self = this;
 
