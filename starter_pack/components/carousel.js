@@ -51,7 +51,7 @@ function definition() {
 
     // events
     events: {
-      END: 'Fired when the carousel reaches the end: function()',
+      LAST: 'Fired when the carousel reaches the end: function()',
       FIRST: 'Fired when the carousel reaches the front: function()',
       CHANGE: 'Fired when the carousel changes state: function(lastValue, newValue)'
     },

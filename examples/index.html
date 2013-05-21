@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
   </head>
-  <body>
+  <body data-atomic-autoparse="true">
     <h1>Welcome to Atomic</h1>
     <p>This test page shows how to use the Atomic Starter Pack with jQuery to quickly create reusable components at any scale</p>
 
@@ -32,12 +32,13 @@
     <h2>Examples</h2>
 
     <h3>Button with Debugger Wiring</h3>
-
     <button id="my-button">Click me!</button>
+
+    <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Carousel With Buttons</h2>
     <style>
-    li.current {
+    #carousel .current {
       background: #fcc;
     }
     </style>
@@ -49,9 +50,11 @@
     <button id="carousel-prev">Previous</button>
     <button id="carousel-next">Next</button>
 
+    <!-- ////////////////////////////////////////////////////////////////////// -->
+
     <h3>Carousel With Buttons That Wraps</h2>
     <style>
-    li.current {
+    #carousel-wraps .current {
       background: #fcc;
     }
     </style>
@@ -63,10 +66,11 @@
     <button id="carousel-wraps-prev">Previous</button>
     <button id="carousel-wraps-next">Next</button>
 
+    <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Carousel With Buttons and Fetching</h2>
     <style>
-    li.current {
+    #carousel-fetch .current {
       background: #fcc;
     }
     </style>
@@ -78,10 +82,28 @@
     <button id="carousel-fetch-prev">Previous</button>
     <button id="carousel-fetch-next">Next</button>
 
+    <!-- ////////////////////////////////////////////////////////////////////// -->
 
+    <h3>Carousel From jQuery Plugin</h2>
+    <style>
+    #carousel-plugin .current {
+      background: #fcc;
+    }
+    </style>
+    <ul id="carousel-plugin" data-atomic-id="carousel-jq" data-atomic="composites/controlledcarousel">
+      <li>one</li>
+      <li>two</li>
+      <li>three</li>
+    </ul>
+    <button data-atomic-for="carousel-jq" data-atomic-node="Previous">Previous</button>
+    <button data-atomic-for="carousel-jq" data-atomic-node="Next">Next</button>
 
+    <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Infinite Scrolling Carousel With Buttons</h3>
+
+    <!-- ////////////////////////////////////////////////////////////////////// -->
+    <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <!-- a global jquery, the latest built atomic.js, and the "none" loader -->
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -91,9 +113,13 @@
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
     <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
     <script type="text/javascript" src="scripts/atomic/components/carousel.js"></script>
+    <script type="text/javascript" src="scripts/atomic/composites/controlledcarousel.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/debugtracer.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/echo.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/fetch.js"></script>
+
+    <!-- the jQuery plugin support -->
+    <script type="text/javascript" src="scripts/atomic/extras/jquery-plugin.js"></script>
 
     <!-- our page specific JavaScript -->
     <script type="text/javascript" src="scripts/page.js"></script>

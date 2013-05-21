@@ -30,6 +30,8 @@ Components will be converted and initialized
 Return the Atomic Component associated with the jQuery selector
 */
 jQuery.fn.atomic = function(action) {
+  action = action || '';
+
   function parse() {
     // an array of the dependencies we need to load for this parse
     // and an object literal to avoid duplicate entries in the array
@@ -63,9 +65,9 @@ jQuery.fn.atomic = function(action) {
         throw new Error('an element with an id of ' + id + ' already exists');
       }
 
-      if (!dependenciesCheck[id]) {
-        dependencies.push(id);
-        dependenciesCheck[id] = 1;
+      if (!dependenciesCheck[type]) {
+        dependencies.push(type);
+        dependenciesCheck[type] = 1;
       }
 
       $node.data('atomic-parsed', 1);
@@ -88,7 +90,7 @@ jQuery.fn.atomic = function(action) {
         $(value.node).data('atomic-component', inst);
         value.$children.each(function(idx, child) {
           var $child = $(child);
-          inst.assign($child.attr('atomic-node'), child);
+          inst.assign(inst.nodes[$child.data('atomic-node')], child);
         });
         inst.load();
       });
@@ -119,3 +121,9 @@ jQuery.fn.atomic = function(action) {
     throw new Error('unknown action: ' + action);
   }
 };
+
+if (jQuery('body').data('atomic-autoparse')) {
+  jQuery(document).ready(function() {
+    jQuery('body').atomic();
+  });
+}
