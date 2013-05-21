@@ -168,13 +168,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     _inits: [],
 
     /**
-     * A collection of assigned nodes
-     * @property {Object} AbstractComponent#_assigned
-     * @private
-     */
-    _assigned: {},
-
-    /**
      * A local event emitter
      * @property {EventEmitter} AbstractComponent#_eventEmitter
      * @private
@@ -201,7 +194,6 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
 
       // set inits, assigned, etc all to local instance-level variables
       this._inits = [];
-      this._assigned = {};
       this.config = {};
       this._eventEmitter = new Atomic._.EventEmitter({
         wildcard: true,
@@ -626,17 +618,15 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Add an additional event to this Component
-     * @method AbstractComponent#addEvent
-     * @param {String} name - the event name. Stored as NAME for usage
+     * Can be overriden to provide update mechanisms for a Component
+     * @method AbstractComponent#refresh
+     * @returns this
      */
-    addEvent: function(name) {
-      this.events[name] = name;
+    refresh: function() {
       return this;
     }
   };
 });
 
-if (module && module.exports) {
-  module.exports = AbstractComponent;
-}
+// for jshint
+AbstractComponent = AbstractComponent;

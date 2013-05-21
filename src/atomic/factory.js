@@ -26,15 +26,33 @@ Atomic.Composite = function(objLiteral) {
 
 // Composite Factory
 Atomic._.Factory = function(objLiteral) {
-  // needs, nodes, events, and wiring
-  var needs = objLiteral.needs || {};
-  var nodes = objLiteral.nodes || {};
-  var events = objLiteral.events || {};
   var wiring = objLiteral.wiring || [];
 
-  var reserved = {'needs':0, 'nodes':0, 'events':0, 'wiring':1};
+  // certain items are "reserved" and cannot be overridden in a wiring
+  var reserved = {
+    // these are "special" but are okay to set using wiring
+    // we are calling them out for readability's sake
+    // wiring has a special use case below
+    'needs':          false,
+    'nodes':          false,
+    'events':         false,
+    'wiring':         true,
+    '_inits':         true,
+    '_eventEmitter':  true,
+    '_isDestroyed':   true
+  };
 
   // currently, we aren't doing anything fancy here
+  // fiber requires an object literal that defines the interface
+  // and we create the interface from the object literal
+  // provided. For every item, if it's not in our reserved list,
+  // we place it onto the additionalMethods collection.
+  //
+  // We then create an init() method that puts the wiring value
+  // as first on the stack of wiring items.
+  //
+  // When a component is created, the wirings are pulled in
+  // and ran in order.
   var component = Atomic._.AbstractComponent.extend(function(base) {
     var additionalMethods = {};
     // add all other extras
@@ -46,10 +64,6 @@ Atomic._.Factory = function(objLiteral) {
     }
     additionalMethods.init = function() {
       base.init.apply(this, arguments);
-
-      // this.needs = Atomic.augment(this.needs, needs);
-      // this.nodes = Atomic.augment(this.nodes, nodes);
-      // this.events = Atomic.augment(this.events, events);
 
       if (typeof wiring === 'function') {
         this.wireIn(wiring);

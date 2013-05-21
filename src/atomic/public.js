@@ -36,6 +36,7 @@ var Atomic_noConflict_oldAtomic = context.Atomic;
 // holds the initialized state of the framework
 var Atomic_load_initialized = false;
 
+// holds the config for if Atomic is AMD optimized
 var Atomic_amd_optimized = false;
 
 Atomic.augment(Atomic, {
