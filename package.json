@@ -16,9 +16,9 @@
   "devDependencies": {
     "express": "3.0.0",
     "venus": "*",
+    "phantomjs": "*",
     "mocha": "*",
     "expect": "*",
-    "phantomjs": "*",
     "grunt": "~0.4.0",
     "grunt-contrib-compress": "~0.4.1",
     "grunt-contrib-concat": "~0.1.3",
