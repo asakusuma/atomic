@@ -493,6 +493,14 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
+     * get root node
+     * @method AbstractComponent#getRoot
+     */
+    getRoot: function () {
+      return this.nodes()._root;
+    },
+
+    /**
      * Load the Component, resolve all dependencies
      * calls the ready method
      * @method AbstractComponent#load

@@ -14,6 +14,12 @@
 
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
+
+    <style>
+      body {
+        padding: 10px;
+      }
+    </style>
   </head>
   <body data-atomic-autoparse="true">
     <h1>Welcome to Atomic</h1>
@@ -33,6 +39,16 @@
 
     <h3>Button with Debugger Wiring</h3>
     <button id="my-button">Click me!</button>
+
+    <!-- ////////////////////////////////////////////////////////////////////// -->
+
+    <h3>Select</h2>
+
+    <select id="simple-select">
+      <option>one</option>
+      <option>two</option>
+      <option>three</option>
+    </select>
 
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
@@ -103,7 +119,6 @@
     <h3>Infinite Scrolling Carousel With Buttons</h3>
 
     <!-- ////////////////////////////////////////////////////////////////////// -->
-    <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <!-- a global jquery, the latest built atomic.js, and the "none" loader -->
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -113,6 +128,7 @@
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
     <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
     <script type="text/javascript" src="scripts/atomic/components/carousel.js"></script>
+    <script type="text/javascript" src="scripts/atomic/components/select.js"></script>
     <script type="text/javascript" src="scripts/atomic/composites/controlledcarousel.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/debugtracer.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/echo.js"></script>
