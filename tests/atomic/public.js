@@ -20,6 +20,7 @@ governing permissions and limitations under the License.
 /*
  * @venus-library mocha
  * @venus-include ../../src/atomic.js
+ * @venus-include _fixture.js
  * @venus-include ../../src/atomic/public.js
  */
 
