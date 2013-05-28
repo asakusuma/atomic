@@ -19,7 +19,7 @@ governing permissions and limitations under the License.
 
 /*
  * @venus-Library mocha
- * @venus-fixure atomic.fixture.html
+ * @venus-include ../../src/atomic.js
  */
 
 describe('sanity check that Atomic is set up', function() {

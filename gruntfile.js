@@ -72,7 +72,9 @@ module.exports = function (grunt) {
       },
       venus: {
         command: ['if [ -e node_modules/venus/bin/venus ] && command -v phantomjs >/dev/null;',
-                  'then node node_modules/venus/bin/venus run -t "tests/spec" -n;',
+                  'then node node_modules/venus/bin/venus run -t "tests/"',
+                        '--phantom "./node_modules/phantomjs/lib/phantom/bin/phantomjs"',
+                        '--require-annotations;',
                   'else echo "cant find venus in node_modules and/or cant find phantomJS. ',
                              'Run npm install and run npm install -g phantomjs";',
                   'fi'].join(' '),
@@ -83,7 +85,7 @@ module.exports = function (grunt) {
       },
       venus_browser: {
         command: ['if [ -e node_modules/venus/bin/venus ];',
-                  'then node node_modules/venus/bin/venus run -t "tests/spec";',
+                  'then node node_modules/venus/bin/venus run -t "tests/" --require-annotations;',
                   'else echo "cant find venus in node_modules. Run npm install";',
                   'fi'].join(' '),
         options: {
@@ -214,6 +216,9 @@ module.exports = function (grunt) {
   // Using Venus via a shell command for now
   // requires npm install -g phantomjs
   grunt.registerTask('test', [
+    'shell:venus_browser'
+  ]);
+  grunt.registerTask('autotest', [
     'shell:venus'
   ]);
 

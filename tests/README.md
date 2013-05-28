@@ -1,22 +1,27 @@
-TODO for akusuma
-
-1. test directory structure (can test by file)
-2. Add basic mocha tests (atomic exists, etc)
-3. Tests can be ran from gruntfile (jchan)
-
 Atomic Testing ReadMe
 =====================
-
 Unit tests are run using Venus
 http://www.venusjs.org
 
-To run all the tests, run:
-> venus run -t spec/ -n
+To set up your computer to use Venus, install PhantomJS globally:
+```
+> npm install -g phantomjs
+```
+
+Then, before testing, verify Venus is running correctly via a self check:
+```
+> ./node_modules/venus/bin/venus demo
+```
+
+Run All Tests
+=============
+Tests are ran via our gruntfile using the following command:
+
+```
+> grunt test
+```
 
 To run a specific test, run:
-> venus run -t spec/[MyTestName].spec.js -n
-
-For instance, to run the Factory test, run:
-> venus run -t spec/factory.spec.js -n
-
-Test commands should be run from the tests/ directory
+```
+> ./node_modules/venus/bin/venus run -t [path to test file] -n
+```

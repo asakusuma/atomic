@@ -18,6 +18,7 @@ governing permissions and limitations under the License.
 
 /*
  * @venus-Library mocha
+ * @venus-include ../../src/atomic.js
  * @venus-include ../../src/atomic/factory.js
  */
 

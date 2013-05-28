@@ -1,43 +1,10 @@
 // Configuration file for Venus
 // All paths can be relative (to the location of this config file) or absolute
 {
-  libraries: {
-    mocha: {
-      includes: [
-        'libraries/mocha.js',
-        'libraries/expect.js',
-        'adaptors/adaptor-template.js',
-        'adaptors/mocha-venus.js',
-        'libraries/sinon-1.5.0.js'
-      ]
-    },
-    qunit: {
-      includes: [
-        'libraries/qunit.js',
-        'adaptors/adaptor-template.js',
-        'adaptors/qunit-venus.js'
-      ]
-    },
-    jasmine: {
-      includes: [
-        'libraries/jasmine.js',
-        'adaptors/adaptor-template.js',
-        'adaptors/jasmine-venus.js'
-      ]
-    }
-  },
-
-  includes: {
-    default: [
-      '../../src/lib/fiber.js',
-      '../../src/lib/eventemitter2.js',
-      '../../src/lib/q.js',
-      '../../src/atomic.js'
-    ]
-  }
-
-  // Serve static content
-  //static: {
-  //  sample: '../test/data'
-  //}
+  default: {},
+  libraries: {},
+  binaries: {},
+  static: {},
+  includes: {},
+  basePaths: {}
 }
