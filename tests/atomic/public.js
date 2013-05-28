@@ -27,4 +27,8 @@ describe('sanity check that Atomic is set up', function() {
   it('should have Atomic defined', function() {
     expect(Atomic).to.be.ok();
   });
+
+  it ('should have a load method', function() {
+    expect(Atomic.load).to.be.ok();
+  });
 });
