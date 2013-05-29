@@ -78,6 +78,16 @@ You got it. The examples/ directory shows how you can use Atomic in many differe
 * files starting with pojs_* are the `plain old JavaScript` apis. Backbone, jQuery, it doesn't matter. Make Components and use them.
 * files starting with magic_* are the `magic HTML interface` apis. Make some Components straight from your markup? Sure, if that's your thing!
 
+# What about unit tests?
+Atomic uses [Venus.js](http://www.venusjs.org/) to run unit tests. To run the tests, you'll need to install [Venus.js](http://www.venusjs.org/), along with two its two dependencies, [Node.js](http://nodejs.org/) and [PhantomJS](http://phantomjs.org/). We recommend that you use [brew](http://mxcl.github.io/homebrew/) to install the dependencies, if you haven't done so already. To install [Venus.js](http://www.venusjs.org/), open up Terminal and run the following commands:
+
+1. `brew install node`
+2. `brew install phantomjs`
+3. `npm install -g venus`
+4. To verify installation, run `venus demo`
+
+To run the actual tests, navigate to the atomic directory and run `grunt autotest`. This will run the tests using PhantomJS, a headless browser. In other words, it runs the tests right in the terminal and you get your results immediately. If you'd like to run the tests in a browser, run `grunt test`. This will provide you with a URL that you can hit with any browser, thereby executing the tests. Browser test results will still output in the terminal.
+
 # Built on Greatness
 * [Q.js](https://github.com/kriskowal/q) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
 * [Fiber](https://github.com/linkedin/Fiber) for OOP sugar internally

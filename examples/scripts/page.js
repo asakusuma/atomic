@@ -51,6 +51,35 @@ Atomic.load('components/button', 'components/carousel')
   }, Atomic.thrower);
 }), Atomic.thrower);
 
+
+// Simple Select
+Atomic.load('components/select', 'components/carousel')
+.then(Atomic.expand(function(Select) {
+  var select = new Select(document.getElementById('simple-select'));
+  select.load();
+
+}), Atomic.thrower);
+
+// Carousel with Buttons
+Atomic.load('components/button', 'components/carousel')
+.then(Atomic.expand(function(Button, Carousel) {
+  var next = new Button(document.getElementById('carousel-next'));
+  var prev = new Button(document.getElementById('carousel-prev'));
+  var carousel = new Carousel(document.getElementById('carousel'));
+
+  // carousel.assign(carousel.nodes.Items, document.getElementById('carousel').getElementsByTagName('li'));
+  carousel.assign(carousel.nodes.FOOOOO, document.body);
+
+  carousel.load()
+  .then(next.load())
+  .then(prev.load())
+  .then(function() {
+    carousel.bind(next, next.events.USE, 'next');
+    carousel.bind(prev, prev.events.USE, 'previous');
+    console.log('The Carousel with Buttons has been loaded');
+  }, Atomic.thrower);
+}), Atomic.thrower);
+
 // Carousel with Buttons that Wraps
 Atomic.load('components/button', 'components/carousel')
 .then(Atomic.expand(function(Button, Carousel) {
