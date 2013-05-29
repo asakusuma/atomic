@@ -79,7 +79,7 @@ You got it. The examples/ directory shows how you can use Atomic in many differe
 * files starting with magic_* are the `magic HTML interface` apis. Make some Components straight from your markup? Sure, if that's your thing!
 
 # What about unit tests?
-Atomic uses [Venus.js](http://www.venusjs.org/) to run unit tests. To run the tests, you'll need to install [Venus.js](http://www.venusjs.org/), along with two its two dependencies, [Node.js](http://nodejs.org/) and [PhantomJS](http://phantomjs.org/). We recommend that you use [brew](http://mxcl.github.io/homebrew/) to install Node.js](http://nodejs.org/) and [PhantomJS](http://phantomjs.org/), if you haven't done so already.
+Atomic uses [Venus.js](http://www.venusjs.org/) to run unit tests. To run the tests, you'll need to install [Venus.js](http://www.venusjs.org/), along with two its two dependencies, [Node.js](http://nodejs.org/) and [PhantomJS](http://phantomjs.org/). We recommend that you use [brew](http://mxcl.github.io/homebrew/) to install [Node.js](http://nodejs.org/) and [PhantomJS](http://phantomjs.org/), if you haven't done so already.
 
 1. Open up Terminal and run the following commands
 2. `brew install node`
