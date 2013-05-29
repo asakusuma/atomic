@@ -22,8 +22,7 @@ var emitter = new Atomic._.EventEmitter({
   maxListeners: 20
 });
 
-Atomic.Events = {};
-Atomic.augment(Atomic.Events, {
+var __Atomic_Events_API__ = {
   /**
    * Listen for events emitted by the global Atomic Object
    * @method Atomic.on
@@ -136,4 +135,6 @@ Atomic.augment(Atomic.Events, {
     emitter.emit.apply(this._eventEmitter, args);
     return Atomic;
   }
-});
+};
+
+__Atomic_Events_API__ = __Atomic_Events_API__;

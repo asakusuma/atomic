@@ -120,7 +120,7 @@ function localize(obj, type, storesResolved) {
  * components to create Composites.
  * @class AbstractComponent
  */
-var AbstractComponent = Atomic._.Fiber.extend(function (base) {
+var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
   return {
     /**
      * A simple ID to be overridden. Useful in debugging
@@ -629,4 +629,4 @@ var AbstractComponent = Atomic._.Fiber.extend(function (base) {
 });
 
 // for jshint
-AbstractComponent = AbstractComponent;
+__Atomic_AbstractComponent__ = __Atomic_AbstractComponent__;

@@ -25,3 +25,8 @@ To run a specific test, run:
 ```
 > ./node_modules/venus/bin/venus run -t [path to test file] -n
 ```
+
+    "venus": "*",
+    "phantomjs": "*",
+    "mocha": "*",
+    "expect": "*",

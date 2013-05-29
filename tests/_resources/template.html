@@ -1,6 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--
 /*
 Atomic
-Copyright 2013 LinkedIn
+Copyright 2011 LinkedIn
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +18,17 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
-
-// constants.js
-var __Atomic_CONSTANTS__ = {};
-
-// js hint requires var to be used
-__Atomic_CONSTANTS__ = __Atomic_CONSTANTS__;
+-->
+  <meta charset="UTF-8" />
+  <title>Atomic Test Suite - {{NAME}}</title>
+  <link rel="stylesheet" href="/tests/_resources/qunit-composite.css" type="text/css" media="screen">
+  <script type="text/javascript" src="/tests/_resources/qunit.js"></script>
+  <script type="text/javascript" src="/tests/_resources/sinon.js"></script>
+</head>
+<body>
+  <div id="qunit"></div>
+  <script type="text/javascript">
+  {{CODE}}
+  </script>
+</body>
+</html>
