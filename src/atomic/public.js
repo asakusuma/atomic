@@ -121,7 +121,7 @@ var __Atomic_Public_API__ = {
    */
   proxy: function(fn, scope) {
     return function() {
-      fn.apply(scope, arguments);
+      return fn.apply(scope, arguments);
     };
   },
 
