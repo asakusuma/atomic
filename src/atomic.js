@@ -26,7 +26,11 @@ governing permissions and limitations under the License.
    * @class Atomic
    */
   var Atomic = {
+    CONSTANTS: {},
+    Events: {},
     _: {
+      Fiber: null,
+      EventEmitter: null,
       requires: {} // used when no module loader is enabled
     },
     loader: {
@@ -35,17 +39,20 @@ governing permissions and limitations under the License.
     }
   };
 
-  var AbstractComponent = null;
-  var CONSTANTS = null;
-
-  var fiber = null;
-
+  // common JS and AMD environment
+  // inside of this file, no define calls can be made
   var module;
   var exports;
   var process;
-
-  // inside of this file, no define calls can be made
   var define = null;
+
+  // imported APIs
+  var __Atomic_AbstractComponent__;
+  var __Atomic_CONSTANTS__;
+  var __Atomic_Public_API__;
+  var __Atomic_Events_API__;
+  var __Atomic_Public_Factory_Methods__;
+  var __Atomic_Private_Factory_Methods__;
 
   Atomic.config = context.ATOMIC_CONFIG || {};
 
@@ -104,7 +111,7 @@ governing permissions and limitations under the License.
   // CONSTANTS
   // --------------------------------------------------
   //@@include('./constants.js')
-  Atomic._.CONSTANTS = CONSTANTS;
+  Atomic.augment(Atomic._.CONSTANTS, __Atomic_CONSTANTS__);
 
   // --------------------------------------------------
   // FIBER
@@ -134,18 +141,23 @@ governing permissions and limitations under the License.
   // ABSTRACT COMPONENT
   // --------------------------------------------------
   //@@include('./atomic/abstractcomponent.js')
-  Atomic._.AbstractComponent = AbstractComponent;
+  Atomic._.AbstractComponent = __Atomic_AbstractComponent__;
 
   // --------------------------------------------------
-  // FACTORIES
+  // FACTORY APIs
   // --------------------------------------------------
   //@@include('./atomic/factory.js')
+  Atomic.augment(Atomic, __Atomic_Public_Factory_Methods__);
+  Atomic.augment(Atomic._, __Atomic_Private_Factory_Methods__);
 
   // --------------------------------------------------
   // PUBLIC INTERFACES
   // --------------------------------------------------
   //@@include('./atomic/public.js')
+  Atomic.augment(Atomic, __Atomic_Public_API__);
+
   //@@include('./atomic/events.js')
+  Atomic.augment(Atomic.Events, __Atomic_Events_API__);
 
   // assign public interface in window scope
   context.Atomic = Atomic;

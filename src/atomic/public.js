@@ -39,7 +39,7 @@ var Atomic_load_initialized = false;
 // holds the config for if Atomic is AMD optimized
 var Atomic_amd_optimized = false;
 
-Atomic.augment(Atomic, {
+var __Atomic_Public_API__ = {
   /**
    * prevent conflicts with an existing variable
    * if it is named "Atomic". Returns the current
@@ -272,4 +272,6 @@ Atomic.augment(Atomic, {
       console.error(msg + '\n' + stack);
     }
   }
-});
+};
+
+__Atomic_Public_API__ = __Atomic_Public_API__;

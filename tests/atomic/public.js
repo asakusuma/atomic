@@ -1,4 +1,4 @@
-/*global describe:true, it:true, expect:true, Atomic:true */
+/*global module:true, test:true, equal:true, __Atomic_Public_API__:true */
 
 /*
 Atomic
@@ -18,18 +18,41 @@ governing permissions and limitations under the License.
 */
 
 /*
- * @venus-library mocha
+ * @venus-library qunit
  * @venus-include ../../src/atomic.js
- * @venus-include _fixture.js
+ * @venus-include _harness.js
  * @venus-include ../../src/atomic/public.js
  */
 
-describe('sanity check that Atomic is set up', function() {
-  it('should have Atomic defined', function() {
-    expect(Atomic).to.be.ok();
-  });
+module('expand()');
+test('allows for argument expansion: converts an array of 3 items to 3 arguments', function() {
+  var caller = function(one, two, three) {
+    equal(one, 'one', 'is argument 1');
+    equal(two, 2, 'is argument 2');
+    equal(three, 'three', 'is argument 3');
+  };
+  var testFn = __Atomic_Public_API__.expand(caller);
+  testFn(['one', 2, 'three']);
+});
 
-  it ('should have a load method', function() {
-    expect(Atomic.load).to.be.ok();
+test('uses values of object literals like arrays', function() {
+  var caller = function(one, two, three) {
+    equal(one, 'car', 'is key 1');
+    equal(two, 'boat', 'is key 2');
+    equal(three, 'plane', 'is key 3');
+  };
+  var testFn = __Atomic_Public_API__.expand(caller);
+  testFn({
+    first: 'car',
+    then: 'boat',
+    last: 'plane'
   });
+});
+
+test('arrays size of 1 are the same as arrays size of N', function() {
+  var caller = function(one) {
+    equal(one, 1, 'has correct argument');
+  };
+  var testFn = __Atomic_Public_API__.expand(caller);
+  testFn([1]);
 });

@@ -1,3 +1,5 @@
+/*global module:true, test:true, ok:true, __Atomic_Events_API__:true */
+
 /*
 Atomic
 Copyright 2013 LinkedIn
@@ -15,8 +17,15 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-// constants.js
-var __Atomic_CONSTANTS__ = {};
+/*
+ * @venus-library qunit
+ * @venus-include ../../src/atomic.js
+ * @venus-include ../../src/lib/eventemitter2.js
+ * @venus-include _harness.js
+ * @venus-include ../../src/atomic/events.js
+ */
 
-// js hint requires var to be used
-__Atomic_CONSTANTS__ = __Atomic_CONSTANTS__;
+module('contract APIs');
+test('has on()', function() {
+  ok(__Atomic_Events_API__.on);
+});
