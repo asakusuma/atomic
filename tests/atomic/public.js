@@ -68,18 +68,11 @@ test('should have a working proxy function', function() {
 
 test('public proxy function', function() {
 	//Works like underscore _.bind
-
 	var obj = {
 		count: 8
 	};
-
 	var func = function() {
 		return this.count;
 	}
-
-	var caller = function(obj, func) {
-    equal(Atomic.proxy(func, obj)(), 8, "sets the 'this' context of a function");
-  };
-  var testFn = __Atomic_Public_API__.expand(caller);
-  testFn(obj, func);
+	equal(__Atomic_Public_API__.proxy(func, obj)(), 8, "sets the 'this' context of a function");
 });
