@@ -49,17 +49,23 @@
       }
       .atomic-select .viewport {
         background-color: #ddddff;
+        border: 1px solid #aaa;
+
       }
       .atomic-select ul {
         background-color: #ddffdd;
-        margin: 0;
+        margin: -1px 0 0 0;
         padding: 0;
+        border: 1px solid blue;
       }
       .atomic-select li {
         list-style: none;
       }
       .atomic-select li.selected {
         background-color: #559955;
+      }
+      .atomic-select.focused .viewport {
+        border: 1px solid blue;
       }
     </style>
 

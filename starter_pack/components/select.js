@@ -138,7 +138,9 @@ function definition() {
     * @method Select#close
     */
     close: function() {
-      this.container.removeClass('open');
+      var container = this.container;
+      container.removeClass('open');
+      container.removeClass('focused');
       this.ul.hide();
     },
     /**
@@ -178,10 +180,15 @@ function definition() {
       var that = this,
           node = this.node,
           viewport = this.viewport,
+          container = this.container,
           ul = this.ul;
 
       node.on('change', function() {
         that.sync();
+      });
+
+      node.on('focus', function() {
+        container.addClass('focused');
       });
 
       viewport.on('click', function() {
