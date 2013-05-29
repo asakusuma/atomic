@@ -43,8 +43,19 @@
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Select</h2>
+    <style>
+      .atomic-select > div {
+        background-color: #ddddff;
+      }
+      .atomic-select > ul {
+        background-color: #ddffdd;
+      }
+      .atomic-select li.selected {
+        background-color: #559955;
+      }
+    </style>
 
-    <select id="simple-select">
+    <select id="simple-select" class="my-class">
       <option>one</option>
       <option>two</option>
       <option>three</option>

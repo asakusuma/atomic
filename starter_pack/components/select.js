@@ -28,8 +28,9 @@ default, Components do not depend on anything other than Atomic
 itself. Often times, developers will use a DOM Library such
 as YUI or jQuery to make the DOM operations easier.
 
-The Select Component provides an API for manipulating a
-"current" class on a collection of nodes
+The Select component creates a mirror of a native select component.
+When the select component is updated, or interacted with, the mirror reflects
+those changes.  The Atomic Select mirror sits on top of the original select box
 */
 var Atomic = require('atomic');
 
@@ -56,10 +57,103 @@ function definition() {
      * @method Select#wiring
      */
     wiring: function() {
-      var node = this.node = this.getRoot();
+      var node = this.node = $(this.getRoot());
 
-      $(node).hide();
-      console.log('select init');
+      this._build();
+      this._bind();
+      this.sync();
+      console.log('Initialized Select');
+    },
+    /**
+    * completely sync atomic mirror with native select.  This includes positioning,
+    * options, classes, the viewport, hover states, etc.
+    * @method Select#sync
+    */
+    sync: function() {
+      var node = this.node,
+          ul = this.ul,
+          li;
+
+      // clear list items
+      ul.text('');
+
+      // build ul for mirror
+      node.find('option').each(function() {
+        li = $(document.createElement('li'));
+        li.text($(this).val());
+        ul.append(li);
+      });
+
+      //this.container.offset(node.offset());
+
+      this.syncViewport();
+      this.syncList();
+    },
+    syncList: function() {
+      var ul = this.ul,
+          option;
+
+      ul.find('li').removeClass('selected');
+
+      this.node.find('option').each(function() {
+        option = $(this);
+        if (option.is(':selected')) {
+          $(ul.find('li')[option.index()]).addClass('selected');
+        }
+      });
+    },
+    _bind: function() {
+      var that = this,
+          node = this.node,
+          viewport = this.viewport,
+          ul = this.ul;
+
+      node.on('change', function() {
+        that.sync();
+        ul.hide();
+      });
+
+      viewport.on('click', function() {
+        ul.toggle();
+      });
+
+      // when user clicks on an atomic select item,
+      // update the native select and then close the ul
+      ul.on('click', function(evt) {
+        var target = $(evt.target);
+
+        node.val(target.text());
+
+        that.syncViewport();
+        that.syncList();
+        ul.hide();
+      });
+
+    },
+    syncViewport: function() {
+      this.viewport.text(this.node.val());
+    },
+    _build: function() {
+      var container = this.container = $(document.createElement('div')),
+          ul = this.ul = $(document.createElement('ul')),
+          viewport = this.viewport = $(document.createElement('div')),
+          node = this.node;
+
+      ul.css('position', 'absolute')
+        .hide();
+
+      // build mirror
+      container.append(viewport)
+        .append(ul)
+        // copy over classes from select to container
+        .attr('class', node.attr('class'))
+        .addClass('atomic-select')
+        .css('display', 'inline-block')
+        .css('position', 'relative');
+        //.css('position', 'absolute');
+
+      // append container after select
+      node.after(container);
     }
 
 
