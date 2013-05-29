@@ -69,12 +69,28 @@ function definition() {
       console.log('Initialized Select');
     },
     /**
-    * completely sync atomic mirror with native select.  This includes positioning,
-    * options, classes, the viewport, hover states, etc.
+    * sync atomic select with native select
     * @method Select#sync
     */
     sync: function() {
+      this.syncContainer();
+      this.syncViewport();
+      this.syncList();
+    },
+    /**
+    * sync atomic select container position with native select position
+    * @method Select#syncContainer
+    */
+    syncContainer: function() {
+      this.container.offset(this.node.offset());
+    },
+    /**
+    * sync atomic select list with native select options
+    * @method Select#syncList
+    */
+    syncList: function() {
       var node = this.node,
+          viewport = this.viewport,
           ul = this.ul,
           li;
 
@@ -88,12 +104,15 @@ function definition() {
         ul.append(li);
       });
 
-      //this.container.offset(node.offset());
+      ul.width(node.outerWidth());
 
-      this.syncViewport();
-      this.syncList();
+      this.syncListSelected();
     },
-    syncList: function() {
+    /**
+    * sync atomic select list selected state with native select selected state
+    * @method Select#syncListSelected
+    */
+    syncListSelected: function() {
       var ul = this.ul,
           option;
 
@@ -106,22 +125,54 @@ function definition() {
         }
       });
     },
+    /**
+    * open the drop down
+    * @method Select#open
+    */
     open: function() {
       this.container.addClass('open');
       this.ul.show();
     },
+    /**
+    * close the drop down
+    * @method Select#close
+    */
     close: function() {
       this.container.removeClass('open');
       this.ul.hide();
     },
+    /**
+    * check if the drop down is open or not
+    * @method Select#isOpen
+    */
     isOpen: function() {
       return this.container.hasClass('open');
     },
+    /**
+    * sync atomic select viewport with native select viewport
+    * @method Select#syncViewport
+    */
+    syncViewport: function() {
+      var node = this.node,
+          viewport = this.viewport;
+
+      viewport.width(node.outerWidth());
+      viewport.height(node.outerHeight());
+      this.syncViewportText();
+    },
+    /**
+    * sync atomic select viewport text with native select viewport text
+    * @method Select#syncViewportText
+    */
+    syncViewportText: function() {
+      this.viewport.text(this.node.val());
+    },
+    /**
+    * focus the native select element tied to the atomic select
+    * @method Select#syncViewportText
+    */
     focus: function() {
       this.node.focus();
-    },
-    _select: function() {
-
     },
     _bind: function() {
       var that = this,
@@ -151,8 +202,8 @@ function definition() {
 
         node.val(target.text());
 
-        that.syncViewport();
-        that.syncList();
+        that.syncViewportText();
+        that.syncListSelected();
         that.close();
       });
 
@@ -175,9 +226,6 @@ function definition() {
       });
 
     },
-    syncViewport: function() {
-      this.viewport.text(this.node.val());
-    },
     _build: function() {
       var container = this.container = $(document.createElement('div')),
           ul = this.ul = $(document.createElement('ul')),
@@ -185,6 +233,7 @@ function definition() {
           node = this.node;
 
       ul.css('position', 'absolute');
+      viewport.addClass('viewport');
 
       this.close();
 
@@ -196,8 +245,8 @@ function definition() {
         .attr('class', node.attr('class'))
         .addClass('atomic-select')
         .css('display', 'inline-block')
-        .css('position', 'relative');
-        //.css('position', 'absolute');
+        .css('position', 'relative')
+        .css('position', 'absolute');
 
       // append container after select
       node.after(container);

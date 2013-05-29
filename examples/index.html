@@ -44,11 +44,19 @@
 
     <h3>Select</h2>
     <style>
-      .atomic-select > div {
+      #simple-select {
+        outline: none;
+      }
+      .atomic-select .viewport {
         background-color: #ddddff;
       }
-      .atomic-select > ul {
+      .atomic-select ul {
         background-color: #ddffdd;
+        margin: 0;
+        padding: 0;
+      }
+      .atomic-select li {
+        list-style: none;
       }
       .atomic-select li.selected {
         background-color: #559955;
