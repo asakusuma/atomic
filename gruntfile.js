@@ -179,11 +179,40 @@ module.exports = function (grunt) {
      * express: runs our server for examples
      */
     express: {
-      example: {
+      server: {
         options: {
           port: 4000,
           debug: true,
           server: path.resolve('./server.js')
+        }
+      },
+      quiet: {
+        options: {
+          port: 4000,
+          debug: false,
+          server: path.resolve('./server.js')
+        }
+      }
+    },
+
+    /**
+     * remove once running venus properly
+     */
+    qunit: {
+      all: {
+        options: {
+          timeout: 20000,
+          urls: [
+            'http://localhost:4000/tests/'
+          ]
+        }
+      }
+    },
+
+    wait: {
+      server: {
+        options: {
+          delay: 3
         }
       }
     }
@@ -201,6 +230,21 @@ module.exports = function (grunt) {
   // grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-qunit');
 
+  // from https://github.com/gruntjs/grunt/issues/236
+  grunt.registerMultiTask('wait', 'Wait for a set amount of time.', function () {
+    var delay = this.data.options.delay;
+    var d = delay ? delay + ' second' + (delay === '1' ? '' : 's') : 'forever';
+
+    grunt.log.write('Waiting ' + d + '...');
+
+    // Make this task asynchronous. Grunt will not continue processing
+    // subsequent tasks until done() is called.
+    var done = this.async();
+
+    // If a delay was specified, call done() after that many seconds.
+    if (delay) { setTimeout(done, delay * 1000); }
+  });
+
   grunt.registerTask('build', [
     'jshint',
     'shell:tag',
@@ -213,17 +257,23 @@ module.exports = function (grunt) {
     'clean:tmp'
   ]);
 
-  // Using Venus via a shell command for now
-  // requires npm install -g phantomjs
+  // Venus is commented out for now until it has
+  // access to hot reload and cleanly scans files
   grunt.registerTask('test', [
-    'shell:venus_browser'
+    'build',
+    'express:quiet',
+    'wait:server',
+    'qunit:all'
+    // shell:venus / shell:venus_browser
   ]);
-  grunt.registerTask('autotest', [
-    'shell:venus'
+
+  grunt.registerTask('itest', [
+    'build',
+    'server'
   ]);
 
   grunt.registerTask('server', [
-    'express:example',
+    'express:server',
     'express-keepalive'
   ]);
   // grunt.registerTask('release', []);
