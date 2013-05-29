@@ -68,3 +68,32 @@ test('returns result of proxied function', function() {
 	}
 	equal(__Atomic_Public_API__.proxy(func, obj)(), 8, 'is returned result');
 });
+
+module('keys()');
+test('returned array has an item for each key', function() {
+  var obj = {
+    count: 8,
+    name: 'John Doe',
+    age: 23
+  };
+  var keys = __Atomic_Public_API__.keys(obj);
+  equal(keys.length, 3, 'has correct length');
+  equal(keys[0], 'count', 'equals first item');
+  equal(keys[1], 'name', 'equals second item');
+  equal(keys[2], 'age', 'equals third item');
+});
+
+test('items in returned array are all strings', function() {
+  var obj = {
+    count: 8,
+    5: 'John Doe',
+    age: 23,
+    8: 5
+  };
+  var keys = __Atomic_Public_API__.keys(obj);
+  strictEqual(keys.length, 4, 'has correct length');
+  strictEqual(keys[0], 'count', 'strict equals first item');
+  strictEqual(keys[1], '5', 'strict equals second item');
+  strictEqual(keys[2], 'age', 'strict equals third item');
+  strictEqual(keys[3], '8', 'strict equals fourth item');
+});
