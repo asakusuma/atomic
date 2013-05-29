@@ -35,6 +35,10 @@ those changes.  The Atomic Select mirror sits on top of the original select box
 var Atomic = require('atomic');
 
 function definition() {
+  var ENTER = 13,
+      ESC = 27,
+      TAB = 9;
+
   // useful constants in this control
   var $ = require('jquery');
 
@@ -102,6 +106,23 @@ function definition() {
         }
       });
     },
+    open: function() {
+      this.container.addClass('open');
+      this.ul.show();
+    },
+    close: function() {
+      this.container.removeClass('open');
+      this.ul.hide();
+    },
+    isOpen: function() {
+      return this.container.hasClass('open');
+    },
+    focus: function() {
+      this.node.focus();
+    },
+    _select: function() {
+
+    },
     _bind: function() {
       var that = this,
           node = this.node,
@@ -110,11 +131,17 @@ function definition() {
 
       node.on('change', function() {
         that.sync();
-        ul.hide();
       });
 
       viewport.on('click', function() {
-        ul.toggle();
+        if (that.isOpen()) {
+          that.close();
+        }
+        else {
+          that.open();
+        }
+
+        that.focus();
       });
 
       // when user clicks on an atomic select item,
@@ -126,7 +153,25 @@ function definition() {
 
         that.syncViewport();
         that.syncList();
-        ul.hide();
+        that.close();
+      });
+
+      $(document.body).on('click', function(evt) {
+        var atomicSelect = $(evt.target).closest('.atomic-select');
+        if (!atomicSelect.length) {
+          that.close();
+        }
+      });
+
+      $(document).keydown(function(evt) {
+        var key = evt.which;
+
+        if (key === ENTER || key === ESC || key === TAB) {
+          if (that.isOpen()) {
+            that.close();
+            evt.preventDefault();
+          }
+        }
       });
 
     },
@@ -139,13 +184,15 @@ function definition() {
           viewport = this.viewport = $(document.createElement('div')),
           node = this.node;
 
-      ul.css('position', 'absolute')
-        .hide();
+      ul.css('position', 'absolute');
+
+      this.close();
 
       // build mirror
       container.append(viewport)
         .append(ul)
         // copy over classes from select to container
+        // TODO: maybe we should add the class copy logic to abstract along with atomic-* - Eric
         .attr('class', node.attr('class'))
         .addClass('atomic-select')
         .css('display', 'inline-block')
