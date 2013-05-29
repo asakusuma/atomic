@@ -56,3 +56,30 @@ test('arrays size of 1 are the same as arrays size of N', function() {
   var testFn = __Atomic_Public_API__.expand(caller);
   testFn([1]);
 });
+
+test('should have a working proxy function', function() {
+  var caller = function(one) {
+    equal(one, 1, 'has correct argument');
+  };
+  var testFn = __Atomic_Public_API__.expand(caller);
+  testFn([1]);
+});
+
+
+test('public proxy function', function() {
+	//Works like underscore _.bind
+
+	var obj = {
+		count: 8
+	};
+
+	var func = function() {
+		return this.count;
+	}
+
+	var caller = function(obj, func) {
+    equal(Atomic.proxy(func, obj)(), 8, "sets the 'this' context of a function");
+  };
+  var testFn = __Atomic_Public_API__.expand(caller);
+  testFn(obj, func);
+});
