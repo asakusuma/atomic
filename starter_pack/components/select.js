@@ -140,7 +140,6 @@ function definition() {
     close: function() {
       var container = this.container;
       container.removeClass('open');
-      container.removeClass('focused');
       this.ul.hide();
     },
     /**
@@ -191,6 +190,10 @@ function definition() {
         container.addClass('focused');
       });
 
+      node.on('blur', function() {
+        container.removeClass('focused');
+      });
+
       viewport.on('click', function() {
         if (that.isOpen()) {
           that.close();
@@ -212,6 +215,10 @@ function definition() {
         that.syncViewportText();
         that.syncListSelected();
         that.close();
+      });
+
+      ul.on('mousedown', function(evt) {
+        evt.preventDefault();
       });
 
       $(document.body).on('click', function(evt) {
@@ -251,6 +258,7 @@ function definition() {
         // TODO: maybe we should add the class copy logic to abstract along with atomic-* - Eric
         .attr('class', node.attr('class'))
         .addClass('atomic-select')
+        .attr('role', 'presentation')
         .css('display', 'inline-block')
         .css('position', 'relative')
         .css('position', 'absolute');
