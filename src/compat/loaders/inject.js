@@ -37,7 +37,7 @@ Atomic.augment(Atomic.loader, {
     define('atomic', [], window.Atomic);
   },
   load: function(deps) {
-    var results = {};
+    var results = [];
     var deferred = Atomic.deferred();
 
     deps.unshift('require');

@@ -37,16 +37,16 @@ Atomic.augment(Atomic.loader, {
     Atomic.loader.save('atomic', window.Atomic);
   },
   load: function(deps) {
-    var results = {};
+    var results = [];
 
     if (!deps) {
       return results;
     }
 
     for (var i = 0, len = deps.length; i < len; i++) {
-      results[deps[i]] = Atomic.loader.modules[deps[i]];
+      results[i] = Atomic.loader.modules[deps[i]];
 
-      if (typeof results[deps[i]] === 'undefined') {
+      if (typeof results[i] === 'undefined') {
         throw new Error('Unable to load: ' + deps[i]);
       }
     }
