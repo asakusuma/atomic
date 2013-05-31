@@ -216,7 +216,7 @@ var __Atomic_Public_API__ = {
   export: function(mod, def, factory) {
     var ranFactory = null;
 
-    if (mod && mod.exports || Atomic_amd_optimized) {
+    if (mod && typeof mod.exports !== 'undefined' || Atomic_amd_optimized) {
       ranFactory = factory();
       mod.exports = ranFactory;
     }

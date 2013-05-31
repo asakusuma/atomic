@@ -626,11 +626,22 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Can be overriden to provide update mechanisms for a Component
-     * @method AbstractComponent#refresh
+     * Can be overriden to synchronize the DOM to the component's internal state
+     * @method AbstractComponent#sync
      * @returns this
      */
-    refresh: function() {
+    sync: function() {
+      return this;
+    },
+
+    /**
+     * Can be overridden to update the component's internal state based on the
+     * current DOM. This is really useful when you are pulling in content via
+     * innerHTML, and want the component to reflect this new information
+     * @method AbstractComponent#update
+     * @returns this
+     */
+    update: function() {
       return this;
     }
   };

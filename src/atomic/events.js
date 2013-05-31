@@ -132,7 +132,7 @@ var __Atomic_Events_API__ = {
    */
   trigger: function () {
     var args = [].slice.call(arguments, 0);
-    emitter.emit.apply(this._eventEmitter, args);
+    emitter.emit.apply(emitter, args);
     return Atomic;
   }
 };

@@ -44,7 +44,7 @@ Atomic.augment(Atomic.loader, {
     require(deps, function(require) {
       try {
         for (var i = 0, len = deps.length; i < len; i++) {
-          results[deps[i]] = require(deps[i]);
+          results[i] = require(deps[i]);
         }
 
         deferred.resolve(results);

@@ -1,4 +1,4 @@
-/*global module:true, test:true, equal:true, __Atomic_Public_API__:true */
+/*global module:true, test:true, equal:true, strictEqual:true, ok:true, __Atomic_Public_API__:true */
 
 /*
 Atomic
@@ -35,20 +35,6 @@ test('allows for argument expansion: converts an array of 3 items to 3 arguments
   testFn(['one', 2, 'three']);
 });
 
-test('uses values of object literals like arrays', function() {
-  var caller = function(one, two, three) {
-    equal(one, 'car', 'is key 1');
-    equal(two, 'boat', 'is key 2');
-    equal(three, 'plane', 'is key 3');
-  };
-  var testFn = __Atomic_Public_API__.expand(caller);
-  testFn({
-    first: 'car',
-    then: 'boat',
-    last: 'plane'
-  });
-});
-
 test('arrays size of 1 are the same as arrays size of N', function() {
   var caller = function(one) {
     equal(one, 1, 'has correct argument');
@@ -65,7 +51,7 @@ test('returns result of proxied function', function() {
 	};
 	var func = function() {
 		return this.count;
-	}
+	};
 	equal(__Atomic_Public_API__.proxy(func, obj)(), 8, 'is returned result');
 });
 
@@ -92,8 +78,48 @@ test('items in returned array are all strings', function() {
   };
   var keys = __Atomic_Public_API__.keys(obj);
   strictEqual(keys.length, 4, 'has correct length');
-  strictEqual(keys[0], 'count', 'strict equals first item');
-  strictEqual(keys[1], '5', 'strict equals second item');
-  strictEqual(keys[2], 'age', 'strict equals third item');
-  strictEqual(keys[3], '8', 'strict equals fourth item');
+  ok(obj[keys[0]], keys[0] + ' found');
+  ok(obj[keys[1]], keys[1] + ' found');
+  ok(obj[keys[2]], keys[2] + ' found');
+  ok(obj[keys[3]], keys[3] + ' found');
+});
+
+module('export()');
+test('uses module.exports if module is defined', function() {
+  var module = {
+    exports: null
+  };
+  var define = null;
+  var fn = function() {
+    return 'bar';
+  };
+  fn.id = 'foo';
+  __Atomic_Public_API__.export(module, define, fn);
+  strictEqual(module.exports, 'bar', 'assigned to exports');
+});
+
+test('uses define if define and define.amd are defined', function() {
+  var passed = false;
+  var define = function() {
+    passed = true;
+  };
+  define.amd = true;
+  var module = null;
+  var fn = function() {
+    return 'bar';
+  };
+  fn.id = 'foo';
+  __Atomic_Public_API__.export(module, define, fn);
+  ok(passed, 'successfully called define()');
+});
+
+test('uses global registry if neither module.exports or define.amd are available', function() {
+  var module = null;
+  var define = null;
+  var fn = function() {
+    return 'bar';
+  };
+  fn.id = 'foo';
+  __Atomic_Public_API__.export(module, define, fn);
+  equal(window.foo, 'bar', 'properly assigned to the window');
 });

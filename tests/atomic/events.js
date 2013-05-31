@@ -25,7 +25,18 @@ governing permissions and limitations under the License.
  * @venus-include ../../src/atomic/events.js
  */
 
-module('contract APIs');
-test('has on()', function() {
+module('event based APIs');
+test('has on(), off()', function() {
   ok(__Atomic_Events_API__.on);
+  ok(__Atomic_Events_API__.off);
+});
+
+test('simple event firing sanity check', function() {
+  var triggered = false;
+  __Atomic_Events_API__.on('foo', function() {
+    triggered = true;
+  });
+
+  __Atomic_Events_API__.trigger('foo');
+  ok(triggered, 'basic event triggering is working');
 });
