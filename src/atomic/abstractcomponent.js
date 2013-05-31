@@ -77,6 +77,10 @@ function localize(obj, type, storesResolved) {
     locked = true;
   };
 
+  obj[type]._raw = function() {
+    return local;
+  };
+
   // behaves like array. toString() will use JSON if available
   obj[type].prototype = [];
   obj[type].toString = function() {
@@ -510,16 +514,19 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var deferred = Atomic.deferred();
       var self = this;
 
-      Atomic.load(Atomic.keys(this.needs()))
+      Atomic.load(this.needs._raw())
       .then(function(needs) {
+
         // populate needs resolution into the this.needs()
+        var resolved = {};
+        var deps = self.needs._raw();
         self.needs._unlock();
-        for (var name in needs) {
-          if (needs.hasOwnProperty(name)) {
-            self.needs(name, needs[name]);
-          }
+        for (var i = 0, dlen = deps.length; i < dlen; i++) {
+          resolved[deps[i]] = needs[i];
+          self.needs(deps[i], needs[i]);
         }
         self.needs._lock();
+
         // dynamically create promise chain
         // inits[0] runs automatically
         var wiringDeferred = Atomic.deferred(),

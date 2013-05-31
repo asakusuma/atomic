@@ -36,6 +36,7 @@ jQuery.fn.atomic = function(action) {
     // an array of the dependencies we need to load for this parse
     // and an object literal to avoid duplicate entries in the array
     var dependencies = [];
+    var resolvedDependencies = {};
     var dependenciesCheck = {};
 
     // a collection if all our matched nodes
@@ -67,6 +68,7 @@ jQuery.fn.atomic = function(action) {
 
       if (!dependenciesCheck[type]) {
         dependencies.push(type);
+        resolvedDependencies[type] = null;
         dependenciesCheck[type] = 1;
       }
 
@@ -82,10 +84,14 @@ jQuery.fn.atomic = function(action) {
     // load the dependencies
     Atomic.load(dependencies)
     .then(function(resolved) {
+      for (var i = 0, len = dependencies.length; i < len; i++) {
+        resolvedDependencies[dependencies[i]] = resolved[i];
+      }
+
       // for each matched node, instantiate, assign children
       // then load()
       jQuery.each(matched, function(key, value) {
-        var Obj = resolved[value.isA];
+        var Obj = resolvedDependencies[value.isA];
         var inst = new Obj(value.node);
         $(value.node).data('atomic-component', inst);
         value.$children.each(function(idx, child) {
