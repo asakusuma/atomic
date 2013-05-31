@@ -132,7 +132,6 @@ var __Atomic_Public_API__ = {
    * @param {Function} fn - the function to expand
    * @returns {Function} a function that takes N args
    */
-   // TODO: this seems to fail when only one component/wiring is loaded - Eric
   expand: function(fn) {
     return function(args) {
       var key;
