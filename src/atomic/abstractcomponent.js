@@ -30,93 +30,80 @@ function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]';
 }
 
-// component.events   <= get all the events
-// component.events() <= get the resolved version of the events
-// component.needs    <= get the needs array of the component
-// component.needs()  <= get the resolved needs
-//                    or get a specific need needs('str')
-//                    or set a specific need needs('str', val)
-function localize(obj, type, storesResolved) {
-  var local = obj[type],
-      i = 0,
-      len,
-      name,
-      locked = true,
-      storage = {};
-
-  // replace with a function
-  obj[type] = function(str, value) {
-    var out = {};
-
-    // set
-    if (str && typeof value !== 'undefined' && storesResolved && !locked) {
-      storage[str] = value;
-      return obj;
+// creates a displayable version of an object structure
+// on component instantiation, this takes needs/nodes/events
+// and turns them into usable objects
+/*
+component.events.USE => 'USE'
+component.nodes.MyNode = document.blah
+*/
+function createDisplayable(obj, writeBack) {
+  var type = (isArray(obj)) ? 'array' : 'object';
+  var size = (type === 'array') ? obj.length : 0;
+  var resolved = {};
+  var name, i, len;
+  var iface = function(key, to) {
+    if (key && to) {
+      return iface._.resolve(key, to);
     }
-
-    // get
-    if (str) {
-      return storage[str];
-    }
-
-    // all
-    for (var name in storage) {
-      if (storage.hasOwnProperty(name)) {
-        out[name] = storage[name];
-      }
-    }
-
-    return out;
+    return resolved;
   };
-
-  // prevent additional writes
-  obj[type]._unlock = function() {
-    locked = false;
-  };
-  obj[type]._lock = function() {
-    locked = true;
-  };
-
-  obj[type]._raw = function() {
-    return local;
-  };
-
-  // behaves like array. toString() will use JSON if available
-  obj[type].prototype = [];
-  obj[type].toString = function() {
-    if (isArray(local)) {
-      return local.join('\n');
-    }
-
+  iface.toString = function() {
     var out = [];
-    for (var name in local) {
-      if (local.hasOwnProperty(name) && name.indexOf('_') !== 0) {
-        out[out.length] = type+'.'+name + ': ' + local[name];
+    var name, i;
+    if (type === 'object') {
+      for (name in obj) {
+        if (obj.hasOwnProperty(name)) {
+          out.push(name + ' (' + (resolved[name] ? 'R' : '?') + '): ' + obj[name]);
+        }
       }
     }
-
+    else {
+      for (i = 0, len = obj.length; i < len; i++) {
+        out.push('[' + i + '] (' + (resolved[obj[i]] ? 'R' : '?') + '): ' + obj[i]);
+      }
+    }
     return out.join('\n');
   };
+  iface._ = {
+    raw: function() {
+      return obj;
+    },
+    add: function() {
+      if (type === 'array') {
+        obj.push(arguments[0]);
+        size++;
+      }
+      else {
+        obj[arguments[0]] = arguments[1];
+        if (writeBack) {
+          iface[arguments[0]] = arguments[0];
+        }
+      }
+    },
+    resolve: function(key, to) {
+      resolved[key] = to;
+    }
+  };
 
-  // write into initial storage and back onto the object
-  if (isArray(local)) {
-    for (i = 0, len = local.length; i < len; i++) {
-      obj[type][i] = local[i];
-      storage[local[i]] = null;
+  if (type === 'object') {
+    for (name in obj) {
+      if (obj.hasOwnProperty(name)) {
+        iface._.resolve(name, null);
+        if (writeBack) {
+          iface[name] = name;
+        }
+      }
     }
   }
   else {
-    for (name in local) {
-      if (local.hasOwnProperty(name)) {
-        obj[type][i++] = name;
-        obj[type]['_' + name] = local[name];
-        obj[type][name] = name;
-        storage[name] = (storesResolved) ? null : name;
-      }
+    for (i = 0, len = obj.length; i < len; i++) {
+      iface._.resolve(obj[i], null);
     }
   }
-}
 
+  return iface;
+}
 /**
  * AbstractComponent a template for creating Components in Atomic
  * Components are the lego blocks of Atomic. They emit events
@@ -194,7 +181,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Object} overrides - any configuration overrides to provide to this object
      */
     init: function (el, overrides) {
-      var name;
+      var name, nodeName;
 
       // set inits, assigned, etc all to local instance-level variables
       this._inits = [];
@@ -207,9 +194,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
       // localize the nodes/events/needs variable BEFORE the user starts configuring
       // nodes and needs can accept overwriting
-      localize(this, 'nodes', true);
-      localize(this, 'events');
-      localize(this, 'needs', true);
+      this.nodes = createDisplayable(this.nodes);
+      this.events = createDisplayable(this.events, true);
+      this.needs = createDisplayable(this.needs);
 
       // attach the el
       if (el) {
@@ -235,8 +222,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
             continue;
           }
           else if (name === 'nodes') {
-            // nodes are augmented
-            this.nodes = Atomic.augment(this.nodes, overrides.nodes);
+            for (nodeName in overrides.nodes) {
+              if (overrides.nodes.hasOwnProperty(nodeName)) {
+                this.nodes._.resolve(nodeName, overrides.nodes[nodeName]);
+              }
+            }
           }
           else {
             // everything else is assigned to config
@@ -253,9 +243,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an element to assign to the role.
      */
     assign: function(name, el) {
-      this.nodes._unlock();
-      this.nodes(name, el);
-      this.nodes._lock();
+      this.nodes._.resolve(name, el);
       return this;
     },
 
@@ -514,18 +502,14 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var deferred = Atomic.deferred();
       var self = this;
 
-      Atomic.load(this.needs._raw())
+      Atomic.load(this.needs._.raw())
       .then(function(needs) {
 
         // populate needs resolution into the this.needs()
-        var resolved = {};
-        var deps = self.needs._raw();
-        self.needs._unlock();
+        var deps = self.needs._.raw();
         for (var i = 0, dlen = deps.length; i < dlen; i++) {
-          resolved[deps[i]] = needs[i];
-          self.needs(deps[i], needs[i]);
+          self.needs._.resolve(deps[i], needs[i]);
         }
-        self.needs._lock();
 
         // dynamically create promise chain
         // inits[0] runs automatically
@@ -592,8 +576,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      *  by default, addFront is false
      */
     wireIn: function(wiring, addFront) {
-      var name;
-      var nodesName;
+      var name, nodesName, eventsName;
 
       // wiring can be set to a single function which defaults
       // to an initializer
@@ -606,15 +589,19 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       else {
         for (name in wiring) {
           if (name === 'events') {
-            Atomic.augment(this.events, wiring[name]);
+            // TODO: Broken
+            for (eventsName in wiring.events) {
+              if (wiring.events.hasOwnProperty(eventsName)) {
+                this.events._.add(eventsName, wiring.events[eventsName]);
+              }
+            }
           }
           else if (name === 'nodes') {
             for (nodesName in wiring.nodes) {
               if (this.nodes[nodesName]) {
                 continue; // we do not overwrite if the Implementor has defined
               }
-              this.nodes['_' + name] = wiring.nodes[nodesName];
-              this.nodes[nodesName] = nodesName;
+              this.nodes._.add(nodesName, wiring.nodes[nodesName]);
             }
           }
           else {

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Scolling Fetching Atomic</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
+
+    <style>
+      body {
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body data-atomic-autoparse="true">
+    <div id="foo" style="width: 200px;">
+      <h1>Scrolling Fetching Demo</h1>
+      <p>Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches.</p>
+
+      <p>Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches.</p>
+
+      <p>Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches.</p>
+
+      <p>Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches.</p>
+
+      <p>Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches. Scrolling and fetching, that's what this will do for you. It will handle your scrolls and your fetches.</p>
+    </div>
+
+    <!-- a global jquery, the latest built atomic.js, and the "none" loader -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/atomic.js"></script>
+    <script type="text/javascript" src="/src/compat/loaders/none.js"></script>
+
+    <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
+    <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
+    <script type="text/javascript" src="scripts/atomic/wirings/infinitecontent.js"></script>
+    <script type="text/javascript" src="scripts/atomic/wirings/bottoming.js"></script>
+    
+    <!-- our page specific JavaScript -->
+    <script type="text/javascript">
+    Atomic.load('components/button', 'wirings/infinitecontent', 'wirings/bottoming')
+    .then(Atomic.expand(function(Button, infiniteContent, bottoming) {
+      // build the button and add echo wiring
+      var button = new Button(document.getElementById('foo'));
+
+      button.wireIn(bottoming());
+
+      button.load()
+      .then(function() {
+        console.log('The Button with scroll friendly wiring has loaded');
+        debugger;
+        button.on(button.events().BOTTOMING, function() {
+          console.log('bottom!');
+        });
+      }, Atomic.thrower)
+      .then(null, Atomic.thrower);
+    }), Atomic.thrower)
+    .then(null, Atomic.thrower);
+    </script>
+  </body>
+</html>

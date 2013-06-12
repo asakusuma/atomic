@@ -1,0 +1,89 @@
+<html>
+<body>
+<script type="text/javascript">
+
+function isArray(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
+function createDisplayable(obj, writeBack) {
+  var type = (isArray(obj)) ? 'array' : 'object';
+  var size = (type === 'array') ? obj.length : 0;
+  var resolved = {};
+  var name, i, len;
+  var iface = function(key, to) {
+    if (key && to) {
+      return iface._.resolve(key, to);
+    }
+    return resolved;
+  };
+  iface.toString = function() {
+    var out = [];
+    if (type === 'object') {
+      for (name in obj) {
+        if (obj.hasOwnProperty(name)) {
+          out.push(name + ' (' + (resolved[name] ? 'R' : '?') + '): ' + obj[name]);
+        }
+      }
+    }
+    else {
+      for (i = 0, len = obj.length; i < len; i++) {
+        out.push('[' + i + '] (' + (resolved[obj[i]] ? 'R' : '?') + '): ' + obj[i])
+      }
+    }
+    return out.join('\n');
+  };
+  iface._ = {
+    raw: function() {
+      return obj;
+    },
+    add: function() {
+      if (type === 'array') {
+        obj.push(arguments[0]);
+        size++;
+      }
+      else {
+        obj[arguments[0]] = arguments[1];
+        if (writeBack) {
+          iface[arguments[0]] = arguments[0];
+        }
+      }
+    },
+    resolve: function(key, to) {
+      resolved[key] = to;
+    }
+  };
+
+  if (type === 'object') {
+    for (name in obj) {
+      if (obj.hasOwnProperty(name)) {
+        iface._.resolve(name, null);
+        if (writeBack) {
+          iface[name] = name;
+        }
+      }
+    }
+  }
+  else {
+    for (i = 0, len = obj.length; i < len; i++) {
+      iface._.resolve(obj[i], null);
+    }
+  }
+
+  return iface;
+}
+
+var fromObj = createDisplayable({
+  'Name': 'This is a description of the object',
+  'Another': 'Yet another Name'
+});
+
+var fromObjTwo = createDisplayable({
+  'RaRaRa': 'This is a description of the object',
+  'BaBaBa': 'Yet another Name'
+}, true);
+
+var fromArray = createDisplayable(['/foo/bar', '/baz/quuz']);
+</script>
+</body>
+</html>

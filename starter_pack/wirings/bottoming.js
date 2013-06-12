@@ -39,7 +39,10 @@ function factory() {
   return function(config) {
     var $ = require('jquery');
 
+    config = config || {};
     config.delay = config.delay || 100;
+    config.direction = config.direction || 'y';
+    config.local = config.local || false;
 
     return {
       events: {
