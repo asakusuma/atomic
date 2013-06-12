@@ -136,7 +136,11 @@ var __Atomic_Public_API__ = {
    * X = method called
    * I = actual invocation
    * 
+   * From https://github.com/documentcloud/underscore/blob/master/underscore.js
    * @method Atomic.throttle
+   * @param {Function} func - the function to throttle
+   * @param {Number} wait - a number of milliseconds to wait
+   * @param {Boolean} immediate - run a trailing function when throttled
    */
   throttle: function(func, wait, immediate) {
     var context, args, result;
@@ -186,6 +190,12 @@ var __Atomic_Public_API__ = {
    *
    * Notice how the user needed to stop acting for a window in order
    * for the trigger to reset
+   *
+   * From https://github.com/documentcloud/underscore/blob/master/underscore.js
+   * @method Atomic.debounce
+   * @param {Function} func - the function to wrap for debouncing
+   * @param {Number} wait - the number of milliseconds to wait until invoking
+   * @param {Boolean} immediate - if true, the event is on the leading edge
    */
   debounce: function(func, wait, immediate) {
     var result;
