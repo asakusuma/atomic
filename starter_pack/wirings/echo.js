@@ -25,7 +25,7 @@ var Atomic = require('atomic');
 function factory() {
   return function(config) {
     return {
-      init: function(needs, nodes) {
+      init: function() {
         this.echo('Initialized Echo wiring');
       },
       /**

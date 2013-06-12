@@ -126,6 +126,79 @@ var __Atomic_Public_API__ = {
   },
 
   /**
+   * Throttle a function. Prevents a function from running again within X seconds
+   * this is really helpful for repeating key events, scrolling, or simply "noisy"
+   * events
+   * Visually, this can be interpreted as
+   * XXXXXXXXXXXX      XXXXXXXXXXXX
+   * I   I   I         I   I   I
+   *
+   * X = method called
+   * I = actual invocation
+   * 
+   * @method Atomic.throttle
+   */
+  throttle: function(fn, onceEvery) {
+    var okayAt = 0;
+    return function() {
+      var now = new Date();
+      if (now > okayAt + onceEvery) {
+        okayAt = now;
+        fn.apply(this, arguments);
+      }
+    };
+  },
+
+  /**
+   * Debounces a function, by only letting it run after the user has taken
+   * no activity for X seconds. Similar to throttle, this is more useful
+   * when you want to limit the invocations to once for every burst of
+   * activity
+   *
+   * Visually, this can be interpreted as (immediate=true)
+   * XXXXXXXXXXXX      XXXXXXXXXXXX
+   * I                 I
+   *
+   * alternatively, this can be interpreted as (immediate=false)
+   * XXXXXXXXXXXX      XXXXXXXXXXXX
+   *                I                 I
+   *
+   * X = method called
+   * I = actual invocation
+   *
+   * Notice how the user needed to stop acting for a window in order
+   * for the trigger to reset
+   */
+  debounce: function(fn, onlyAfter, immediate) {
+    var timeout = null;
+
+    return function() {
+      var args = arguments;
+      var context = this;
+      if (immediate) {
+        if (!timeout) {
+          // call, start timer
+          timeout = window.setTimeout(function() {
+            timeout = null;
+          }, onlyAfter);
+          return fn.apply(context, args);
+        }
+      }
+      else {
+        if (timeout) {
+          // reset timer
+          window.clearTimeout(timeout);
+        }
+        // start new timer
+        timeout = window.setTimeout(function() {
+          timeout = null;
+          fn.apply(context, args);
+        }, onlyAfter);
+      }
+    };
+  },
+
+  /**
    * Take a function (which takes 1 arg) and return a function that takes
    * N args, where N is the length of the object or array in arguments[0]
    * @method Atomic.expand
