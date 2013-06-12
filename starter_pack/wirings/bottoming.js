@@ -79,7 +79,7 @@ function factory() {
             if (last + $window.height() > maximum - config.tolerance) {
               self.trigger(self.events.BOTTOMOUT);
             }
-          }));
+          }, config.delay));
         }
       }
     };

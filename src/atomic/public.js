@@ -138,14 +138,32 @@ var __Atomic_Public_API__ = {
    * 
    * @method Atomic.throttle
    */
-  throttle: function(fn, onceEvery) {
-    var okayAt = 0;
+  throttle: function(func, wait, immediate) {
+    var context, args, result;
+    var timeout = null;
+    var previous = 0;
+    var later = function() {
+      previous = new Date();
+      timeout = null;
+      result = func.apply(context, args);
+    };
     return function() {
       var now = new Date();
-      if (now > okayAt + onceEvery) {
-        okayAt = now;
-        fn.apply(this, arguments);
+      if (!previous && immediate === false) {
+        previous = now;
       }
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+      } else if (!timeout) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
     };
   },
 
@@ -169,32 +187,24 @@ var __Atomic_Public_API__ = {
    * Notice how the user needed to stop acting for a window in order
    * for the trigger to reset
    */
-  debounce: function(fn, onlyAfter, immediate) {
+  debounce: function(func, wait, immediate) {
+    var result;
     var timeout = null;
-
     return function() {
-      var args = arguments;
-      var context = this;
-      if (immediate) {
-        if (!timeout) {
-          // call, start timer
-          timeout = window.setTimeout(function() {
-            timeout = null;
-          }, onlyAfter);
-          return fn.apply(context, args);
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) {
+          result = func.apply(context, args);
         }
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) {
+        result = func.apply(context, args);
       }
-      else {
-        if (timeout) {
-          // reset timer
-          window.clearTimeout(timeout);
-        }
-        // start new timer
-        timeout = window.setTimeout(function() {
-          timeout = null;
-          fn.apply(context, args);
-        }, onlyAfter);
-      }
+      return result;
     };
   },
 
