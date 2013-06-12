@@ -57,8 +57,7 @@
       button.load()
       .then(function() {
         console.log('The Button with scroll friendly wiring has loaded');
-        debugger;
-        button.on(button.events().BOTTOMING, function() {
+        button.on(button.events.BOTTOMOUT, function() {
           console.log('bottom!');
         });
       }, Atomic.thrower)

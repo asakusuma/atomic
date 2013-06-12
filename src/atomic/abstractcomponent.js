@@ -37,7 +37,7 @@ function isArray(obj) {
 component.events.USE => 'USE'
 component.nodes.MyNode = document.blah
 */
-function createDisplayable(obj, writeBack) {
+function createDisplayable(obj, writeBack, preResolved) {
   var type = (isArray(obj)) ? 'array' : 'object';
   var size = (type === 'array') ? obj.length : 0;
   var resolved = {};
@@ -79,6 +79,9 @@ function createDisplayable(obj, writeBack) {
         if (writeBack) {
           iface[arguments[0]] = arguments[0];
         }
+        if (preResolved) {
+          resolved[arguments[0]] = arguments[0];
+        }
       }
     },
     resolve: function(key, to) {
@@ -92,6 +95,9 @@ function createDisplayable(obj, writeBack) {
         iface._.resolve(name, null);
         if (writeBack) {
           iface[name] = name;
+        }
+        if (preResolved) {
+          resolved[name] = name;
         }
       }
     }
@@ -195,7 +201,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       // localize the nodes/events/needs variable BEFORE the user starts configuring
       // nodes and needs can accept overwriting
       this.nodes = createDisplayable(this.nodes);
-      this.events = createDisplayable(this.events, true);
+      this.events = createDisplayable(this.events, true, true);
       this.needs = createDisplayable(this.needs);
 
       // attach the el

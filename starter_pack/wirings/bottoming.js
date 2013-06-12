@@ -40,9 +40,10 @@ function factory() {
     var $ = require('jquery');
 
     config = config || {};
-    config.delay = config.delay || 100;
+    config.delay = config.delay || 300;
     config.direction = config.direction || 'y';
     config.local = config.local || false;
+    config.tolerance = config.tolerance || 300;
 
     return {
       events: {
@@ -63,7 +64,7 @@ function factory() {
             last = scroll;
             maximum = (config.direction === 'x') ? $root.width() : $root.height();
             if (last + config.tolerance > maximum) {
-              self.trigger(self.evenets.BOTTOMOUT);
+              self.trigger(self.events.BOTTOMOUT);
             }
           }, config.delay));
         }
@@ -76,7 +77,7 @@ function factory() {
             last = scroll;
             maximum = ((config.direction === 'x') ? $root.offset().left + $root.width() : $root.offset().top + $root.height());
             if (last + $window.height() > maximum - config.tolerance) {
-              self.trigger(self.evenets.BOTTOMOUT);
+              self.trigger(self.events.BOTTOMOUT);
             }
           }));
         }
