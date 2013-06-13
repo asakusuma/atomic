@@ -25,11 +25,12 @@ Atomic.load('components/button', 'wirings/debugtracer')
   var button = new Button(document.getElementById('my-button'));
   button.wireIn(debugtracer());
 
-  button.load()
-  .then(function() {
+  button.load().then(function() {
     console.log('The Button with Debug Tracer wiring has loaded');
-  }, Atomic.thrower);
-}), Atomic.thrower);
+  })
+  .then(null, Atomic.e);
+}))
+.then(null, Atomic.e);
 
 // Carousel with Buttons
 Atomic.load('components/button', 'components/carousel')
@@ -48,17 +49,19 @@ Atomic.load('components/button', 'components/carousel')
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
     console.log('The Carousel with Buttons has been loaded');
-  }, Atomic.thrower);
-}), Atomic.thrower);
+  })
+  .then(null, Atomic.e);
+}))
+.then(null, Atomic.e);
 
 
 // Simple Select
 Atomic.load('components/select', 'components/carousel')
 .then(Atomic.expand(function(Select) {
   var select = new Select(document.getElementById('simple-select'));
-  select.load();
-
-}), Atomic.thrower);
+  select.load().then(null, Atomic.e);
+}))
+.then(null, Atomic.e);
 
 // Carousel with Buttons
 Atomic.load('components/button', 'components/carousel')
@@ -77,8 +80,10 @@ Atomic.load('components/button', 'components/carousel')
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
     console.log('The Carousel with Buttons has been loaded');
-  }, Atomic.thrower);
-}), Atomic.thrower);
+  })
+  .then(null, Atomic.e);
+}))
+.then(null, Atomic.e);
 
 // Carousel with Buttons that Wraps
 Atomic.load('components/button', 'components/carousel')
@@ -86,8 +91,6 @@ Atomic.load('components/button', 'components/carousel')
   var next = new Button(document.getElementById('carousel-wraps-next'));
   var prev = new Button(document.getElementById('carousel-wraps-prev'));
   var carousel = new Carousel(document.getElementById('carousel-wraps'));
-
-  // carousel.assign(carousel.nodes.Items, document.getElementById('carousel-wraps').getElementsByTagName('li'));
 
   // example of an inline wiring to add wrapping functionality
   carousel.wireIn(function() {
@@ -109,8 +112,10 @@ Atomic.load('components/button', 'components/carousel')
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
     console.log('The Carousel with Buttons (Wrapping) has been loaded');
-  }, Atomic.thrower);
-}), Atomic.thrower);
+  })
+  .then(null, Atomic.e);
+}))
+.then(null, Atomic.e);
 
 
 // // Carousel with Buttons and Fetch
@@ -153,6 +158,7 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
         console.log('wtf happened?');
       }
     });
-
-  }, Atomic.thrower);
-}), Atomic.thrower);
+  })
+  .then(null, Atomic.e);
+}))
+.then(null, Atomic.e);

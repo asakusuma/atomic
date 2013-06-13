@@ -41,29 +41,30 @@
     <script type="text/javascript" src="/src/compat/loaders/none.js"></script>
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
-    <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
+    <script type="text/javascript" src="scripts/atomic/components/generic.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/infinitecontent.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/bottoming.js"></script>
     
     <!-- our page specific JavaScript -->
     <script type="text/javascript">
-    Atomic.load('components/button', 'wirings/infinitecontent', 'wirings/bottoming')
-    .then(Atomic.expand(function(Button, infiniteContent, bottoming) {
+    Atomic.load('components/generic', 'wirings/infinitecontent', 'wirings/bottoming')
+    .then(Atomic.expand(function(Generic, infiniteContent, bottoming) {
       // build the button and add echo wiring
-      var button = new Button(document.getElementById('foo'));
+      var button = new Generic(document.getElementById('foo'));
 
       button.wireIn(bottoming());
+      button.wireIn(infiniteContent());
 
       button.load()
       .then(function() {
-        console.log('The Button with scroll friendly wiring has loaded');
+        console.log('The Generic with scroll friendly wiring has loaded');
         button.on(button.events.BOTTOMOUT, function() {
           console.log('bottom!');
         });
-      }, Atomic.thrower)
-      .then(null, Atomic.thrower);
-    }), Atomic.thrower)
-    .then(null, Atomic.thrower);
+      })
+      .then(null, Atomic.e);
+    }))
+    .then(null, Atomic.e);
     </script>
   </body>
 </html>

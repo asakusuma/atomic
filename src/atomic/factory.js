@@ -77,9 +77,6 @@ var __Atomic_Private_Factory_Methods__ = {
 var __Atomic_Public_Factory_Methods__ = {
   Component: function(objLiteral) {
     return __Atomic_Private_Factory_Methods__.Factory(objLiteral);
-  },
-  Composite: function(objLiteral) {
-    return __Atomic_Private_Factory_Methods__.Factory(objLiteral);
   }
 };
 

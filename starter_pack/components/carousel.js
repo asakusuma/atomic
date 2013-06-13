@@ -35,7 +35,7 @@ var Atomic = require('atomic');
 
 function definition() {
   // useful constants in this control
-  var $ = require('jquery');
+  var $;
   var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
@@ -44,7 +44,7 @@ function definition() {
     name: 'SamplePack Carousel by @jakobo',
 
     // no dependencies
-    needs: [],
+    needs: ['jquery'],
 
     // no additional nodes needed
     nodes: {},
@@ -61,6 +61,7 @@ function definition() {
      * @method Carousel#wiring
      */
     wiring: function() {
+      $ = this.needs('jquery');
       this._index = 0;
       this._$items = null;
       this.refresh();

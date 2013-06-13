@@ -24,7 +24,7 @@ on a container. Bottoming out can happen one of two ways:
   * The container is scrolled such that the bottom of the container
     is reached
 
-In either case, a "BOTTOM" event is fired
+In either case, a "BOTTOMOUT" event is fired
 
 It can be configured with the following options:
   * tolerance(int) a number of pixels before the "bottom" the event fires

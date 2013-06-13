@@ -46,6 +46,9 @@ function createDisplayable(obj, writeBack, preResolved) {
     if (key && to) {
       return iface._.resolve(key, to);
     }
+    else if (key) {
+      return resolved[key];
+    }
     return resolved;
   };
   iface.toString = function() {
@@ -200,7 +203,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
       // localize the nodes/events/needs variable BEFORE the user starts configuring
       // nodes and needs can accept overwriting
-      this.nodes = createDisplayable(this.nodes);
+      this.nodes = createDisplayable(this.nodes, true);
       this.events = createDisplayable(this.events, true, true);
       this.needs = createDisplayable(this.needs);
 

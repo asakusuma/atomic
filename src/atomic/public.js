@@ -334,7 +334,7 @@ var __Atomic_Public_API__ = {
    * @method Atomic.thrower
    * @param {Object} err - the error from a rejection
    */
-  thrower: function(err) {
+  error: function(err) {
     /*global console:true */
 
     // if exception, try to get the stack
@@ -365,5 +365,6 @@ var __Atomic_Public_API__ = {
     }
   }
 };
+__Atomic_Public_API__.e = __Atomic_Public_API__.error;
 
 __Atomic_Public_API__ = __Atomic_Public_API__;

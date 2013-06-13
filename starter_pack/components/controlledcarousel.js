@@ -16,16 +16,6 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-/*
-============================================================
-STARTER PACK COMPOSITES
-============================================================
-Composites bring together multiple Components to serve a higher
-purpose. This example Composite, the ControlledCarousel, comes
-with several nodes for previous/next/first/last/etc. By
-assigning nodes to these items, you can pre-wire a carousel with
-some default behavior.
-*/
 var Atomic = require('atomic');
 
 function definition() {
@@ -34,7 +24,7 @@ function definition() {
   var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
-  return Atomic.Composite({
+  return Atomic.Component({
     // a common name to assist in debugging
     name: 'SamplePack ControlledCarousel by @jakobo',
 
@@ -107,6 +97,6 @@ function definition() {
   });
 }
 // you only need to set .id if you are using the "system" loader
-definition.id = 'composites/controlledcarousel';
+definition.id = 'components/controlledcarousel';
 
 Atomic.export(module, define, definition);
