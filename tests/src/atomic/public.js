@@ -19,9 +19,9 @@ governing permissions and limitations under the License.
 
 /*
  * @venus-library qunit
- * @venus-include ../../src/atomic.js
+ * @venus-include ../../../src/atomic.js
  * @venus-include _harness.js
- * @venus-include ../../src/atomic/public.js
+ * @venus-include ../../../src/atomic/public.js
  */
 
 module('expand()');
