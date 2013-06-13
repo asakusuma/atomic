@@ -25,12 +25,6 @@ Atomic.augment(Atomic.loader, {
     Atomic.loader.modules[id] = module;
   },
   init: function() {
-    window.require = function(name) {
-      return Atomic.loader.modules[name];
-    };
-    window.module = null;
-    window.define = null;
-
     if (window.jQuery) {
       Atomic.loader.save('jquery', window.jQuery);
     }

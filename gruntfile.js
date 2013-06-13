@@ -24,10 +24,18 @@ module.exports = function (grunt) {
     output_files: {
       main:         './dist/atomic-__ATOMIC__VERSION__/atomic.js',
       main_min:     './dist/atomic-__ATOMIC__VERSION__/atomic.min.js',
-      config:       './dist/atomic-__ATOMIC__VERSION__/config.js',
       license:      './dist/atomic-__ATOMIC__VERSION__/LICENSE',
       readme:       './dist/atomic-__ATOMIC__VERSION__/README.md',
-      starterPack:  './dist/atomic-__ATOMIC__VERSION__/starter_pack/'
+      starterPack:  './dist/atomic-__ATOMIC__VERSION__/starter_pack/',
+      compat:       './dist/atomic-__ATOMIC__VERSION__/compat/'
+    },
+    last_output_files: {
+      main:         './dist/recent/atomic.js',
+      main_min:     './dist/recent/atomic.min.js',
+      license:      './dist/recent/LICENSE',
+      readme:       './dist/recent/README.md',
+      starterPack:  './dist/recent/starter_pack/',
+      compat:       './dist/recent/compat/'
     },
     anonymous_header: '!(function(context, undefined){\n',
     anonymous_footer: '\n;context.Atomic.version = "__ATOMIC__VERSION__";\n})(this);',
@@ -101,23 +109,29 @@ module.exports = function (grunt) {
       atomic: {
         files: [
           {src: './tmp/atomic.js', dest: '<%=output_files.main %>', filter: 'isFile'},
-          {src: './tmp/atomic.min.js', dest: '<%=output_files.main_min %>', filter: 'isFile'}
+          {src: './tmp/atomic.min.js', dest: '<%=output_files.main_min %>', filter: 'isFile'},
+          {src: './tmp/atomic.js', dest: '<%=last_output_files.main %>', filter: 'isFile'},
+          {src: './tmp/atomic.min.js', dest: '<%=last_output_files.main_min %>', filter: 'isFile'}
         ]
       },
       text: {
         files: [
           {src: ['./LICENSE'], dest: '<%= output_files.license %>', filter: 'isFile'},
-          {src: ['./README.md'], dest: '<%= output_files.readme %>', filter: 'isFile'}
-        ]
-      },
-      config: {
-        files: [
-          {src: ['./src/config/config.js'], dest: '<%= output_files.config %>', filter: 'isFile'}
+          {src: ['./README.md'], dest: '<%= output_files.readme %>', filter: 'isFile'},
+          {src: ['./LICENSE'], dest: '<%= last_output_files.license %>', filter: 'isFile'},
+          {src: ['./README.md'], dest: '<%= last_output_files.readme %>', filter: 'isFile'}
         ]
       },
       starterPack: {
         files: [
-          {expand: true, cwd: './starter_pack/', src: ['**'], dest: '<%= output_files.starterPack %>'}
+          {expand: true, cwd: './starter_pack/', src: ['**'], dest: '<%= output_files.starterPack %>'},
+          {expand: true, cwd: './starter_pack/', src: ['**'], dest: '<%= last_output_files.starterPack %>'}
+        ]
+      },
+      compat: {
+        files: [
+          {expand: true, cwd: './src/compat/', src: ['**'], dest: '<%= output_files.compat %>'},
+          {expand: true, cwd: './src/compat/', src: ['**'], dest: '<%= last_output_files.compat %>'}
         ]
       }
     },
@@ -136,7 +150,8 @@ module.exports = function (grunt) {
             './src/customizable/*.js',
             './starter_pack/**/*.js',
             './src/*.js',
-            './tests/spec/**/*.js',
+            './tests/src/**/*.js',
+            './tests/starter_pack/**/*.js',
             './server.js'
           ]
         },
@@ -252,8 +267,8 @@ module.exports = function (grunt) {
     'uglify:atomic',
     'copy:atomic',
     'copy:text',
-    'copy:config',
     'copy:starterPack',
+    'copy:compat',
     'clean:tmp'
   ]);
 

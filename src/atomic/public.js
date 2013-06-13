@@ -75,6 +75,10 @@ var __Atomic_Public_API__ = {
     var deferred = Atomic.deferred();
     var args = [].slice.call(arguments, 0);
 
+    function isArray(obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    }
+
     // wrap the callback if it exists
     if (typeof args[args.length - 1] === 'function') {
       deferred.promise.then(args[args.length - 1]);
@@ -84,6 +88,10 @@ var __Atomic_Public_API__ = {
     // if 2+ args, no need to expand further
     if (args.length === 1) {
       args = args[0];
+    }
+
+    if (!isArray(args)) {
+      args = [args];
     }
 
     // if not initialized, init, and then do the load step
@@ -308,6 +316,18 @@ var __Atomic_Public_API__ = {
   export: function(mod, def, factory) {
     var ranFactory = null;
 
+    if (typeof factory === 'undefined' && typeof def === 'undefined' && typeof mod === 'function') {
+      factory = mod;
+      if (Atomic.loader && Atomic.loader.save) {
+        ranFactory = factory();
+        Atomic.loader.save(factory.id, ranFactory);
+      }
+      else {
+        ranFactory = factory();
+        window[factory.id] = ranFactory;
+      }
+      return;
+    }
     if (mod && typeof mod.exports !== 'undefined' || Atomic_amd_optimized) {
       ranFactory = factory();
       mod.exports = ranFactory;

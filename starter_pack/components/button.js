@@ -35,10 +35,10 @@ is used as a convienence, as modern jQuery uses a single
 document level listener as opposed to listeners on individual
 nodes.
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
 function factory() {
-  var $ = require('jquery');
+  var $;
 
   // calls the Atomic Component constructor
   return Atomic.Component({
@@ -46,7 +46,7 @@ function factory() {
     name: 'SamplePack Button by @jakobo',
 
     // no dependencies
-    needs: [],
+    needs: ['jquery'],
 
     // no additional nodes needed
     nodes: {},
@@ -60,6 +60,7 @@ function factory() {
 
     // wiring functions to make this work
     wiring: function() {
+      $ = this.needs('jquery');
       var self = this;
       // nodes._root is the default container, either an el passed
       // to the constructor, or via attach()
@@ -72,4 +73,4 @@ function factory() {
 // you only need to set .id if you are using the "system" loader
 factory.id = 'components/button';
 
-Atomic.export(module, define, factory);
+try { Atomic.export(module, define, factory); } catch(e) { Atomic.export(factory); }
