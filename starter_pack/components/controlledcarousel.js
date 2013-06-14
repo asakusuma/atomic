@@ -16,11 +16,11 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
 function definition() {
   // useful constants in this control
-  var $ = require('jquery');
+  var $;
   var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
@@ -29,7 +29,7 @@ function definition() {
     name: 'SamplePack ControlledCarousel by @jakobo',
 
     // no dependencies
-    needs: ['components/carousel', 'components/button'],
+    needs: ['jquery', 'components/carousel', 'components/button'],
 
     // no additional nodes needed
     nodes: {
@@ -51,6 +51,7 @@ function definition() {
      * @method ControlledCarousel#wiring
      */
     wiring: function() {
+      $ = this.needs('jquery');
       var Carousel = this.needs('components/carousel');
       var Button = this.needs('components/button');
       var self = this;
@@ -99,4 +100,4 @@ function definition() {
 // you only need to set .id if you are using the "system" loader
 definition.id = 'components/controlledcarousel';
 
-Atomic.export(module, define, definition);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

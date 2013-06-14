@@ -31,7 +31,7 @@ as YUI or jQuery to make the DOM operations easier.
 The Carousel Component provides an API for manipulating a
 "current" class on a collection of nodes
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
 function definition() {
   // useful constants in this control
@@ -164,4 +164,4 @@ function definition() {
 // you only need to set .id if you are using the "system" loader
 definition.id = 'components/carousel';
 
-Atomic.export(module, define, definition);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

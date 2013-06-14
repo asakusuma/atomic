@@ -19,7 +19,7 @@ governing permissions and limitations under the License.
 /*
 This wiring adds debugging ability to all methods within a component
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
 function definition() {
   return function(config) {
@@ -57,4 +57,4 @@ function definition() {
 }
 
 definition.id = 'wirings/debugtracer';
-Atomic.export(module, define, definition);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

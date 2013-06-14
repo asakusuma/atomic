@@ -1,4 +1,4 @@
-/*global Atomic:true, require:true, module:true, define: true, console:true */
+/*global Atomic:true, module:true, define: true, console:true */
 /*
 Atomic
 Copyright 2013 LinkedIn
@@ -29,14 +29,18 @@ governing permissions and limitations under the License.
 // 2) add multiple methods
 // 3) require static nodes
 // Eric
-function factory() {
+function definition() {
   return function(config) {
     config = config || {};
 
     var endpoint = config.endpoint;
+    var $;
 
     return {
+      needs: ['jquery'],
+
       init: function() {
+        $ = this.needs('jquery');
         console.log('Initialized Fetch wiring');
       },
       /**
@@ -51,8 +55,7 @@ function factory() {
        * @returns Atomic.deferred
        */
       fetch: function(params, replace, callbacks) {
-        var $ = require('jquery'),
-            self = this,
+        var self = this,
             deferred = Atomic.deferred(),
             url = endpoint + '?',
             key;
@@ -96,6 +99,6 @@ function factory() {
 }
 
 // you only need to set .id if you are using the "system" loader
-factory.id = 'wirings/fetch';
+definition.id = 'wirings/fetch';
 
-Atomic.export(module, define, factory);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

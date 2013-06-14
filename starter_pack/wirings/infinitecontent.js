@@ -34,14 +34,16 @@ It exposes the following methods:
   * more()
     manually fetch additional content and attach it to the container
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
-function factory() {
+function definition() {
   return function(config) {
-    var $ = require('jquery');
+    var $;
 
     return {
+      needs: ['jquery'],
       init: function() {
+        $ = this.needs('jquery');
         this.more.totalCalls = 0;
       },
       more: function() {
@@ -71,6 +73,6 @@ function factory() {
   };
 }
 // you only need to set .id if you are using the "system" loader
-factory.id = 'wirings/infinitecontent';
+definition.id = 'wirings/infinitecontent';
 
-Atomic.export(module, define, factory);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

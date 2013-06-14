@@ -33,11 +33,11 @@ It can be configured with the following options:
   * local(boolean) if true, the local container will be watched instead of
     the window
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
-function factory() {
+function definition() {
   return function(config) {
-    var $ = require('jquery');
+    var $;
 
     config = config || {};
     config.delay = config.delay || 300;
@@ -50,6 +50,7 @@ function factory() {
         'BOTTOMOUT': 'occurs when the container bottoms out'
       },
       init: function() {
+        $ = this.needs('jquery');
         var last = 0;
         var maximum = 0;
         var self = this;
@@ -86,6 +87,6 @@ function factory() {
   };
 }
 // you only need to set .id if you are using the "system" loader
-factory.id = 'wirings/bottoming';
+definition.id = 'wirings/bottoming';
 
-Atomic.export(module, define, factory);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

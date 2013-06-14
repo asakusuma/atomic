@@ -39,8 +39,8 @@ component.nodes.MyNode = document.blah
 */
 function createDisplayable(obj, writeBack, preResolved) {
   var type = (isArray(obj)) ? 'array' : 'object';
-  var size = (type === 'array') ? obj.length : 0;
   var resolved = {};
+  var registry = {};
   var name, i, len;
   var iface = function(key, to) {
     if (key && to) {
@@ -74,8 +74,11 @@ function createDisplayable(obj, writeBack, preResolved) {
     },
     add: function() {
       if (type === 'array') {
-        obj.push(arguments[0]);
-        size++;
+        if (!registry[arguments[0]]) {
+          registry[arguments[0]] = 1;
+          obj.push(arguments[0]);
+          iface._.resolve(arguments[0], null);
+        }
       }
       else {
         obj[arguments[0]] = arguments[1];
@@ -585,7 +588,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      *  by default, addFront is false
      */
     wireIn: function(wiring, addFront) {
-      var name, nodesName, eventsName;
+      var name, nodesName, eventsName, i, len;
 
       // wiring can be set to a single function which defaults
       // to an initializer
@@ -611,6 +614,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
                 continue; // we do not overwrite if the Implementor has defined
               }
               this.nodes._.add(nodesName, wiring.nodes[nodesName]);
+            }
+          }
+          else if (name === 'needs') {
+            for (i = 0, len = wiring.needs.length; i < len; i++) {
+              this.needs._.add(wiring.needs[i]);
             }
           }
           else {

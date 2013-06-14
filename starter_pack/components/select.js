@@ -32,7 +32,7 @@ The Select component creates a mirror of a native select component.
 When the select component is updated, or interacted with, the mirror reflects
 those changes.  The Atomic Select mirror sits on top of the original select box
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
 function definition() {
   var ENTER = 13,
@@ -40,15 +40,15 @@ function definition() {
       TAB = 9;
 
   // useful constants in this control
-  var $ = require('jquery');
+  var $;
 
   // calls the Atomic Component constructor
   return Atomic.Component({
     // a common name to assist in debugging
     name: 'SamplePack Select by @erowell',
 
-    // no dependencies
-    needs: [],
+    // depends on
+    needs: ['jquery'],
 
     // no additional nodes needed
     nodes: {},
@@ -61,12 +61,13 @@ function definition() {
      * @method Select#wiring
      */
     wiring: function() {
+      $ = this.needs('jquery');
       var node = this.node = $(this.getRoot());
 
       this._build();
       this._bind();
       this.sync();
-      console.log('Initialized Select');
+      // console.log('Initialized Select');
     },
     /**
     * sync atomic select with native select
@@ -273,4 +274,4 @@ function definition() {
 // you only need to set .id if you are using the "system" loader
 definition.id = 'components/select';
 
-Atomic.export(module, define, definition);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

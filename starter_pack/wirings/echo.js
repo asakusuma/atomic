@@ -20,9 +20,9 @@ governing permissions and limitations under the License.
 A reusable wiring.
 This is a sample wiring. Go ahead and include it and add "echo" methods
 */
-var Atomic = require('atomic');
+var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
-function factory() {
+function definition() {
   return function(config) {
     return {
       init: function() {
@@ -43,6 +43,6 @@ function factory() {
   };
 }
 // you only need to set .id if you are using the "system" loader
-factory.id = 'wirings/echo';
+definition.id = 'wirings/echo';
 
-Atomic.export(module, define, factory);
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }

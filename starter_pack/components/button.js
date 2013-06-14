@@ -37,7 +37,7 @@ nodes.
 */
 var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
 
-function factory() {
+function definition() {
   var $;
 
   // calls the Atomic Component constructor
@@ -71,6 +71,6 @@ function factory() {
   });
 }
 // you only need to set .id if you are using the "system" loader
-factory.id = 'components/button';
+definition.id = 'components/button';
 
-try { Atomic.export(module, define, factory); } catch(e) { Atomic.export(factory); }
+try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }
