@@ -4,15 +4,13 @@
 These files are folded into the main `atomic.js` file. Their insertion points are identified by the `//@@insert(.....)` string.
 
 ## compat/*
-Contains compatibility with objects or items outside of the Atomic system. This is where library bridges may go if required, and it also includes the `configurator.js`, which sets of the dependency manager of choice.
+Many parts of Atomic are customizable to work with existing infrastructure. This is where you can augment Atomic's various libraries such as AMD/CJS loaders.
 
 ## lib/*
 Contains libraries external to Atomic, but are so fundamental, we must include them in the build. We are currently including
 * Fiber - oop javascript system
 * EventEmitter2 - event system
+* When - Promises
 
 ## atomic.js
 This file holds all the insertions from the `atomic/*` directory.
-
-## customizable/config.js
-Copied into the release directory, this is the `ATOMIC_CONFIG` used for setting up atomic to work with various systems. Pure JSON, written to a single variable.

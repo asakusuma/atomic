@@ -16,7 +16,17 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-// private functions
+/**
+ * Add an initialization function to an instance object
+ * this places the function onto the _inits property
+ * of the instance, and can optionally put it at the front
+ * of the init collection
+ * @method AbstractComponent.addInit
+ * @private
+ * @param {Object} obj - the object to augment with a new init
+ * @param {Function} func - the function to add to obj
+ * @param {Boolean} addFront - if true, the Func is placed at the front
+ */
 function addInit(obj, func, addFront) {
   if (addFront) {
     obj._inits.unshift(func);
@@ -26,6 +36,13 @@ function addInit(obj, func, addFront) {
   }
 }
 
+/**
+ * Test if the provided object is an array
+ * @method AbstractComponent.isArray
+ * @private
+ * @param {Object} obj - the object to test
+ * @returns {Boolean} if true, the object is an array
+ */
 function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]';
 }
@@ -37,6 +54,37 @@ function isArray(obj) {
 component.events.USE => 'USE'
 component.nodes.MyNode = document.blah
 */
+/**
+ * Creates a "displayable" version of an object or array.
+ * On instantiation of an AbstractComponent, this is what
+ * converts the needs/nodes/events into their more efficient
+ * resolved forms.
+ * An object returned by createDisplayable has the following
+ * methods available to it:
+ *
+ * () - called as a function with no arguments, the resolved
+ *   version of the object is provided. This is all of the
+ *   assignments that have been made.
+ * (key) - called as a function with one argument, the resolved
+ *   value for a specific key is provided. This is the same as
+ *   calling ().key
+ * (key, value) - assigns a resolved "value" to a key
+ * .toString() - the string interface for this object provides
+ *   the original structure in an easy to read format. It also
+ *   indicates which objects have been resolved and have values
+ *   assigned to them. This is primarily a debugging tool.
+ * ._ - a collection of internal methods for the interface,
+ *   including add (adds new items to the collection), raw
+     (returns the original object), and resolve (assigns a resolved
+ *   value)
+ *
+ * @method AbstractComponent.createDisplayable
+ * @private
+ * @param {Object} obj - the object to convert
+ * @param {Boolean} writeBack - if true, properties are also stored on the returned object
+ * @param {Boolean} preResolved - if true, no resolution of the object is used. The keys become values
+ * @returns {Object} a function/object combination wtih the above methods
+ */
 function createDisplayable(obj, writeBack, preResolved) {
   var type = (isArray(obj)) ? 'array' : 'object';
   var resolved = {};

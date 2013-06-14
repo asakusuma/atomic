@@ -25,6 +25,9 @@ governing permissions and limitations under the License.
 /**
  * A helper method to return the When object. Aids in unit
  * testing the public functions
+ * @method Atomic.getWhen
+ * @private
+ * @returns {Object} the When.js interface
  */
 function getWhen() {
   return Atomic._.When;

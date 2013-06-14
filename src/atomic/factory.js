@@ -17,6 +17,14 @@ governing permissions and limitations under the License.
 */
 
 var __Atomic_Private_Factory_Methods__ = {
+  /**
+   * The Internal Factory function hides most of the logic
+   * for creating Atomic Components. It's split out to keep the
+   * interface separate from the Fiber integration
+   * @method Atomic.Factory
+   * @private
+   * @see Atomic.Component
+   */
   Factory: function(objLiteral) {
     var wiring = objLiteral.wiring || [];
 
@@ -75,6 +83,17 @@ var __Atomic_Private_Factory_Methods__ = {
 };
 
 var __Atomic_Public_Factory_Methods__ = {
+  /**
+   * Creates an Atomic Component
+   * An Atomic Component consists of the following items in its object literal:
+   * needs - an array of dependencies required for this component
+   * nodes - an object literal of node name / purpose
+   * events - an object literal of event name / purpose
+   * wiring - a function or object literal compatible with AbstractComponent#wireIn
+   * @method Atomic.Component
+   * @param {Object} objLiteral - the object literal to create a component from
+   * @return {Object} an object that extends AbstractComponent
+   */
   Component: function(objLiteral) {
     return __Atomic_Private_Factory_Methods__.Factory(objLiteral);
   }
