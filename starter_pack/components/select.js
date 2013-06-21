@@ -60,7 +60,7 @@ function definition() {
      * Main wiring function
      * @method Select#wiring
      */
-    wiring: function() {
+    init: function() {
       $ = this.needs('jquery');
       var node = this.node = $(this.getRoot());
 

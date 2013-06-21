@@ -26,8 +26,6 @@ var __Atomic_Private_Factory_Methods__ = {
    * @see Atomic.Component
    */
   Factory: function(objLiteral) {
-    var wiring = objLiteral.wiring || [];
-
     // certain items are "reserved" and cannot be overridden in a wiring
     var reserved = {
       // these are "special" but are okay to set using wiring
@@ -36,7 +34,7 @@ var __Atomic_Private_Factory_Methods__ = {
       'needs':          false,
       'nodes':          false,
       'events':         false,
-      'wiring':         true,
+      'init':           true,
       '_inits':         true,
       '_eventEmitter':  true,
       '_isDestroyed':   true
@@ -64,14 +62,8 @@ var __Atomic_Private_Factory_Methods__ = {
       }
       additionalMethods.init = function() {
         base.init.apply(this, arguments);
-
-        if (typeof wiring === 'function') {
-          this.wireIn(wiring);
-        }
-        else if (Object.prototype.toString.call(wiring) === '[object Array]') {
-          for (var i = 0, len = wiring.length; i < len; i++) {
-            this.wireIn(wiring[i]);
-          }
+        if (typeof objLiteral.init === 'function') {
+          this.wireIn(objLiteral.init, true);
         }
       };
 

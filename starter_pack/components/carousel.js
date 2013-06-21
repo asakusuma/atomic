@@ -60,7 +60,7 @@ function definition() {
      * Main wiring function. Creates internal index and items collections
      * @method Carousel#wiring
      */
-    wiring: function() {
+    init: function() {
       $ = this.needs('jquery');
       this._index = 0;
       this._$items = null;

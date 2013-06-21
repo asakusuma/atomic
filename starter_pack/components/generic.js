@@ -51,7 +51,7 @@ function definition() {
     events: {},
 
     // wiring functions to make this work
-    wiring: function() {}
+    init: function() {}
   });
 }
 // you only need to set .id if you are using the "system" loader

@@ -59,7 +59,7 @@ function definition() {
     },
 
     // wiring functions to make this work
-    wiring: function() {
+    init: function() {
       $ = this.needs('jquery');
       var self = this;
       // nodes._root is the default container, either an el passed

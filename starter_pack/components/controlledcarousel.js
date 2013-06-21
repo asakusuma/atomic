@@ -50,7 +50,7 @@ function definition() {
      * Main wiring function. Creates internal index and items collections
      * @method ControlledCarousel#wiring
      */
-    wiring: function() {
+    init: function() {
       $ = this.needs('jquery');
       var Carousel = this.needs('components/carousel');
       var Button = this.needs('components/button');
