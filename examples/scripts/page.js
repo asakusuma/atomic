@@ -40,7 +40,7 @@ Atomic.load('components/button', 'components/carousel')
   var carousel = new Carousel(document.getElementById('carousel'));
 
   // carousel.assign(carousel.nodes.Items, document.getElementById('carousel').getElementsByTagName('li'));
-  carousel.assign(carousel.nodes.FOOOOO, document.body);
+  carousel.assign(carousel.elements.FOOOOO, document.body);
 
   carousel.load()
   .then(next.load())
@@ -70,8 +70,8 @@ Atomic.load('components/button', 'components/carousel')
   var prev = new Button(document.getElementById('carousel-prev'));
   var carousel = new Carousel(document.getElementById('carousel'));
 
-  // carousel.assign(carousel.nodes.Items, document.getElementById('carousel').getElementsByTagName('li'));
-  carousel.assign(carousel.nodes.FOOOOO, document.body);
+  // sample assignment
+  carousel.assign(carousel.elements.FOOOOO, document.body);
 
   carousel.load()
   .then(next.load())

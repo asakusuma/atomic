@@ -37,10 +37,10 @@ function definition() {
     var $;
 
     return {
-      needs: ['jquery'],
+      depends: ['jquery'],
 
       init: function() {
-        $ = this.needs('jquery');
+        $ = this.depends('jquery');
         console.log('Initialized Fetch wiring');
       },
       /**
@@ -82,10 +82,10 @@ function definition() {
           url: url
         }).success(function(response) {
           if (replace) {
-            self.nodes()._root.innerHTML = response;
+            self.elements()._root.innerHTML = response;
           }
           else {
-            self.nodes()._root.innerHTML += response;
+            self.elements()._root.innerHTML += response;
           }
           deferred.resolve();
         }).error(function(err) {

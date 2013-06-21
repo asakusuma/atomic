@@ -42,10 +42,10 @@ function definition() {
     name: 'Generic Component by @jakobo',
 
     // no dependencies
-    needs: [],
+    depends: [],
 
     // no additional nodes needed
-    nodes: {},
+    elements: {},
 
     // no events
     events: {},

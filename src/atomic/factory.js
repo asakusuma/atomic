@@ -31,8 +31,8 @@ var __Atomic_Private_Factory_Methods__ = {
       // these are "special" but are okay to set using wiring
       // we are calling them out for readability's sake
       // wiring has a special use case below
-      'needs':          false,
-      'nodes':          false,
+      'depends':        false,
+      'elements':       false,
       'events':         false,
       'init':           true,
       '_inits':         true,
@@ -78,8 +78,8 @@ var __Atomic_Public_Factory_Methods__ = {
   /**
    * Creates an Atomic Component
    * An Atomic Component consists of the following items in its object literal:
-   * needs - an array of dependencies required for this component
-   * nodes - an object literal of node name / purpose
+   * depends - an array of dependencies required for this component
+   * elements - an object literal of node name / purpose
    * events - an object literal of event name / purpose
    * wiring - a function or object literal compatible with AbstractComponent#wireIn
    * @method Atomic.Component

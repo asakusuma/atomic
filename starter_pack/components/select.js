@@ -48,10 +48,10 @@ function definition() {
     name: 'SamplePack Select by @erowell',
 
     // depends on
-    needs: ['jquery'],
+    depends: ['jquery'],
 
     // no additional nodes needed
-    nodes: {},
+    elements: {},
 
     // events
     events: {},
@@ -61,7 +61,7 @@ function definition() {
      * @method Select#wiring
      */
     init: function() {
-      $ = this.needs('jquery');
+      $ = this.depends('jquery');
       var node = this.node = $(this.getRoot());
 
       this._build();

@@ -52,7 +52,7 @@ function isArray(obj) {
 // and turns them into usable objects
 /*
 component.events.USE => 'USE'
-component.nodes.MyNode = document.blah
+component.elements.MyNode = document.blah
 */
 /**
  * Creates a "displayable" version of an object or array.
@@ -182,17 +182,17 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     /**
      * An array of dependencies this module needs to run
      * These are modules the implementing component needs
-     * @property {Array} AbstractComponent#needs
+     * @property {Array} AbstractComponent#depends
      */
-    needs: [],
+    depends: [],
 
     /**
      * A key/string collection of nodes and their purpose
      * These are nodes that components need to have in order to function.
      * This object is overriden with an instance variable during the constructor
-     * @property {Object} AbstractComponent#nodes
+     * @property {Object} AbstractComponent#elements
      */
-    nodes: {},
+    elements: {},
 
     /**
      * A key/string collection of events
@@ -254,9 +254,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
       // localize the nodes/events/needs variable BEFORE the user starts configuring
       // nodes and needs can accept overwriting
-      this.nodes = createDisplayable(this.nodes, true);
+      this.elements = createDisplayable(this.elements, true);
       this.events = createDisplayable(this.events, true, true);
-      this.needs = createDisplayable(this.needs);
+      this.depends = createDisplayable(this.depends);
 
       // attach the el
       if (el) {
@@ -277,14 +277,14 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
             // can't override a _ property here
             continue;
           }
-          else if (name === 'needs' || name === 'events' || name === 'config') {
+          else if (name === 'depends' || name === 'events' || name === 'config') {
             // needs and events should be wired in. using config for this is just silly
             continue;
           }
-          else if (name === 'nodes') {
-            for (nodeName in overrides.nodes) {
-              if (overrides.nodes.hasOwnProperty(nodeName)) {
-                this.nodes._.resolve(nodeName, overrides.nodes[nodeName]);
+          else if (name === 'elements') {
+            for (nodeName in overrides.elements) {
+              if (overrides.elements.hasOwnProperty(nodeName)) {
+                this.elements._.resolve(nodeName, overrides.elements[nodeName]);
               }
             }
           }
@@ -297,13 +297,13 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Assign a node to the component.nodes collection
+     * Assign a node to the component.elements collection
      * @method AbstractComponent#assign
-     * @param {String} name - the node to assign. Use a component.nodes reference
+     * @param {String} name - the node to assign. Use a component.elements reference
      * @param {HTMLElement} el - an element to assign to the role.
      */
     assign: function(name, el) {
-      this.nodes._.resolve(name, el);
+      this.elements._.resolve(name, el);
       return this;
     },
 
@@ -314,8 +314,8 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     destroy: function () {
       this._isDestroyed = true;
       this.offAny();
-      if(this.nodes._root.parentNode) {
-        this.nodes._root.parentNode.removeChild(this.nodes._root);
+      if(this.elements()._root.parentNode) {
+        this.elements()._root.parentNode.removeChild(this.elements()._root);
       }
       this.removeAllListeners();
       return null;
@@ -549,7 +549,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @method AbstractComponent#getRoot
      */
     getRoot: function () {
-      return this.nodes()._root;
+      return this.elements()._root;
     },
 
     /**
@@ -562,13 +562,13 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var deferred = Atomic.deferred();
       var self = this;
 
-      Atomic.load(this.needs._.raw())
+      Atomic.load(this.depends._.raw())
       .then(function(needs) {
 
-        // populate needs resolution into the this.needs()
-        var deps = self.needs._.raw();
+        // populate needs resolution into the this.depends()
+        var deps = self.depends._.raw();
         for (var i = 0, dlen = deps.length; i < dlen; i++) {
-          self.needs._.resolve(deps[i], needs[i]);
+          self.depends._.resolve(deps[i], needs[i]);
         }
 
         // dynamically create promise chain
@@ -656,17 +656,17 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
               }
             }
           }
-          else if (name === 'nodes') {
-            for (nodesName in wiring.nodes) {
-              if (this.nodes[nodesName]) {
+          else if (name === 'elements') {
+            for (nodesName in wiring.elements) {
+              if (this.elements[nodesName]) {
                 continue; // we do not overwrite if the Implementor has defined
               }
-              this.nodes._.add(nodesName, wiring.nodes[nodesName]);
+              this.elements._.add(nodesName, wiring.elements[nodesName]);
             }
           }
-          else if (name === 'needs') {
-            for (i = 0, len = wiring.needs.length; i < len; i++) {
-              this.needs._.add(wiring.needs[i]);
+          else if (name === 'depends') {
+            for (i = 0, len = wiring.depends.length; i < len; i++) {
+              this.depends._.add(wiring.depends[i]);
             }
           }
           else {

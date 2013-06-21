@@ -96,7 +96,7 @@ jQuery.fn.atomic = function(action) {
         $(value.node).data('atomic-component', inst);
         value.$children.each(function(idx, child) {
           var $child = $(child);
-          inst.assign(inst.nodes[$child.data('atomic-node')], child);
+          inst.assign(inst.elements[$child.data('atomic-element')], child);
         });
         inst.load();
       });

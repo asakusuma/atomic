@@ -44,10 +44,10 @@ function definition() {
     name: 'SamplePack Carousel by @jakobo',
 
     // no dependencies
-    needs: ['jquery'],
+    depends: ['jquery'],
 
     // no additional nodes needed
-    nodes: {},
+    elements: {},
 
     // events
     events: {
@@ -61,7 +61,7 @@ function definition() {
      * @method Carousel#wiring
      */
     init: function() {
-      $ = this.needs('jquery');
+      $ = this.depends('jquery');
       this._index = 0;
       this._$items = null;
       this.refresh();
@@ -76,7 +76,7 @@ function definition() {
      * @returns this
      */
     refresh: function() {
-      this._$items = $(this.nodes()._root).children();
+      this._$items = $(this.elements()._root).children();
       return this;
     },
 

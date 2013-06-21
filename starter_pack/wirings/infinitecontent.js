@@ -41,7 +41,7 @@ function definition() {
     var $;
 
     return {
-      needs: ['jquery'],
+      depends: ['jquery'],
       init: function() {
         $ = this.needs('jquery');
         this.more.totalCalls = 0;

@@ -46,10 +46,10 @@ function definition() {
     name: 'SamplePack Button by @jakobo',
 
     // no dependencies
-    needs: ['jquery'],
+    depends: ['jquery'],
 
     // no additional nodes needed
-    nodes: {},
+    elements: {},
 
     // events
     events: {
@@ -60,11 +60,11 @@ function definition() {
 
     // wiring functions to make this work
     init: function() {
-      $ = this.needs('jquery');
+      $ = this.depends('jquery');
       var self = this;
       // nodes._root is the default container, either an el passed
       // to the constructor, or via attach()
-      $(self.nodes()._root).on('click', function() {
+      $(self.elements()._root).on('click', function() {
         self.trigger(self.events.USE);
       });
     }

@@ -29,10 +29,10 @@ function definition() {
     name: 'SamplePack ControlledCarousel by @jakobo',
 
     // no dependencies
-    needs: ['jquery', 'components/carousel', 'components/button'],
+    depends: ['jquery', 'components/carousel', 'components/button'],
 
     // no additional nodes needed
-    nodes: {
+    elements: {
       'Previous': 'This node when interacted with will reverse the carousel one position',
       'Next': 'This node when interacted with will advance the carousel one position',
       'First': 'This node when interacted with will return the carousel to the first position',
@@ -51,13 +51,13 @@ function definition() {
      * @method ControlledCarousel#wiring
      */
     init: function() {
-      $ = this.needs('jquery');
-      var Carousel = this.needs('components/carousel');
-      var Button = this.needs('components/button');
+      $ = this.depends('jquery');
+      var Carousel = this.depends('components/carousel');
+      var Button = this.depends('components/button');
       var self = this;
       var buttons = {};
 
-      var carousel = new Carousel(this.nodes()._root);
+      var carousel = new Carousel(this.elements()._root);
       carousel.on(carousel.events.LAST, function() {
         self.trigger(self.events.LAST);
       })
@@ -68,26 +68,26 @@ function definition() {
         self.trigger(self.events.CHANGE, lastValue, newValue);
       });
 
-      if (this.nodes().First) {
-        buttons.First = new Button(this.nodes().First);
+      if (this.elements().First) {
+        buttons.First = new Button(this.elements().First);
         carousel.bind(buttons.First, buttons.First.events.USE, 'first');
         buttons.First.load();
       }
 
-      if (this.nodes().Last) {
-        buttons.Last = new Button(this.nodes().Last);
+      if (this.elements().Last) {
+        buttons.Last = new Button(this.elements().Last);
         carousel.bind(buttons.Last, buttons.Last.events.USE, 'last');
         buttons.Last.load();
       }
 
-      if (this.nodes().Previous) {
-        buttons.Previous = new Button(this.nodes().Previous);
+      if (this.elements().Previous) {
+        buttons.Previous = new Button(this.elements().Previous);
         carousel.bind(buttons.Previous, buttons.Previous.events.USE, 'previous');
         buttons.Previous.load();
       }
 
-      if (this.nodes().Next) {
-        buttons.Next = new Button(this.nodes().Next);
+      if (this.elements().Next) {
+        buttons.Next = new Button(this.elements().Next);
         carousel.bind(buttons.Next, buttons.Next.events.USE, 'next');
         buttons.Next.load();
       }
