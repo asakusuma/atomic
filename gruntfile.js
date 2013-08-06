@@ -37,6 +37,11 @@ module.exports = function (grunt) {
       starterPack:  './dist/recent/starter_pack/',
       compat:       './dist/recent/compat/'
     },
+    zip_locations: {
+      archive:      'atomic-__ATOMIC__VERSION__.tgz',
+      path:         'atomic-__ATOMIC__VERSION__'
+    },
+    atomic_version: null,
     anonymous_header: '!(function(context, undefined){\n',
     anonymous_footer: '\n;context.Atomic.version = "__ATOMIC__VERSION__";\n})(this);',
     pkg: grunt.file.readJSON('package.json'),
@@ -59,6 +64,7 @@ module.exports = function (grunt) {
           callback: function (err, stdout, stderr, next) {
             var foot = grunt.config.get('anonymous_footer');
             var output_files = grunt.config.get('output_files');
+            var zip_locations = grunt.config.get('zip_locations');
             var version = stdout.replace(/[\s]/g, '');
             var file;
             var type;
@@ -69,9 +75,14 @@ module.exports = function (grunt) {
 
             // set the atomic version everywhere we need to
             grunt.config.set('anonymous_footer', addVersion(foot));
+            grunt.config.set('atomic_version', version);
             for (type in output_files) {
               file = grunt.config.get('output_files.'+type);
               grunt.config.set('output_files.'+type, addVersion(file));
+            }
+            for (type in zip_locations) {
+              file = grunt.config.get('zip_locations.'+type);
+              grunt.config.set('zip_locations.'+type, addVersion(file));
             }
 
             next();
@@ -182,7 +193,10 @@ module.exports = function (grunt) {
     includereplace: {
       atomic: {
         options: {
-          prefix: '//@@',
+          globals: {
+            ATOMIC_VERSION: '<%=atomic_version %>'
+          },
+          prefix: '\/\/@@',
           suffix: ''
         },
         src: './src/atomic.js',
@@ -230,6 +244,24 @@ module.exports = function (grunt) {
           delay: 3
         }
       }
+    },
+    
+    compress: {
+      release: {
+        options: {
+          archive: './dist/<%= zip_locations.archive %>',
+          pretty: true
+        },
+        files: [
+          {
+            src: '**',
+            dest: '/',
+            expand: true,
+            filter: 'isFile',
+            cwd: 'dist/<%= zip_locations.path %>/'
+          }
+        ]
+      }
     }
   });
 
@@ -241,7 +273,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-express');
-  // grunt.loadNpmTasks('grunt-contrib-compress');
+  grunt.loadNpmTasks('grunt-contrib-compress');
   // grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-qunit');
 
@@ -291,7 +323,11 @@ module.exports = function (grunt) {
     'express:server',
     'express-keepalive'
   ]);
-  // grunt.registerTask('release', []);
+
+  grunt.registerTask('release', [
+    'build',
+    'compress:release'
+  ]);
 
   grunt.registerTask('default', ['build']);
 };

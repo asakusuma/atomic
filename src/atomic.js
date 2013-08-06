@@ -159,6 +159,9 @@ governing permissions and limitations under the License.
   //@@include('./atomic/events.js')
   Atomic.augment(Atomic.Events, __Atomic_Events_API__);
 
+  // assign atomic version
+  //@@include('./atomic/version.js')
+
   // assign public interface in window scope
   context.Atomic = Atomic;
 })(this);
