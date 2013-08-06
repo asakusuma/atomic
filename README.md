@@ -41,7 +41,7 @@ Got all that? Good! Now we can enhance some elements.
 Let's say you want to make a button. And a carousel. And have the button control the carousel. Just write JavaScript.
 
 ```js
-to redo
+to redo...
 ```
 
 Click "next", advance "carousel". What just happened?
