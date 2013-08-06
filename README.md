@@ -41,22 +41,14 @@ Got all that? Good! Now we can enhance some elements.
 Let's say you want to make a button. And a carousel. And have the button control the carousel. Just write JavaScript.
 
 ```js
-Atomic.load(['components/button', 'components/carousel'], function(Button, Carousel) {
-  var button = new Button(document.getElementById('next')),
-      carousel = new Carousel(document.getElementById('carousel'));
-
-  carousel.bind(button, button.events.USE, 'next');
-
-  button.load();
-  carousel.load();
-});
+to redo
 ```
 
 Click "next", advance "carousel". What just happened?
 
 1. **Atomic.load()** will load the Button and Carousel from the `components/` directory. This is where all simple HTML Enhancements reside. Once the DOM is ready and the Elements objects loaded, the callback `function` is called with Button and Carousel in order.
 2. Create the new objects with the **new** keyword, and pass them an element. This is the enhancement.
-3. Use `bind()`, `on()`, `off()`, and more, all still with JavaScript
+3. Use `on()`, `off()`, etc, all still with JavaScript
 
 ## What Can Components Do?
 
@@ -65,9 +57,9 @@ Atomic Components are designed to wrap normal HTML elements, making them behave 
 * Produces events independent of the DOM, enabling an abstraction of accessibility, touch events, and more
 * Has a public API for manipulation
 
-## Combining Components Into Composites
+## Combining Components
 
-The fun doesn't stop there! Atomic Components have a way to fuse together. The end result, we call Composites. Composites are just like Components, except they also...
+The fun doesn't stop there! Atomic Components have a way to fuse together. Components can...
 
 * Include other Atomic Components
 * May expose their internals or provide an abstraction in front of its "inner workings"
@@ -79,17 +71,10 @@ You got it. The examples/ directory shows how you can use Atomic in many differe
 * files starting with magic_* are the `magic HTML interface` apis. Make some Components straight from your markup? Sure, if that's your thing!
 
 # What about unit tests?
-Atomic uses [Venus.js](http://www.venusjs.org/) to run unit tests. To run the tests, you'll need to install [Venus.js](http://www.venusjs.org/), along with two its two dependencies, [Node.js](http://nodejs.org/) and [PhantomJS](http://phantomjs.org/). We recommend that you use [brew](http://mxcl.github.io/homebrew/) to install the dependencies, if you haven't done so already. To install [Venus.js](http://www.venusjs.org/), open up Terminal and run the following commands:
-
-1. `brew install node`
-2. `brew install phantomjs`
-3. `npm install -g venus`
-4. To verify installation, run `venus demo`
-
-To run the actual tests, navigate to the atomic directory and run `grunt autotest`. This will run the tests using PhantomJS, a headless browser. In other words, it runs the tests right in the terminal and you get your results immediately. If you'd like to run the tests in a browser, run `grunt test`. This will provide you with a URL that you can hit with any browser, thereby executing the tests. Browser test results will still output in the terminal.
+We're using QUnit right now. With grunt, you'll just need `grunt build test` to get going.
 
 # Built on Greatness
-* [Q.js](https://github.com/kriskowal/q) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
+* [When](https://github.com/cujojs/when) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
 * [Fiber](https://github.com/linkedin/Fiber) for OOP sugar internally
 * [Eventemitter2](https://github.com/hij1nx/EventEmitter2) for a standalone event system
 
