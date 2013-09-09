@@ -35,9 +35,8 @@ is used as a convienence, as modern jQuery uses a single
 document level listener as opposed to listeners on individual
 nodes.
 */
-var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
-
-function definition() {
+var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
+Atomic.pack('components/button', function() { return module; }, function() { return define; }, function() {
   var $;
 
   // calls the Atomic Component constructor
@@ -69,8 +68,4 @@ function definition() {
       });
     }
   });
-}
-// you only need to set .id if you are using the "system" loader
-definition.id = 'components/button';
-
-try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }
+});

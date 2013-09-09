@@ -16,9 +16,8 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
-
-function definition() {
+var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
+Atomic.pack('components/controlledcarousel', function() { return module; }, function() { return define; }, function() {
   // useful constants in this control
   var $;
   var CURRENT_CLASS = 'current';
@@ -96,8 +95,4 @@ function definition() {
       return carousel.load();
     }
   });
-}
-// you only need to set .id if you are using the "system" loader
-definition.id = 'components/controlledcarousel';
-
-try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }
+});

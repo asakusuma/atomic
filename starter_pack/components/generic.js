@@ -33,9 +33,9 @@ component whos logic resides solely in wiring. This is actually
 a great choice if as a developer everything you need already
 exists in wirings.
 */
-var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
+var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
+Atomic.pack('components/generic', function() { return module; }, function() { return define; }, function() {
 
-function definition() {
   // calls the Atomic Component constructor
   return Atomic.Component({
     // a common name to assist in debugging
@@ -53,8 +53,4 @@ function definition() {
     // wiring functions to make this work
     init: function() {}
   });
-}
-// you only need to set .id if you are using the "system" loader
-definition.id = 'components/generic';
-
-try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }
+});

@@ -312,6 +312,7 @@ var __Atomic_Public_API__ = {
   /**
    * Export a module for CommonJS or AMD loaders
    * @method Atomic.export
+   * @deprecated
    * @param {Object} mod - commonJS module object
    * @param {Object} def - AMD define function
    * @param {Function} factory - the defining factory for module or exports
@@ -348,6 +349,45 @@ var __Atomic_Public_API__ = {
     }
 
     return ranFactory;
+  },
+
+  /**
+   * Export a module for CommonJS or AMD loaders
+   * @method Atomic.pack
+   * @param {String} id - an identifier for this module
+   * @param {Function} mod - a function that safely returns the module var if it exists
+   * @param {Function} def - a function that safely returns the define var if it exists
+   * @param {Function} factory - the defining factory for module or exports
+   */
+  pack: function(id, mod, def, factory) {
+    var module, define;
+
+    // try and capture module and define into local variables
+    try {
+      module = mod();
+    }
+    catch(e) {}
+    try {
+      define = def();
+    }
+    catch(e) {}
+
+    var result = null;
+
+    if ((typeof module !== 'undefined' && module && typeof module.exports !== 'undefined') || Atomic_amd_optimized) {
+      result = factory();
+      module.exports = result;
+    }
+    else if (typeof define !== 'undefined' && define && typeof define.amd !== 'undefined' && define.amd) {
+      define(factory);
+    }
+    else if (typeof Atomic.loader !== 'undefined' && typeof Atomic.loader.save === 'function') {
+      result = factory();
+      Atomic.loader.save(id, result);
+    }
+    else {
+      throw new Error('You must implement a module loader or use the "none" loader');
+    }
   },
 
   /**

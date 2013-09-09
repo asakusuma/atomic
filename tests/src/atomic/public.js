@@ -121,5 +121,54 @@ test('uses global registry if neither module.exports or define.amd are available
   };
   fn.id = 'foo';
   __Atomic_Public_API__.export(module, define, fn);
+  equal(window.Atomic.MODULES.foo, 'bar', 'properly assigned to the window');
+});
+
+module('pack()');
+test('uses module.exports if module is defined', function() {
+  var module = {
+    exports: null
+  };
+  var define = null;
+  var fn = function() {
+    return 'bar';
+  };
+  fn.id = 'foo';
+  __Atomic_Public_API__.pack(module, define, fn);
+  strictEqual(module.exports, 'bar', 'assigned to exports');
+});
+
+test('uses define if define and define.amd are defined', function() {
+  var passed = false;
+  var define = function() {
+    passed = true;
+  };
+  define.amd = true;
+  var module = null;
+  var fn = function() {
+    return 'bar';
+  };
+  fn.id = 'foo';
+  __Atomic_Public_API__.pack(module, define, fn);
+  ok(passed, 'successfully called define()');
+});
+
+test('uses global registry if neither module.exports or define.amd are available', function() {
+  var module = null;
+  var define = null;
+  var fn = function() {
+    return 'bar';
+  };
+  __Atomic_Public_API__.pack('foo', module, define, fn);
+  equal(window.Atomic.MODULES.foo, 'bar', 'properly assigned to the window');
+});
+
+test('uses global registry if neither module.exports or define.amd are available', function() {
+  var module = null;
+  var define = null;
+  var fn = function() {
+    return 'bar';
+  };
+  __Atomic_Public_API__.pack(module, define, fn);
   equal(window.foo, 'bar', 'properly assigned to the window');
 });
