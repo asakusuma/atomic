@@ -162,6 +162,7 @@ module.exports = function (grunt) {
             './starter_pack/**/*.js',
             './src/*.js',
             './tests/src/**/*.js',
+            './tests/integration/**/*.js',
             './tests/starter_pack/**/*.js',
             './server.js'
           ]
