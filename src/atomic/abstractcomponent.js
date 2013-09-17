@@ -47,17 +47,10 @@ function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]';
 }
 
-// creates a displayable version of an object structure
-// on component instantiation, this takes needs/nodes/events
-// and turns them into usable objects
-/*
-component.events.USE => 'USE'
-component.elements.MyNode = document.blah
-*/
 /**
  * Creates a "displayable" version of an object or array.
  * On instantiation of an AbstractComponent, this is what
- * converts the needs/nodes/events into their more efficient
+ * converts the elements/depends/events into their final
  * resolved forms.
  * An object returned by createDisplayable has the following
  * methods available to it:
@@ -75,7 +68,7 @@ component.elements.MyNode = document.blah
  *   assigned to them. This is primarily a debugging tool.
  * ._ - a collection of internal methods for the interface,
  *   including add (adds new items to the collection), raw
-     (returns the original object), and resolve (assigns a resolved
+     (returns the original object), and set (assigns a resolved
  *   value)
  *
  * @method AbstractComponent.createDisplayable
@@ -87,17 +80,17 @@ component.elements.MyNode = document.blah
  */
 function createDisplayable(obj, writeBack, preResolved) {
   var type = (isArray(obj)) ? 'array' : 'object';
-  var resolved = {};
+  var values = {};
   var registry = {};
   var name, i, len;
   var iface = function(key, to) {
     if (key && to) {
-      return iface._.resolve(key, to);
+      return iface._.set(key, to);
     }
     else if (key) {
-      return resolved[key];
+      return values[key];
     }
-    return resolved;
+    return values;
   };
   iface.toString = function() {
     var out = [];
@@ -105,13 +98,13 @@ function createDisplayable(obj, writeBack, preResolved) {
     if (type === 'object') {
       for (name in obj) {
         if (obj.hasOwnProperty(name)) {
-          out.push(name + ' (' + (resolved[name] ? 'R' : '?') + '): ' + obj[name]);
+          out.push(name + ' (' + (values[name] ? 'R' : '?') + '): ' + obj[name]);
         }
       }
     }
     else {
       for (i = 0, len = obj.length; i < len; i++) {
-        out.push('[' + i + '] (' + (resolved[obj[i]] ? 'R' : '?') + '): ' + obj[i]);
+        out.push('[' + i + '] (' + (values[obj[i]] ? 'R' : '?') + '): ' + obj[i]);
       }
     }
     return out.join('\n');
@@ -125,7 +118,7 @@ function createDisplayable(obj, writeBack, preResolved) {
         if (!registry[arguments[0]]) {
           registry[arguments[0]] = 1;
           obj.push(arguments[0]);
-          iface._.resolve(arguments[0], null);
+          iface._.set(arguments[0], null);
         }
       }
       else {
@@ -134,31 +127,31 @@ function createDisplayable(obj, writeBack, preResolved) {
           iface[arguments[0]] = arguments[0];
         }
         if (preResolved) {
-          resolved[arguments[0]] = arguments[0];
+          values[arguments[0]] = arguments[0];
         }
       }
     },
-    resolve: function(key, to) {
-      resolved[key] = to;
+    set: function(key, to) {
+      values[key] = to;
     }
   };
 
   if (type === 'object') {
     for (name in obj) {
       if (obj.hasOwnProperty(name)) {
-        iface._.resolve(name, null);
+        iface._.set(name, null);
         if (writeBack) {
           iface[name] = name;
         }
         if (preResolved) {
-          resolved[name] = name;
+          values[name] = name;
         }
       }
     }
   }
   else {
     for (i = 0, len = obj.length; i < len; i++) {
-      iface._.resolve(obj[i], null);
+      iface._.set(obj[i], null);
     }
   }
 
@@ -284,7 +277,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
           else if (name === 'elements') {
             for (nodeName in overrides.elements) {
               if (overrides.elements.hasOwnProperty(nodeName)) {
-                this.elements._.resolve(nodeName, overrides.elements[nodeName]);
+                this.elements._.set(nodeName, overrides.elements[nodeName]);
               }
             }
           }
@@ -303,7 +296,18 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an element to assign to the role.
      */
     assign: function(name, el) {
-      this.elements._.resolve(name, el);
+      this.elements._.set(name, el);
+      return this;
+    },
+	
+    /**
+     * Assign a dependency to the component.depends collection
+     * @method AbstractComponent#resolve
+     * @param {String} name - the dependency to resolve. Use a component.depends reference
+     * @param {Object} obj - the resolved object
+     */
+    resolve: function(name, obj) {
+      this.depends._.set(name, obj);
       return this;
     },
 
@@ -561,23 +565,39 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     load: function (cb) {
       var deferred = Atomic.deferred();
       var self = this;
+      var fetch = [];
+      var allDependencies = this.depends._.raw();
+      var allResolvedDependencies = this.depends();
+      var fetchLen;
+      
+      // only fetch things we don't have a resolved value for
+      for (var i = 0, len = allDependencies.length; i < len; i++) {
+        if (!allResolvedDependencies[allDependencies[i]]) {
+          fetch.push(allDependencies[i]);
+        }
+      }
 
-      Atomic.load(this.depends._.raw())
-      .then(function(needs) {
+      Atomic.load.apply(Atomic, fetch)
+      .then(function(values) {
+        var wiringDeferred = Atomic.deferred(),
+            inits,
+            len,
+            promise,
+            createWiringCall,
+            i,
+            n;
 
-        // populate needs resolution into the this.depends()
-        var deps = self.depends._.raw();
-        for (var i = 0, dlen = deps.length; i < dlen; i++) {
-          self.depends._.resolve(deps[i], needs[i]);
+
+        // populate values resolution into the this.depends()
+        for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
+          self.depends._.set(fetch[i], values[i]);
         }
 
         // dynamically create promise chain
         // inits[0] runs automatically
-        var wiringDeferred = Atomic.deferred(),
-            inits = self._inits,
-            len = inits.length,
-            promise = Atomic.when(inits[0].call(self)),
-            createWiringCall;
+        inits = self._inits;
+        len = inits.length;
+        promise = Atomic.when(inits[0].call(self)),
 
         // creates a call to a wiring function. Done outside of the
         // wiring for-loop
@@ -590,7 +610,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         };
 
         // replace itself with a new promise
-        for (var n = 1; n < len; n++) {
+        for (n = 1; n < len; n++) {
           promise = promise.then(createWiringCall(inits[n]));
         }
 

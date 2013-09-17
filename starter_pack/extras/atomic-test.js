@@ -29,8 +29,8 @@ Atomic Components. Most notably:
 
 Atomic.version = 'TEST-' + Atomic.version;
 Atomic.Test = {};
-Atomic.Test.__components = {};
-Atomic.Test.__defines = {};
+Atomic.Test.__loads = {};
+Atomic.Test.__packs = {};
 Atomic.Test.methods = {};
 Atomic.Test.methods.pack = Atomic.pack;
 Atomic.Test.methods.Component = Atomic.Component;
@@ -42,24 +42,32 @@ Atomic.Test.methods.load = Atomic.load;
  * @method Atomic.Test.resetEnv
  */
 Atomic.Test.resetEnv = function() {
-  Atomic.Test.__components = {};
-  Atomic.Test.__defines = {};
+  Atomic.Test.__packs = {};
+  Atomic.Test.__loads = {};
 };
 
 /**
- * define an external module that isn't an Atomic Component
- * useful for items such as underscore or jQuery, which may be external
- * libraries, but are still needed inside an Atomic Component. It's
- * recommended to use a utility like Sinon and mock/replace integration
- * methods where needed.
- * @method Atomic.Test.define
- * @param {String} id - the id to reference this exports collection
- * @param {Object} exp - the exports object for the given id
+ * Pre-resolve an outcome for Atomic.load()
+ * useful for testing your page-level JavaScript, where you want to
+ * call Atomic.load() with everything already set up for you
+ * @method Atomic.Test.resolve()
+ * @param {String} name - the name you would like to resolve
+ * @param {Object} obj - the object you would like "name" to resovle to
  */
-Atomic.Test.define = function (id, exp) {
-  Atomic.Test.__defines[id] = exp;
+Atomic.Test.resolve = function(name, obj) {
+  Atomic.Test.__loads[name] = obj;
 };
 
+/**
+ * Get a predefined pack, usually from loading Atomic.pack() in
+ * a testing environment
+ * @method Atomic.Test.getPack()
+ * @param {String} id - the pack ID to return
+ * @returns obj
+ */
+Atomic.Test.getPack = function(id) {
+  return Atomic.Test.__packs[id];
+};
 
 /**
  * Creates a fake Atomic Component, without any functioning methods
@@ -81,39 +89,31 @@ Atomic.Test.fakeComponent = function(def) {
   var obj = {
     depends: [],
     name: 'Mock of ' + def.id,
-    events: {}
+    events: {},
+	init: function() {}
   };
-  
+
   var newFn = function() {
     return function() {};
   };
-  
+
   var i;
-  
+
   if (def.methods) {
     for (i = 0, len = def.methods.length; i < len; i++) {
       obj[def.methods[i]] = newFn();
     }
   }
-  
+
   if (def.events) {
     for (i = 0, len = def.events.length; i < len; i++) {
       obj.events[def.events[i]] = 'Mock event from fakeComponent()';
     }
   }
-  
-  obj.init = function() {
-    var wire = this.wireIn;
-    this.wireIn = function(o) {
-      o.depends = [];
-      return wire(o);
-    };
-  };
-  
-  var component = Atomic.Component(obj);
-  Atomic.Test.__components[id] = component;
-};
 
+  var component = Atomic.Component(obj);
+  return component;
+};
 
 /**
  * Replaces the Atomic.pack() function
@@ -121,7 +121,7 @@ Atomic.Test.fakeComponent = function(def) {
  * @method Atomic.pack
  */
 Atomic.pack = function(id, m, d, factory) {
-  Atomic.Test.__components[id] = factory();
+  Atomic.Test.__packs[id] = factory();
 };
 
 /**
@@ -135,29 +135,28 @@ Atomic.Component = function(definition) {
 };
 
 /**
- * Replaces Atomic.load, using an alternate loading method
- * This loading method looks at the internal registers for modules
- * and opts to use those instead. Returns a promise just like the
- * original Atomic.load function
+ * Replaces Atomic.load, and ensures you cannot call it while in testing
+ * mode. This helps to make sure you are testing in isolation and that your
+ * dependencies have been properly mocked.
  */
 Atomic.load = function() {
   var deps = [].slice.call(arguments, 0);
-  var resolvedDeps = [];
+  var resolved = [];
   var deferred = Atomic.deferred();
-  var mod;
-  var comp;
+
   for (var i = 0, len = deps.length; i < len; i++) {
-    mod = Atomic.Test.__defines[deps[i]];
     comp = Atomic.Test.__components[deps[i]];
-  
-    if (!mod && !comp) {
-      throw new Error('must define: ' + deps[i] + ' either with fakeComponent() or define()');
-    }
-  
-    resolvedDeps.push(mod || comp);
+    resolved.push(comp);
   }
+  
+  if (resolved.length !== deps.length) {
+    throw new Error('one or more dependencies were not resolved before Atomic.load was called. ' +
+      'Provide local component dependencies with component.resolve(), and global dependencies ' +
+      'with Atomic.resolve()');
+  }
+  
   window.setTimeout(function() {
-    deferred.resolve(resolvedDeps);
+    deferred.resolve(resolved);
   }, 10);
   
   return deferred.promise;

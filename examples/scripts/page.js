@@ -23,6 +23,7 @@ Atomic.load('components/button', 'wirings/debugtracer')
 .then(Atomic.expand(function(Button, debugtracer) {
   // build the button and add echo wiring
   var button = new Button(document.getElementById('my-button'));
+  
   button.wireIn(debugtracer());
 
   button.load().then(function() {
