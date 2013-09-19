@@ -28,7 +28,8 @@
     "grunt-include-replace": "~0.1.0",
     "wrench": "~1.5.1",
     "underscore": "~1.4.4",
-    "esprima": "~1.0.3"
+    "esprima": "~1.0.3",
+    "venus": "~2.1.14"
   },
   "dependencies": {},
   "engine": "node >= 0.8.10"

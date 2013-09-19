@@ -61,7 +61,7 @@ module.exports = function (grunt) {
       tag: {
         command: 'git describe HEAD',
         options: {
-          callback: function (err, stdout, stderr, next) {
+          callback: function(err, stdout, stderr, next) {
             var foot = grunt.config.get('anonymous_footer');
             var output_files = grunt.config.get('output_files');
             var zip_locations = grunt.config.get('zip_locations');
@@ -90,23 +90,14 @@ module.exports = function (grunt) {
         }
       },
       venus: {
-        command: ['if [ -e node_modules/venus/bin/venus ] && command -v phantomjs >/dev/null;',
-                  'then node ./node_modules/venus/bin/venus run -t "tests/"',
-                        '--phantom "./node_modules/phantomjs/lib/phantom/bin/phantomjs"',
-                        '--require-annotations;',
-                  'else echo "cant find venus in node_modules and/or cant find phantomJS. ',
-                             'Run npm install and run npm install -g phantomjs";',
-                  'fi'].join(' '),
+        command: 'node ./node_modules/venus/bin/venus run -t "tests/" -e ghost',
         options: {
           stdout: true
         }
 
       },
       venus_browser: {
-        command: ['if [ -e node_modules/venus/bin/venus ];',
-                  'then node ./node_modules/venus/bin/venus run -t "tests/" --require-annotations;',
-                  'else echo "cant find venus in node_modules. Run npm install";',
-                  'fi'].join(' '),
+        command: 'node ./node_modules/venus/bin/venus run -t "tests/"',
         options: {
           stdout: true
         }
@@ -313,6 +304,10 @@ module.exports = function (grunt) {
     'wait:server',
     'qunit:all'
     // shell:venus / shell:venus_browser
+  ]);
+  
+  grunt.registerTask('venus_check', [
+    'shell:venus'
   ]);
 
   grunt.registerTask('itest', [
