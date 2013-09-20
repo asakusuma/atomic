@@ -90,7 +90,7 @@ module.exports = function (grunt) {
         }
       },
       venus: {
-        command: 'node ./node_modules/venus/bin/venus run -t "tests/" -e ghost',
+        command: 'node ./node_modules/venus/bin/venus "tests/" -e ghost',
         options: {
           stdout: true
         }
@@ -237,7 +237,7 @@ module.exports = function (grunt) {
         }
       }
     },
-    
+
     compress: {
       release: {
         options: {
@@ -305,7 +305,7 @@ module.exports = function (grunt) {
     'qunit:all'
     // shell:venus / shell:venus_browser
   ]);
-  
+
   grunt.registerTask('venus_check', [
     'shell:venus'
   ]);
