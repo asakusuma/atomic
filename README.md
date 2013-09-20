@@ -1,3 +1,5 @@
+* [![View Summary](https://secure.travis-ci.org/jakobo/atomic.png?branch=master)](http://travis-ci.org/#!/jakobo/atomic/branches)
+
 # Atomic
 ## It's Just JavaScript
 
@@ -65,13 +67,10 @@ The fun doesn't stop there! Atomic Components have a way to fuse together. Compo
 * May expose their internals or provide an abstraction in front of its "inner workings"
 
 # Um, examples?
-You got it. The examples/ directory shows how you can use Atomic in many different ways:
-
-* files starting with pojs_* are the `plain old JavaScript` apis. Backbone, jQuery, it doesn't matter. Make Components and use them.
-* files starting with magic_* are the `magic HTML interface` apis. Make some Components straight from your markup? Sure, if that's your thing!
+You got it. The examples/ directory shows how you can use Atomic in many different ways
 
 # What about unit tests?
-We're using QUnit right now. With grunt, you'll just need `grunt build test` to get going.
+"grunt test" or "grunt itest" if you like using your own browser.
 
 # Built on Greatness
 * [When](https://github.com/cujojs/when) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
