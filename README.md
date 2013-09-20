@@ -1,4 +1,4 @@
-* [![View Summary](https://secure.travis-ci.org/jakobo/atomic.png?branch=master)](http://travis-ci.org/#!/jakobo/atomic/branches)
+[![View Summary](https://travis-ci.org/Jakobo/atomic.png)](http://travis-ci.org/#!/Jakobo/atomic/branches)
 
 # Atomic
 ## It's Just JavaScript
