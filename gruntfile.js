@@ -216,20 +216,6 @@ module.exports = function (grunt) {
       }
     },
 
-    /**
-     * remove once running venus properly
-     */
-    qunit: {
-      all: {
-        options: {
-          timeout: 20000,
-          urls: [
-            'http://localhost:4000/tests/'
-          ]
-        }
-      }
-    },
-
     wait: {
       server: {
         options: {
@@ -266,8 +252,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-contrib-compress');
-  // grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-qunit');
 
   // from https://github.com/gruntjs/grunt/issues/236
   grunt.registerMultiTask('wait', 'Wait for a set amount of time.', function () {
