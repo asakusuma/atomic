@@ -300,19 +300,12 @@ module.exports = function (grunt) {
   // access to hot reload and cleanly scans files
   grunt.registerTask('test', [
     'build',
-    'express:quiet',
-    'wait:server',
-    'qunit:all'
-    // shell:venus / shell:venus_browser
-  ]);
-
-  grunt.registerTask('venus_check', [
     'shell:venus'
   ]);
 
   grunt.registerTask('itest', [
     'build',
-    'server'
+    'shell:venus_browser'
   ]);
 
   grunt.registerTask('server', [
