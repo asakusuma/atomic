@@ -6,14 +6,15 @@
 Atomic is a DOM Library Agnostic solution for creating a better HTML element. They're called **Atomic Components**, and they come with a robust event system and patterns for composition.
 
 Why would you choose Atomic?
-* **No DOM Library Opinion** You're not bound to jQuery, YUI, Ender, or anything
-* **Small** < 99kb **SIZE TBD**
+* **No DOM Library Opinion** You're not bound to jQuery, YUI, Ender, or anything of the sort
+* **Small** 6kb gzipped
 * **Simple** enhance an element, put them together, that's it
 * **Works with AMD and CJS Loaders** You can use any loader strategy you'd like
+* **Naturally Async** Components initialize and download dependencies only when you tell them too, giving you full control of the lifecycle
 
 Why would you avoid Atomic?
-* **Out-of-the-box** products like jQuery UI, Dijit, Flight, and more can give you large amounts of functionality for free.
-* **Prototyping** the amount of initial work you will need to build up in Atomic makes it a poor choice for prototyping. You should consider something like Bootstrap in those cases
+* **Out-of-the-box** products like jQuery UI, Dijit, Flight, and more can give you large amounts of functionality for free. If you're not in an environment that may require you to one-off code or make frequent changes, you may want to consider one of these frameworks instead.
+* **Prototyping** the amount of initial work you will need to build up in Atomic makes it a poor choice for prototyping. You should consider something like Bootstrap in those cases, which gives you a proof of concept for very little investment.
 
 # Getting Started
 ## Your Script Tags
@@ -25,25 +26,43 @@ First, add a script loader to the page. Any loader that supports AMD or CommonJS
 * [Curl](https://github.com/cujojs/curl) (AMD, CJS)
 * [Cajon](https://github.com/requirejs/cajon) (CJS)
 
-Then, add the config to your page, and change the `system` variable to your loader framework of choice.
-```js
-// or inline it if that's your thing
-<script src="config.js"></script>
-```
+You'll then want to "link" the loader to Atomic. This is done by augmenting `Atomic.Loader` with your needed method:
 
-Finally, load the atomic.js script
 ```js
-<script src="atomic.js"></script>
-```
+// we'll call this "loader-config.js" for fun
+Atomic.augment(Atomic.loader, {
+  init: function() {
+    // do any needed initialization
+  },
+  load: function(dependencies) {
+    var deferred = Atomic.deferred();
+    // call your loader's asynchronous download function
+    // and then return a promise
+    return deferred.promise;
+  }
+});
+````
 
-Got all that? Good! Now we can enhance some elements.
+Atomic comes with a variety of loaders ready for you. [A list of loaders](./tree/master/src/compat/loaders) is available in the source tree, or in the `compat` directory of a distrobution.
 
 ## Enhancing elements with Components
 
 Let's say you want to make a button. And a carousel. And have the button control the carousel. Just write JavaScript.
 
 ```js
-to redo...
+Atomic.load('components/button', 'components.carousel')
+.then(Atomic.expand(function(Button, Carousel) {
+  var button = new Button(buttonElement);
+  var carousel = new Carousel(carouselElement);
+  button.on(button.events.USE, function() {
+    carousel.next();
+  });
+  
+  button.load()
+  .then(carousel.load())
+  then(null, Atomic.e);
+}), Atomic.e)
+.then(null, Atomic.e);
 ```
 
 Click "next", advance "carousel". What just happened?
