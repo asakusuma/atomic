@@ -186,6 +186,14 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @property {Object} AbstractComponent#elements
      */
     elements: {},
+    
+    /**
+     * A key/string collection of css classes used in this component.
+     * this serves both as a placeholder for classes a developer wants to use
+     * and a documentation for implementing developers
+     * @property {Object} AbstractComponent#classes
+     */
+    classes: {},
 
     /**
      * A key/string collection of events
