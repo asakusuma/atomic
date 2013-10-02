@@ -258,6 +258,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       this.elements = createDisplayable(this.elements, true);
       this.events = createDisplayable(this.events, true, true);
       this.depends = createDisplayable(this.depends);
+      this.classes = createDisplayable(this.classes);
 
       // attach the el
       if (el) {
