@@ -31,14 +31,13 @@ as YUI or jQuery to make the DOM operations easier.
 The Carousel Component provides an API for manipulating a
 "current" class on a collection of nodes
 */
-var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
-Atomic.pack('components/carousel', function() { return module; }, function() { return define; }, function() {
+((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/carousel', ['Atomic/Component'], function(Component) {
   // useful constants in this control
   var $;
   var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
-  return Atomic.Component({
+  return Component({
     // a common name to assist in debugging
     name: 'SamplePack Carousel by @jakobo',
 

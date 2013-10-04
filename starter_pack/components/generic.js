@@ -33,11 +33,10 @@ component whos logic resides solely in wiring. This is actually
 a great choice if as a developer everything you need already
 exists in wirings.
 */
-var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
-Atomic.pack('components/generic', function() { return module; }, function() { return define; }, function() {
+((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/generic', ['Atomic/Component'], function(Component) {
 
   // calls the Atomic Component constructor
-  return Atomic.Component({
+  return Component({
     // a common name to assist in debugging
     name: 'Generic Component by @jakobo',
 

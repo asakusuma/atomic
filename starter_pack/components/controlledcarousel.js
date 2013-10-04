@@ -16,14 +16,13 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
-Atomic.pack('components/controlledcarousel', function() { return module; }, function() { return define; }, function() {
+((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/controlledcarousel', ['Atomic/Component'], function(Component) {
   // useful constants in this control
   var $;
   var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
-  return Atomic.Component({
+  return Component({
     // a common name to assist in debugging
     name: 'SamplePack ControlledCarousel by @jakobo',
 

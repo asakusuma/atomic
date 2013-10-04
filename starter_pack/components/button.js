@@ -35,12 +35,11 @@ is used as a convienence, as modern jQuery uses a single
 document level listener as opposed to listeners on individual
 nodes.
 */
-var Atomic = (typeof require === 'function') ? require('atomic') : window.Atomic;
-Atomic.pack('components/button', function() { return module; }, function() { return define; }, function() {
+((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/button', ['Atomic/Component'], function(Component) {
   var $;
 
   // calls the Atomic Component constructor
-  return Atomic.Component({
+  return Component({
     // a common name to assist in debugging
     name: 'SamplePack Button by @jakobo',
 
