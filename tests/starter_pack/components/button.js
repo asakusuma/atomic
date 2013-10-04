@@ -9,14 +9,14 @@
 
 module('starter pack button');
 asyncTest('exists', 1, function() {
-  var Button = Atomic.Test.getPack('components/button');
+  var Button = Atomic.Test.getModule('components/button');
   
   ok(Button, 'exists');
   start();
 });
 
 asyncTest('interaction', 1, function() {
-  var Button = Atomic.Test.getPack('components/button');
+  var Button = Atomic.Test.getModule('components/button');
   
   $('body').append('<button id="yay">yay</button>');
   var button = new Button($('#yay').get(0));

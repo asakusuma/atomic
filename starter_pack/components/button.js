@@ -35,7 +35,7 @@ is used as a convienence, as modern jQuery uses a single
 document level listener as opposed to listeners on individual
 nodes.
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/button', ['Atomic/Component'], function(Component) {
+((typeof define == 'function' && define.amd) ? define : Atomic)('components/button', ['Atomic/Component'], function(Component) {
   var $;
 
   // calls the Atomic Component constructor

@@ -16,7 +16,7 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/controlledcarousel', ['Atomic/Component'], function(Component) {
+((typeof define == 'function' && define.amd) ? define : Atomic)('components/controlledcarousel', ['Atomic/Component'], function(Component) {
   // useful constants in this control
   var $;
   var CURRENT_CLASS = 'current';

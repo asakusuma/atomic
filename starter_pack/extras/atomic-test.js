@@ -29,12 +29,8 @@ Atomic Components. Most notably:
 
 Atomic.version = 'TEST-' + Atomic.version;
 Atomic.Test = {};
-Atomic.Test.__loads = {};
-Atomic.Test.__packs = {};
 Atomic.Test.methods = {};
-Atomic.Test.methods.pack = Atomic.pack;
 Atomic.Test.methods.Component = Atomic.Component;
-Atomic.Test.methods.load = Atomic.load;
 
 /**
  * resets the environment, making all dependencies invalid again
@@ -42,8 +38,7 @@ Atomic.Test.methods.load = Atomic.load;
  * @method Atomic.Test.resetEnv
  */
 Atomic.Test.resetEnv = function() {
-  Atomic.Test.__packs = {};
-  Atomic.Test.__loads = {};
+  Atomic._.modules = {};
 };
 
 /**
@@ -55,18 +50,17 @@ Atomic.Test.resetEnv = function() {
  * @param {Object} obj - the object you would like "name" to resovle to
  */
 Atomic.Test.resolve = function(name, obj) {
-  Atomic.Test.__loads[name] = obj;
+  Atomic(name, [], function() { return obj; });
 };
 
 /**
- * Get a predefined pack, usually from loading Atomic.pack() in
- * a testing environment
- * @method Atomic.Test.getPack()
- * @param {String} id - the pack ID to return
- * @returns obj
+ * Get a module, useful for testing. Since all tests avoid async operations
+ * this can grab a module by it's defined module id
+ * @method Atomic.Test.getModule
+ * @param {String} id - the id of module to get
  */
-Atomic.Test.getPack = function(id) {
-  return Atomic.Test.__packs[id];
+Atomic.Test.getModule = function(id) {
+  return Atomic._.modules[id];
 };
 
 /**
@@ -116,15 +110,6 @@ Atomic.Test.fakeComponent = function(def) {
 };
 
 /**
- * Replaces the Atomic.pack() function
- * This new function writes to an internal component registry
- * @method Atomic.pack
- */
-Atomic.pack = function(id, m, d, factory) {
-  Atomic.Test.__packs[id] = factory();
-};
-
-/**
  * Current a placeholder, passes through to Atomic.Component
  * It is likely we will need to alter the way component generation
  * works, but it's unknown in which ways yet
@@ -145,7 +130,7 @@ Atomic.load = function() {
   var deferred = Atomic.deferred();
 
   for (var i = 0, len = deps.length; i < len; i++) {
-    comp = Atomic.Test.__components[deps[i]];
+    comp = Atomic._.modules[deps[i]];
     resolved.push(comp);
   }
   

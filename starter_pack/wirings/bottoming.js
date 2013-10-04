@@ -33,7 +33,7 @@ It can be configured with the following options:
   * local(boolean) if true, the local container will be watched instead of
     the window
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('wirings/bottoming', [], function() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/bottoming', [], function() {
   return function(config) {
     var $;
 

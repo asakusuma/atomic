@@ -31,7 +31,7 @@ as YUI or jQuery to make the DOM operations easier.
 The Carousel Component provides an API for manipulating a
 "current" class on a collection of nodes
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/carousel', ['Atomic/Component'], function(Component) {
+((typeof define == 'function' && define.amd) ? define : Atomic)('components/carousel', ['Atomic/Component'], function(Component) {
   // useful constants in this control
   var $;
   var CURRENT_CLASS = 'current';

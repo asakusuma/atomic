@@ -34,7 +34,7 @@ It exposes the following methods:
   * more()
     manually fetch additional content and attach it to the container
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('wirings/infinitecontent', [], function() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/infinitecontent', [], function() {
   return function(config) {
     var $;
 

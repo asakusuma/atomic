@@ -29,7 +29,7 @@ governing permissions and limitations under the License.
 // 2) add multiple methods
 // 3) require static nodes
 // Eric
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('wirings/fetch', [], function() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/fetch', [], function() {
   return function(config) {
     config = config || {};
 

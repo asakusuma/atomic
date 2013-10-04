@@ -20,7 +20,7 @@ governing permissions and limitations under the License.
 A reusable wiring.
 This is a sample wiring. Go ahead and include it and add "echo" methods
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('wirings/echo', [], function() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/echo', [], function() {
   return function(config) {
     return {
       init: function() {

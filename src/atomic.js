@@ -37,8 +37,17 @@ governing permissions and limitations under the License.
     modules: {}
   };
   Atomic.loader = {
-    init: null,
-    load: null
+    init: function() {},
+    load: function(deps) {
+      var resolved = [];
+      for (var i = 0, len = deps.length; i < len; i++) {
+        if (!Atomic._.modules[deps[i]]) {
+          throw new Error('Module ID is not defined: ' + deps[i]);
+        }
+        resolved.push(Atomic._.modules[deps[i]]);
+      }
+      return resolved;
+    }
   };
 
   // common JS and AMD environment
@@ -92,7 +101,7 @@ governing permissions and limitations under the License.
     if (typeof id !== 'string') {
       throw new Error('you must specify an ID if you are not using a module loader system');
     }
-    if (typeof depends === 'function') {
+    if (Object.prototype.toString.call(depends) !== '[object Array]') {
       factory = depends;
       depends = [];
     }
@@ -106,24 +115,26 @@ governing permissions and limitations under the License.
         throw new Error('Module not loaded: ' + str);
       }
       return Atomic._.modules[str];
-    }
+    };
     
     var module = {
       exports: {}
     };
     
-    var resolved = [];;
+    var resolved = [];
     var result;
-    for (var i = 0, len = depends.length; i < depends; i++) {
+    for (var i = 0, len = depends.length; i < len; i++) {
       if (depends[i] === 'require') {
         resolved.push(require);
         continue;
       }
       if (depends[i] === 'module') {
         resolved.push(module);
+        continue;
       }
       if (depends[i] === 'exports') {
         resolved.push(module.exports);
+        continue;
       }
       if (!Atomic._.modules[depends[i]]) {
         throw new Error('Module not loaded: ' + depends[i]);
@@ -131,14 +142,20 @@ governing permissions and limitations under the License.
       resolved.push(Atomic._.modules[depends[i]]);
     }
     
-    result = factory.apply(factory, resolved);
-    if (result) {
-      Atomic._.modules[id] = result;
+    if (typeof factory === 'function') {
+      result = factory.apply(factory, resolved);
+      if (result) {
+        Atomic._.modules[id] = result;
+      }
+      else {
+        Atomic._.modules[id] = module.exports;
+      }
     }
     else {
-      Atomic._.modules[id] = module.exports;
+      Atomic._.modules[id] = factory;
     }
-  }
+    
+  };
 
   /**
    * Create a "CommonJS" environment. This lets us
@@ -226,4 +243,9 @@ governing permissions and limitations under the License.
 
   // assign public interface in window scope
   context.Atomic = Atomic;
+  
+  // assign all the pieces to modules
+  var defineCall = (typeof define == 'function' && define.amd) ? define : Atomic;
+  defineCall('Atomic', [], function() { return Atomic; });
+  defineCall('Atomic/Component', [], function() { return Atomic.Component; });
 })(this);

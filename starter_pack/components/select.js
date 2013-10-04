@@ -32,7 +32,7 @@ The Select component creates a mirror of a native select component.
 When the select component is updated, or interacted with, the mirror reflects
 those changes.  The Atomic Select mirror sits on top of the original select box
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('components/select', ['Atomic/Component'], function(Component) {
+((typeof define == 'function' && define.amd) ? define : Atomic)('components/select', ['Atomic/Component'], function(Component) {
 
   var ENTER = 13,
       ESC = 27,

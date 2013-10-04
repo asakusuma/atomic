@@ -19,7 +19,7 @@ governing permissions and limitations under the License.
 /*
 This wiring adds debugging ability to all methods within a component
 */
-((typeof define !== 'undefined' && define.amd) ? define : Atomic)('wirings/debugtracer', [], function() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/debugtracer', [], function() {
   return function(config) {
     return {
       init: function() {
