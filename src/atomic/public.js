@@ -308,86 +308,73 @@ var __Atomic_Public_API__ = {
     });
     return deferred.promise;
   },
-
+  
   /**
-   * Export a module for CommonJS or AMD loaders
-   * @method Atomic.export
-   * @deprecated
-   * @param {Object} mod - commonJS module object
-   * @param {Object} def - AMD define function
-   * @param {Function} factory - the defining factory for module or exports
+   * Shims the global define when an AMD loader doesn't exist
+   * very useful when running unit tests, so you are not tied to a loader's structure
+   * @method Atomic.define
+   * @param {String} id - the ID of the module
+   * @param {Array} depends - the dependencies array
+   * @param {Function} factory - the factory function that contains exports
    */
-  export: function(mod, def, factory) {
-    var ranFactory = null;
-
-    if (typeof factory === 'undefined' && typeof def === 'undefined' && typeof mod === 'function') {
-      factory = mod;
-      if (Atomic.loader && Atomic.loader.save) {
-        ranFactory = factory();
-        Atomic.loader.save(factory.id, ranFactory);
+  define: function(id, depends, factory) {
+    if (typeof id !== 'string') {
+      throw new Error('you must specify an ID if you are not using a module loader system');
+    }
+    if (Object.prototype.toString.call(depends) !== '[object Array]') {
+      factory = depends;
+      depends = [];
+    }
+    
+    // a local require
+    var require = function(str) {
+      if (window.console && window.console.warn) {
+        window.console.warn('using runtime require() is dangerous without a module loader');
+      }
+      if (!Atomic._.modules[str]) {
+        throw new Error('Module not loaded: ' + str);
+      }
+      return Atomic._.modules[str];
+    };
+    
+    var module = {
+      exports: {}
+    };
+    
+    var resolved = [];
+    var result;
+    for (var i = 0, len = depends.length; i < len; i++) {
+      if (depends[i] === 'require') {
+        resolved.push(require);
+        continue;
+      }
+      if (depends[i] === 'module') {
+        resolved.push(module);
+        continue;
+      }
+      if (depends[i] === 'exports') {
+        resolved.push(module.exports);
+        continue;
+      }
+      if (!Atomic._.modules[depends[i]]) {
+        throw new Error('Module not loaded: ' + depends[i]);
+      }
+      resolved.push(Atomic._.modules[depends[i]]);
+    }
+    
+    if (typeof factory === 'function') {
+      result = factory.apply(factory, resolved);
+      if (result) {
+        Atomic._.modules[id] = result;
       }
       else {
-        ranFactory = factory();
-        window[factory.id] = ranFactory;
+        Atomic._.modules[id] = module.exports;
       }
-      return;
-    }
-    if (mod && typeof mod.exports !== 'undefined' || Atomic_amd_optimized) {
-      ranFactory = factory();
-      mod.exports = ranFactory;
-    }
-    else if (def && def.amd) {
-      def(factory);
-    }
-    else if (Atomic.loader && Atomic.loader.save) {
-      ranFactory = factory();
-      Atomic.loader.save(factory.id, ranFactory);
     }
     else {
-      ranFactory = factory();
-      window[factory.id] = ranFactory;
+      Atomic._.modules[id] = factory;
     }
-
-    return ranFactory;
-  },
-
-  /**
-   * Export a module for CommonJS or AMD loaders
-   * @method Atomic.pack
-   * @param {String} id - an identifier for this module
-   * @param {Function} mod - a function that safely returns the module var if it exists
-   * @param {Function} def - a function that safely returns the define var if it exists
-   * @param {Function} factory - the defining factory for module or exports
-   */
-  pack: function(id, mod, def, factory) {
-    var module, define;
-
-    // try and capture module and define into local variables
-    try {
-      module = mod();
-    }
-    catch(e) {}
-    try {
-      define = def();
-    }
-    catch(e) {}
-
-    var result = null;
-
-    if ((typeof module !== 'undefined' && module && typeof module.exports !== 'undefined') || Atomic_amd_optimized) {
-      result = factory();
-      module.exports = result;
-    }
-    else if (typeof define !== 'undefined' && define && typeof define.amd !== 'undefined' && define.amd) {
-      define(factory);
-    }
-    else if (typeof Atomic.loader !== 'undefined' && typeof Atomic.loader.save === 'function') {
-      result = factory();
-      Atomic.loader.save(id, result);
-    }
-    else {
-      throw new Error('You must implement a module loader or use the "none" loader');
-    }
+    
   },
 
   /**
