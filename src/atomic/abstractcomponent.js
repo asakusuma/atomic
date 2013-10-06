@@ -722,6 +722,57 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      */
     update: function() {
       return this;
+    },
+
+    /**
+     * Public method to set a model on a component
+     * @method setModel
+     * @param {Object} model - the model to be set
+     */
+    setModel: function(model) {
+      if(typeof model == 'object' && typeof model.toJSON == 'function') {
+        this._applyModel(model);
+      }
+    },
+
+    /**
+     * Apply a model to the component. Store internally, bind to change
+     * event, and apply model state to DOM
+     * @method _applyModel
+     * @param {Object} model - the model to be applied
+     */
+    _applyModel: function(model) {
+      //Unbind old model
+      if(this._model && typeof this._model.off === 'function') {
+        this._model.off(null, null, this);
+      }
+      
+      this._model = model;
+      this._applyState(this._model.toJSON());
+
+      //Bind to changes
+      this._model.on('change', (function(context) {
+        return function() {
+          context._onModelChange.apply(context, arguments);
+        };
+      })(this));
+    },
+
+    /**
+     * Callback method to component model change
+     * @method _onModelChange
+     */
+    _onModelChange: function() {
+      this._applyState(this._model.toJSON());
+    },
+
+    /**
+     * Must be overwritten in order to use state or model features.
+     * @method _applyState
+     * @param {Object} state - the state object
+     */
+    _applyState: function(state) {
+      throw "You must ovverride _applyState";
     }
   };
 });
