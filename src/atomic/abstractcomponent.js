@@ -706,10 +706,10 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
     /**
      * Takes an object literal and applies it to the state
-     * @method toJSON
+     * @method fromJSON
      * @param {Object} obj - the object literal representing the state
      */
-    toJSON: function(obj) {
+    fromJSON: function(obj) {
       if(typeof obj == 'object') {
         this.state = obj;
         this.render();
@@ -718,10 +718,10 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
     /**
      * Returns the object literal representing the components state
-     * @method toJSON
+     * @method toSON
      * @returns {Object} object literal representing state
      */
-    toJSON: function(obj) {
+    toJSON: function() {
       var state = {};
       if(typeof this.state == 'object') {
         state = this.state;
