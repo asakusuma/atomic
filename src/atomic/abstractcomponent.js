@@ -747,6 +747,95 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      */
     update: function() {
       return this;
+    },
+
+    /**
+     * Public method to set and apply a model to a component
+     * @method setModel
+     * @param {Object} model - the model to be set
+     */
+    setModel: function(model) {
+      if(typeof model == 'object' && typeof model.toJSON == 'function') {
+        this._applyModel(model);
+      }
+    },
+
+    /**
+     * Public method to retrieve the component model
+     * @method getModel
+     * @returns {Object} model - the component's model
+     */
+    getModel: function() {
+      var model = null;
+      if(this._model) {
+        model = this._model;
+      }
+      return model;
+    },
+
+    /**
+     * Public method to set and apply a state to a component
+     * @method setModel
+     * @param {Object} model - the model to be set
+     */
+    setState: function(state) {
+      if(typeof state == 'object') {
+        this._state = state;
+        this._applyState(state);
+      }
+    },
+
+    /**
+     * Public method to retrieve the component state
+     * @method getState
+     * @returns {Object} state - the component's state
+     */
+    getState: function() {
+      if(this._state) {
+        return this._state;
+      } else {
+        throw 'Component state not defined';
+      }
+    },
+
+    /**
+     * Apply a model to the component. Store internally, bind to change
+     * event, and apply model state to DOM
+     * @method _applyModel
+     * @param {Object} model - the model to be applied
+     */
+    _applyModel: function(model) {
+      //Unbind old model
+      if(this._model && typeof this._model.off === 'function') {
+        this._model.off(null, null, this);
+      }
+      
+      this._model = model;
+      this._applyState(this._model.toJSON());
+
+      //Bind to changes
+      this._model.on('change', (function(context) {
+        return function() {
+          context._onModelChange.apply(context, arguments);
+        };
+      })(this));
+    },
+
+    /**
+     * Callback method to component model change
+     * @method _onModelChange
+     */
+    _onModelChange: function() {
+      this._applyState(this._model.toJSON());
+    },
+
+    /**
+     * Must be overwritten in order to use state or model features.
+     * @method _applyState
+     * @param {Object} state - the state object
+     */
+    _applyState: function(state) {
+      throw "You must ovverride _applyState";
     }
   };
 });
