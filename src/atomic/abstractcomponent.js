@@ -705,11 +705,36 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Can be overriden to synchronize the DOM to the component's internal state
-     * @method AbstractComponent#sync
+     * Takes an object literal and applies it to the state
+     * @method fromJSON
+     * @param {Object} obj - the object literal representing the state
+     */
+    fromJSON: function(obj) {
+      if(typeof obj == 'object') {
+        this.state = obj;
+        this.render();
+      }
+    },
+
+    /**
+     * Returns the object literal representing the components state
+     * @method toSON
+     * @returns {Object} object literal representing state
+     */
+    toJSON: function() {
+      var state = {};
+      if(typeof this.state == 'object') {
+        state = this.state;
+      }
+      return state;
+    },
+
+    /**
+     * Can be overriden to apply the component's internal state to the DOM
+     * @method render
      * @returns this
      */
-    sync: function() {
+    render: function() {
       return this;
     },
 
