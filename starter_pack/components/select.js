@@ -116,15 +116,16 @@ those changes.  The Atomic Select mirror sits on top of the original select box
     * @method Select#syncListSelected
     */
     syncListSelected: function() {
-      var ul = this.ul,
+      var that = this,
+          ul = this.ul,
           option;
 
-      ul.find('li').removeClass('selected');
+      ul.find('li').removeClass(this.BEM('item', 'selected'));
 
       this.node.find('option').each(function() {
         option = $(this);
         if (option.is(':selected')) {
-          $(ul.find('li')[option.index()]).addClass('selected');
+          $(ul.find('li')[option.index()]).addClass(that.BEM('item', 'selected'));
         }
       });
     },
@@ -133,7 +134,7 @@ those changes.  The Atomic Select mirror sits on top of the original select box
     * @method Select#open
     */
     open: function() {
-      this.container.addClass('open');
+      this.container.addClass(this.BEM(null, 'open'));
       this.ul.show();
     },
     /**
@@ -141,8 +142,7 @@ those changes.  The Atomic Select mirror sits on top of the original select box
     * @method Select#close
     */
     close: function() {
-      var container = this.container;
-      container.removeClass('open');
+      this.container.removeClass(this.BEM(null, 'open'));
       this.ul.hide();
     },
     /**
@@ -150,7 +150,8 @@ those changes.  The Atomic Select mirror sits on top of the original select box
     * @method Select#isOpen
     */
     isOpen: function() {
-      return this.container.hasClass('open');
+      // TODO: convert to state operations
+      this.container.hasClass(this.BEM(null, 'open'));
     },
     /**
     * sync atomic select viewport with native select viewport
@@ -190,11 +191,11 @@ those changes.  The Atomic Select mirror sits on top of the original select box
       });
 
       node.on('focus', function() {
-        container.addClass('focused');
+        container.addClass(that.BEM(null, 'focused'));
       });
 
       node.on('blur', function() {
-        container.removeClass('focused');
+        container.removeClass(that.BEM(null, 'focused'));
       });
 
       viewport.on('click', function() {
@@ -225,7 +226,7 @@ those changes.  The Atomic Select mirror sits on top of the original select box
       });
 
       $(document.body).on('click', function(evt) {
-        var atomicSelect = $(evt.target).closest('.atomic-select');
+        var atomicSelect = $(evt.target).closest('.' + that.BEM());
         if (!atomicSelect.length) {
           that.close();
         }
@@ -250,7 +251,7 @@ those changes.  The Atomic Select mirror sits on top of the original select box
           node = this.node;
 
       ul.css('position', 'absolute');
-      viewport.addClass('viewport');
+      viewport.addClass(this.BEM('viewport'));
 
       this.close();
 
@@ -260,7 +261,6 @@ those changes.  The Atomic Select mirror sits on top of the original select box
         // copy over classes from select to container
         // TODO: maybe we should add the class copy logic to abstract along with atomic-* - Eric
         .attr('class', node.attr('class'))
-        .addClass('atomic-select')
         .attr('role', 'presentation')
         .css('display', 'inline-block')
         .css('position', 'relative')
@@ -268,6 +268,12 @@ those changes.  The Atomic Select mirror sits on top of the original select box
 
       // append container after select
       node.after(container);
+      
+      // BEM: Old node is no longer the root and block, it's a child of the main control now
+      node.removeClass(this.BEM());
+      node.removeClass(this.BEM('root'));
+      node.addClass(this.BEM('replaced'));
+      container.removeClass(this.BEM(null, 'loading'));
     }
 
 
