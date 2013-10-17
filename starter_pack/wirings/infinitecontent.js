@@ -34,16 +34,14 @@ It exposes the following methods:
   * more()
     manually fetch additional content and attach it to the container
 */
-var Atomic = (typeof require !== 'undefined') ? require('atomic') : window.Atomic;
-
-function definition() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/infinitecontent', [], function() {
   return function(config) {
     var $;
 
     return {
       depends: ['jquery'],
       init: function() {
-        $ = this.needs('jquery');
+        $ = this.depends('jquery');
         this.more.totalCalls = 0;
       },
       more: function() {
@@ -71,8 +69,4 @@ function definition() {
       }
     };
   };
-}
-// you only need to set .id if you are using the "system" loader
-definition.id = 'wirings/infinitecontent';
-
-try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }
+});

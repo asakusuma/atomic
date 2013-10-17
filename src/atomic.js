@@ -25,17 +25,28 @@ governing permissions and limitations under the License.
    * The global Atomic Object
    * @class Atomic
    */
-  var Atomic = {
-    CONSTANTS: {},
-    Events: {},
-    _: {
-      Fiber: null,
-      EventEmitter: null,
-      requires: {} // used when no module loader is enabled
-    },
-    loader: {
-      init: null,
-      load: null
+  var Atomic = function() {
+    Atomic.define.apply(Atomic, arguments);
+  };
+  Atomic.CONSTANTS = {};
+  Atomic.Events = {};
+  Atomic._ = {
+    Fiber: null,
+    EventEmitter: null,
+    requires: {}, // used when no module loader is enabled
+    modules: {}
+  };
+  Atomic.loader = {
+    init: function() {},
+    load: function(deps) {
+      var resolved = [];
+      for (var i = 0, len = deps.length; i < len; i++) {
+        if (!Atomic._.modules[deps[i]]) {
+          throw new Error('Module ID is not defined: ' + deps[i]);
+        }
+        resolved.push(Atomic._.modules[deps[i]]);
+      }
+      return resolved;
     }
   };
 
@@ -76,6 +87,74 @@ governing permissions and limitations under the License.
       }
     }
     return src;
+  };
+  
+  /**
+   * Shims the global define when an AMD loader doesn't exist
+   * very useful when running unit tests, so you are not tied to a loader's structure
+   * @method Atomic.define
+   * @param {String} id - the ID of the module
+   * @param {Array} depends - the dependencies array
+   * @param {Function} factory - the factory function that contains exports
+   */
+  Atomic.define = function(id, depends, factory) {
+    if (typeof id !== 'string') {
+      throw new Error('you must specify an ID if you are not using a module loader system');
+    }
+    if (Object.prototype.toString.call(depends) !== '[object Array]') {
+      factory = depends;
+      depends = [];
+    }
+    
+    // a local require
+    var require = function(str) {
+      if (window.console && window.console.warn) {
+        window.console.warn('using runtime require() is dangerous without a module loader');
+      }
+      if (!Atomic._.modules[str]) {
+        throw new Error('Module not loaded: ' + str);
+      }
+      return Atomic._.modules[str];
+    };
+    
+    var module = {
+      exports: {}
+    };
+    
+    var resolved = [];
+    var result;
+    for (var i = 0, len = depends.length; i < len; i++) {
+      if (depends[i] === 'require') {
+        resolved.push(require);
+        continue;
+      }
+      if (depends[i] === 'module') {
+        resolved.push(module);
+        continue;
+      }
+      if (depends[i] === 'exports') {
+        resolved.push(module.exports);
+        continue;
+      }
+      if (!Atomic._.modules[depends[i]]) {
+        throw new Error('Module not loaded: ' + depends[i]);
+      }
+      resolved.push(Atomic._.modules[depends[i]]);
+    }
+    
+    if (typeof factory === 'function') {
+      result = factory.apply(factory, resolved);
+      if (result) {
+        Atomic._.modules[id] = result;
+      }
+      else {
+        Atomic._.modules[id] = module.exports;
+      }
+    }
+    else {
+      Atomic._.modules[id] = factory;
+    }
+    
   };
 
   /**
@@ -164,4 +243,9 @@ governing permissions and limitations under the License.
 
   // assign public interface in window scope
   context.Atomic = Atomic;
+  
+  // assign all the pieces to modules
+  var defineCall = (typeof define == 'function' && define.amd) ? define : Atomic;
+  defineCall('Atomic', [], function() { return Atomic; });
+  defineCall('Atomic/Component', [], function() { return Atomic.Component; });
 })(this);

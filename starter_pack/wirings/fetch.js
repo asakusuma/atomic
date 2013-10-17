@@ -29,7 +29,7 @@ governing permissions and limitations under the License.
 // 2) add multiple methods
 // 3) require static nodes
 // Eric
-function definition() {
+((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/fetch', [], function() {
   return function(config) {
     config = config || {};
 
@@ -96,9 +96,4 @@ function definition() {
       }
     };
   };
-}
-
-// you only need to set .id if you are using the "system" loader
-definition.id = 'wirings/fetch';
-
-try { Atomic.export(module, define, definition); } catch(e) { Atomic.export(definition); }
+});

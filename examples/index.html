@@ -148,7 +148,10 @@
     <!-- a global jquery, the latest built atomic.js, and the "none" loader -->
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="/atomic.js"></script>
-    <script type="text/javascript" src="/src/compat/loaders/none.js"></script>
+    <script type="text/javascript">
+      // shoehorn jquery in
+      Atomic('jquery', [], function() { return window.jQuery; });
+    </script>
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
     <script type="text/javascript" src="scripts/atomic/components/button.js"></script>
