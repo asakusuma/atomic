@@ -82,10 +82,10 @@ governing permissions and limitations under the License.
           url: url
         }).success(function(response) {
           if (replace) {
-            self.elements()._root.innerHTML = response;
+            self.elements().root.innerHTML = response;
           }
           else {
-            self.elements()._root.innerHTML += response;
+            self.elements().root.innerHTML += response;
           }
           deferred.resolve();
         }).error(function(err) {

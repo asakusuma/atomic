@@ -34,10 +34,12 @@ The Carousel Component provides an API for manipulating a
 ((typeof define == 'function' && define.amd) ? define : Atomic)('components/carousel', ['Atomic/Component'], function(Component) {
   // useful constants in this control
   var $;
-  var CURRENT_CLASS = 'current';
 
   // calls the Atomic Component constructor
   return Component({
+    // the ID for this component
+    id: 'components/carousel',
+    
     // a common name to assist in debugging
     name: 'SamplePack Carousel by @jakobo',
 
@@ -74,7 +76,8 @@ The Carousel Component provides an API for manipulating a
      * @returns this
      */
     refresh: function() {
-      this._$items = $(this.elements()._root).children();
+      this._$items = $(this.elements().root).children();
+      this._$items.addClass(this.BEM('item'));
       return this;
     },
 
@@ -112,8 +115,8 @@ The Carousel Component provides an API for manipulating a
       var lastValue = this._index;
 
       this._index = at;
-      this._$items.removeClass(CURRENT_CLASS);
-      this._$items.eq(this._index).addClass(CURRENT_CLASS);
+      this._$items.removeClass(this.BEM('item', 'current'));
+      this._$items.eq(this._index).addClass(this.BEM('item', 'current'));
       this.trigger(this.events.CHANGE, lastValue, at);
       return this;
     },

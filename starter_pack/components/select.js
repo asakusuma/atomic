@@ -43,6 +43,9 @@ those changes.  The Atomic Select mirror sits on top of the original select box
 
   // calls the Atomic Component constructor
   return Atomic.Component({
+    // the ID for this component
+    id: 'components/select',
+    
     // a common name to assist in debugging
     name: 'SamplePack Select by @erowell',
 

@@ -19,6 +19,34 @@
       body {
         padding: 10px;
       }
+      
+      #simple-select {
+        outline: none;
+      }
+      .atomic-select .viewport {
+        background-color: #ddddff;
+        border: 1px solid #aaa;
+
+      }
+      .atomic-select ul {
+        background-color: #ddffdd;
+        margin: -1px 0 0 0;
+        padding: 0;
+        border: 1px solid blue;
+      }
+      .atomic-select li {
+        list-style: none;
+      }
+      .atomic-select li.selected {
+        background-color: #559955;
+      }
+      .atomic-select.focused .viewport {
+        border: 1px solid blue;
+      }
+      
+      .components-carousel__item--current {
+        background: #fcc;
+      }
     </style>
   </head>
   <body data-atomic-autoparse="true">
@@ -43,32 +71,6 @@
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Select</h2>
-    <style>
-      #simple-select {
-        outline: none;
-      }
-      .atomic-select .viewport {
-        background-color: #ddddff;
-        border: 1px solid #aaa;
-
-      }
-      .atomic-select ul {
-        background-color: #ddffdd;
-        margin: -1px 0 0 0;
-        padding: 0;
-        border: 1px solid blue;
-      }
-      .atomic-select li {
-        list-style: none;
-      }
-      .atomic-select li.selected {
-        background-color: #559955;
-      }
-      .atomic-select.focused .viewport {
-        border: 1px solid blue;
-      }
-    </style>
-
     <select id="simple-select" class="my-class">
       <option>one</option>
       <option>two</option>
@@ -78,11 +80,6 @@
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Carousel With Buttons</h2>
-    <style>
-    #carousel .current {
-      background: #fcc;
-    }
-    </style>
     <ul id="carousel">
       <li>one</li>
       <li>two</li>
@@ -94,11 +91,6 @@
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Carousel With Buttons That Wraps</h2>
-    <style>
-    #carousel-wraps .current {
-      background: #fcc;
-    }
-    </style>
     <ul id="carousel-wraps">
       <li>one</li>
       <li>two</li>
@@ -110,11 +102,6 @@
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Carousel With Buttons and Fetching</h2>
-    <style>
-    #carousel-fetch .current {
-      background: #fcc;
-    }
-    </style>
     <ul id="carousel-fetch">
       <li>one</li>
       <li>two</li>
@@ -126,11 +113,6 @@
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
     <h3>Carousel From jQuery Plugin</h2>
-    <style>
-    #carousel-plugin .current {
-      background: #fcc;
-    }
-    </style>
     <ul id="carousel-plugin" data-atomic-id="carousel-jq" data-atomic="components/controlledcarousel">
       <li>one</li>
       <li>two</li>
@@ -138,10 +120,6 @@
     </ul>
     <button data-atomic-for="carousel-jq" data-atomic-element="Previous">Previous</button>
     <button data-atomic-for="carousel-jq" data-atomic-element="Next">Next</button>
-
-    <!-- ////////////////////////////////////////////////////////////////////// -->
-
-    <h3>Infinite Scrolling Carousel With Buttons</h3>
 
     <!-- ////////////////////////////////////////////////////////////////////// -->
 
