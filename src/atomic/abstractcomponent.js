@@ -719,6 +719,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      */
     state: function(firstArg, secondArg) {
       if(typeof firstArg == 'object') {
+        //Setting the state object
+
+        //Declare config defaults
         var config = {
           extend: true,
           overwrite: true
@@ -726,20 +729,35 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         if(typeof secondArg == 'object') {
           _.extend(config, secondArg);
         }
+
         if(config.extend && config.overwrite) {
+          //If we are extending, and want to overwrite
+          //old state properties with new state properties
           _.extend(this.state, firstArg);
+
         } else if(config.extend) {
+          //If we are extending, but we don't want to mutate
+          //any existing properties
           _.defaults(this.state, firstArg);
+
         } else {
+          //If we want to reset the state comletely with
+          //the new state
           this.state = obj;
         }
         this.render();
+
       } else if(typeof firstArg == 'string' && secondArg) {
+        //Setting a state property
         this.state[firstArg] = secondArg;
         this.render();
+
       } else if(typeof firstArg == 'string') {
+        //Retrieve a state property
         return this.state[firstArg];
+
       } else {
+        //Retrieve the entire state object
         return this.state;
       }
     },
