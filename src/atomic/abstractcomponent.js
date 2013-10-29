@@ -705,28 +705,61 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Takes an object literal and applies it to the state
-     * @method fromJSON
-     * @param {Object} obj - the object literal representing the state
+     * Overloaded state function for setting and getting the state
+     * @method state
+     * @param {Object|String} Either the key to be retrieved or set, or an object
+     * literal representing the new state or an extension of the new state
+     * @param {*} value - Either the value to be set, or a config object for a state
+     * mutation operation.
+     *    @param {Boolean} value.extend - If false, will throw away the old state 
+     *    completely and assign the new object to be the state. Otherwise, will extend
+     *    the state. Defaults to true.
+     *    @param {Boolean} value.overwrite - If reset is set to false, will only extend
+     *    properties that are undefined. Defaults to true.
      */
-    fromJSON: function(obj) {
-      if(typeof obj == 'object') {
-        this.state = obj;
-        this.render();
-      }
-    },
+    state: function(firstArg, secondArg) {
+      if(typeof firstArg == 'object') {
+        //Setting the state object
 
-    /**
-     * Returns the object literal representing the components state
-     * @method toSON
-     * @returns {Object} object literal representing state
-     */
-    toJSON: function() {
-      var state = {};
-      if(typeof this.state == 'object') {
-        state = this.state;
+        //Declare config defaults
+        var config = {
+          extend: true,
+          overwrite: true
+        };
+        if(typeof secondArg == 'object') {
+          _.extend(config, secondArg);
+        }
+
+        if(config.extend && config.overwrite) {
+          //If we are extending, and want to overwrite
+          //old state properties with new state properties
+          _.extend(this.state, firstArg);
+
+        } else if(config.extend) {
+          //If we are extending, but we don't want to mutate
+          //any existing properties
+          _.defaults(this.state, firstArg);
+
+        } else {
+          //If we want to reset the state comletely with
+          //the new state
+          this.state = obj;
+        }
+        this.render();
+
+      } else if(typeof firstArg == 'string' && secondArg) {
+        //Setting a state property
+        this.state[firstArg] = secondArg;
+        this.render();
+
+      } else if(typeof firstArg == 'string') {
+        //Retrieve a state property
+        return this.state[firstArg];
+
+      } else {
+        //Retrieve the entire state object
+        return this.state;
       }
-      return state;
     },
 
     /**
