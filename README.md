@@ -60,7 +60,7 @@ Atomic.load('components/button', 'components.carousel')
   
   button.load()
   .then(carousel.load())
-  then(null, Atomic.e);
+  .then(null, Atomic.e);
 }), Atomic.e)
 .then(null, Atomic.e);
 ```
