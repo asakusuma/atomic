@@ -632,9 +632,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
-      this.addClass(this.elements().root, this.BEM());
-      this.addClass(this.elements().root, this.BEM(this.elements.root));
-      this.addClass(this.elements().root, this.BEM(null, 'loading'));
+      if (this.elements().root) {
+        this.addClass(this.elements().root, this.BEM());
+        this.addClass(this.elements().root, this.BEM(this.elements.root));
+        this.addClass(this.elements().root, this.BEM(null, 'loading'));
+      }
       var deferred = Atomic.deferred();
       var self = this;
       var fetch = [];
@@ -708,15 +710,19 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       .then(function() {
         var els = self.elements._.raw();
         for (var name in els) {
-          if (els.hasOwnProperty(name)) {
+          if (els.hasOwnProperty(name) && self.elements()[name]) {
             self.addClass(self.elements()[name], self.BEM(name));
           }
         }
-        self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+        if (self.elements().root) {
+          self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+        }
         deferred.resolve();
       }, function(err) {
-        self.removeClass(self.elements().root, self.BEM(null, 'loading'));
-        self.addClass(self.elements().root, self.BEM(null, 'failed'));
+        if (self.elements().root) {
+          self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+          self.addClass(self.elements().root, self.BEM(null, 'failed'));
+        }
         deferred.reject(err);
       });
 
