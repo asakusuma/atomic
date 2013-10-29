@@ -35,39 +35,41 @@ is used as a convienence, as modern jQuery uses a single
 document level listener as opposed to listeners on individual
 nodes.
 */
-((typeof define == 'function' && define.amd) ? define : Atomic)('components/button', ['Atomic/Component'], function(Component) {
-  var $;
+(function(define) {
+  define('components/button', ['Atomic/Component'], function(Component) {
+    var $;
 
-  // calls the Atomic Component constructor
-  return Component({
-    // the ID for this component
-    id: 'components/button',
+    // calls the Atomic Component constructor
+    return Component({
+      // the ID for this component
+      id: 'components/button',
     
-    // a common name to assist in debugging
-    name: 'SamplePack Button by @jakobo',
+      // a common name to assist in debugging
+      name: 'SamplePack Button by @jakobo',
 
-    // no dependencies
-    depends: ['jquery'],
+      // no dependencies
+      depends: ['jquery'],
 
-    // no additional nodes needed
-    elements: {},
+      // no additional nodes needed
+      elements: {},
 
-    // events
-    events: {
-      // TODO from Eric: I know that 'click' isn't used here because we want to
-      // include tap events as well.  But USE is very strange.
-      USE: 'Triggered when the button is used'
-    },
+      // events
+      events: {
+        // TODO from Eric: I know that 'click' isn't used here because we want to
+        // include tap events as well.  But USE is very strange.
+        USE: 'Triggered when the button is used'
+      },
 
-    // wiring functions to make this work
-    init: function() {
-      $ = this.depends('jquery');
-      var self = this;
-      // nodes.root is the default container, either an el passed
-      // to the constructor, or via attach()
-      $(self.elements().root).on('click', function() {
-        self.trigger(self.events.USE);
-      });
-    }
+      // wiring functions to make this work
+      init: function() {
+        $ = this.depends('jquery');
+        var self = this;
+        // nodes.root is the default container, either an el passed
+        // to the constructor, or via attach()
+        $(self.elements().root).on('click', function() {
+          self.trigger(self.events.USE);
+        });
+      }
+    });
   });
-});
+}(typeof define == 'function' && define.amd ? define : Atomic));

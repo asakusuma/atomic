@@ -34,39 +34,41 @@ It exposes the following methods:
   * more()
     manually fetch additional content and attach it to the container
 */
-((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/infinitecontent', [], function() {
-  return function(config) {
-    var $;
+(function(define) {
+  define('wirings/infinitecontent', [], function() {
+    return function(config) {
+      var $;
 
-    return {
-      depends: ['jquery'],
-      init: function() {
-        $ = this.depends('jquery');
-        this.more.totalCalls = 0;
-      },
-      more: function() {
-        var self = this;
-        var url = this._callUrl(this.more.totalCalls);
-        this.more.totalCalls++;
+      return {
+        depends: ['jquery'],
+        init: function() {
+          $ = this.depends('jquery');
+          this.more.totalCalls = 0;
+        },
+        more: function() {
+          var self = this;
+          var url = this._callUrl(this.more.totalCalls);
+          this.more.totalCalls++;
 
-        $.ajax(url, {
-          cache: false
-        })
-        .success(function(data) {
-          $(self.elements().root).append(self._callFormat(data));
-        });
-      },
-      _callUrl: function(calls) {
-        return config.url(calls);
-      },
-      _callFormat: function(data) {
-        if (config.format) {
-          return config.format(data);
+          $.ajax(url, {
+            cache: false
+          })
+          .success(function(data) {
+            $(self.elements().root).append(self._callFormat(data));
+          });
+        },
+        _callUrl: function(calls) {
+          return config.url(calls);
+        },
+        _callFormat: function(data) {
+          if (config.format) {
+            return config.format(data);
+          }
+          else {
+            return data;
+          }
         }
-        else {
-          return data;
-        }
-      }
+      };
     };
-  };
-});
+  });
+}(typeof define == 'function' && define.amd ? define : Atomic));

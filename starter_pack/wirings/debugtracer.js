@@ -19,37 +19,39 @@ governing permissions and limitations under the License.
 /*
 This wiring adds debugging ability to all methods within a component
 */
-((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/debugtracer', [], function() {
-  return function(config) {
-    return {
-      init: function() {
-        var ignore = {
-          before: 1,
-          after: 1,
-          needs: 1,
-          nodes: 1,
-          events: 1
-        };
-        var self = this;
-        var tracerId = 0;
-        var callId = 0;
-        var callDebugged = function(name) {
-          tracerId++;
-          self.before(name, function() {
-            console.log(tracerId + '-' + (++callId) + ': calling ' + name + ' with ', arguments);
-          });
-          self.after(name, function() {
-            console.log(tracerId + '-' + (callId--) + ': completed ' + name);
-          });
-        };
+(function(define) {
+  define('wirings/debugtracer', [], function() {
+    return function(config) {
+      return {
+        init: function() {
+          var ignore = {
+            before: 1,
+            after: 1,
+            needs: 1,
+            nodes: 1,
+            events: 1
+          };
+          var self = this;
+          var tracerId = 0;
+          var callId = 0;
+          var callDebugged = function(name) {
+            tracerId++;
+            self.before(name, function() {
+              console.log(tracerId + '-' + (++callId) + ': calling ' + name + ' with ', arguments);
+            });
+            self.after(name, function() {
+              console.log(tracerId + '-' + (callId--) + ': completed ' + name);
+            });
+          };
 
-        for (var name in this) {
-          if (ignore[name] || typeof this[name] !== 'function') {
-            continue;
+          for (var name in this) {
+            if (ignore[name] || typeof this[name] !== 'function') {
+              continue;
+            }
+            callDebugged(name);
           }
-          callDebugged(name);
         }
-      }
+      };
     };
-  };
-});
+  });
+}(typeof define == 'function' && define.amd ? define : Atomic));
