@@ -40,6 +40,9 @@ nodes.
 
   // calls the Atomic Component constructor
   return Component({
+    // the ID for this component
+    id: 'components/button',
+    
     // a common name to assist in debugging
     name: 'SamplePack Button by @jakobo',
 
@@ -60,9 +63,9 @@ nodes.
     init: function() {
       $ = this.depends('jquery');
       var self = this;
-      // nodes._root is the default container, either an el passed
+      // nodes.root is the default container, either an el passed
       // to the constructor, or via attach()
-      $(self.elements()._root).on('click', function() {
+      $(self.elements().root).on('click', function() {
         self.trigger(self.events.USE);
       });
     }

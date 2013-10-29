@@ -53,7 +53,7 @@ It exposes the following methods:
           cache: false
         })
         .success(function(data) {
-          self.$_root.append(self._callFormat(data));
+          $(self.elements().root).append(self._callFormat(data));
         });
       },
       _callUrl: function(calls) {

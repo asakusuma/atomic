@@ -52,7 +52,7 @@ It can be configured with the following options:
         var last = 0;
         var maximum = 0;
         var self = this;
-        var $root = $(this.nodes()._root);
+        var $root = $(this.elements().root);
         var $window = $(window);
         if (config.local) {
           $root.on('scroll', Atomic.debounce(function() {

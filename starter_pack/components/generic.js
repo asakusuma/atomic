@@ -37,6 +37,9 @@ exists in wirings.
 
   // calls the Atomic Component constructor
   return Component({
+    // the ID for this component
+    id: 'components/generic',
+    
     // a common name to assist in debugging
     name: 'Generic Component by @jakobo',
 

@@ -37,6 +37,52 @@ function addInit(obj, func, addFront) {
 }
 
 /**
+ * Adds a class to a node (helper method)
+ * @method AbstractComponent.addClass
+ * @private
+ * @param {HTMLElement} el - an html element
+ * @param {String} klass - a class name to apply
+ * @returns {HTMLElement}
+ */
+function addClass(el, klass) {
+  var className = el.className;
+  if (!hasClass(el, klass)) {
+    className += ' ' + klass.replace(/[^A-Z0-9\-\_]/gi, '-');
+    className = className.replace(/^\s+|\s+$/g, '');
+  }
+  el.className = className;
+  return el;
+}
+
+/**
+ * Removes a class from a node
+ * @method AbstractComponent.removeClass
+ * @private
+ * @param {HTMLElement} el - an html element
+ * @param {String} klass - a class name to remove
+ * @returns {HTMLElement}
+ */
+function removeClass(el, klass) {
+  var className = el.className;
+  className = className.replace(new RegExp('(?:^|\\s)' + klass.replace(/[^A-Z0-9\-\_]/gi, '-') + '(?!\\S)', 'g') , '');
+  className = className.replace(/^\s+|\s+$/g, '');
+  el.className = className;
+  return el;
+}
+
+/**
+ * Tests if an element has a class
+ * @method AbstractComponent.hasClass
+ * @private
+ * @param {HTMLElement} el - an html element
+ * @param {String} klass - a class name to test for
+ * @returns {Boolean}
+ */
+function hasClass(el, klass) {
+  return el.className.match(new RegExp('(?:^|\\s)' + klass.replace(/[^A-Z0-9\-\_]/gi, '-') + '(?!\\S)'));
+}
+
+/**
  * Test if the provided object is an array
  * @method AbstractComponent.isArray
  * @private
@@ -171,6 +217,12 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @property {String} AbstractComponent#name
      */
     name: 'AbstractComponent. Override me to improve debugging',
+    
+    /**
+     * The module path for this. Used in debugging and BEM syntax
+     * @property {String} id
+     */
+    id: 'abstractcomponent',
 
     /**
      * An array of dependencies this module needs to run
@@ -244,6 +296,8 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         newListener: false,
         maxListeners: 20
       });
+      
+      this.elements.root = 'The root HTML node of this component (automatically generated)';
 
       // localize the nodes/events/needs variable BEFORE the user starts configuring
       // nodes and needs can accept overwriting
@@ -318,8 +372,8 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     destroy: function () {
       this._isDestroyed = true;
       this.offAny();
-      if(this.elements()._root.parentNode) {
-        this.elements()._root.parentNode.removeChild(this.elements()._root);
+      if(this.elements().root.parentNode) {
+        this.elements().root.parentNode.removeChild(this.elements().root);
       }
       this.removeAllListeners();
       return null;
@@ -544,7 +598,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an HTML element to attach
      */
     attach: function (el) {
-      this.assign('_root', el);
+      this.assign('root', el);
       return this;
     },
 
@@ -553,7 +607,26 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @method AbstractComponent#getRoot
      */
     getRoot: function () {
-      return this.elements()._root;
+      return this.elements().root;
+    },
+    
+    BEM: function(element, modifier) {
+      var className = this.id.replace(/[^A-Z0-9\-\_]/gi, '-');
+      if (element) {
+        className += '__' + element;
+      }
+      if (modifier) {
+        className += '--' + modifier;
+      }
+      return className;
+    },
+    
+    addClass: function(el, className) {
+      return addClass(el, className);
+    },
+    
+    removeClass: function(el, className) {
+      return removeClass(el, className);
     },
 
     /**
@@ -563,6 +636,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
+      this.addClass(this.elements().root, this.BEM());
+      this.addClass(this.elements().root, this.BEM(this.elements.root));
+      this.addClass(this.elements().root, this.BEM(null, 'loading'));
       var deferred = Atomic.deferred();
       var self = this;
       var fetch = [];
@@ -634,8 +710,17 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         return wiringDeferred.promise;
       })
       .then(function() {
+        var els = self.elements._.raw();
+        for (var name in els) {
+          if (els.hasOwnProperty(name)) {
+            self.addClass(self.elements()[name], self.BEM(name));
+          }
+        }
+        self.removeClass(self.elements().root, self.BEM(null, 'loading'));
         deferred.resolve();
       }, function(err) {
+        self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+        self.addClass(self.elements().root, self.BEM(null, 'failed'));
         deferred.reject(err);
       });
 

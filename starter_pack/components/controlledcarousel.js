@@ -23,6 +23,9 @@ governing permissions and limitations under the License.
 
   // calls the Atomic Component constructor
   return Component({
+    // the ID for this component
+    id: 'components/controlledcarousel',
+    
     // a common name to assist in debugging
     name: 'SamplePack ControlledCarousel by @jakobo',
 
@@ -55,7 +58,7 @@ governing permissions and limitations under the License.
       var self = this;
       var buttons = {};
 
-      var carousel = new Carousel(this.elements()._root);
+      var carousel = new Carousel(this.elements().root);
       carousel.on(carousel.events.LAST, function() {
         self.trigger(self.events.LAST);
       })
