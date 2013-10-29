@@ -33,29 +33,6 @@ Atomic.load('components/button', 'wirings/debugtracer')
 }))
 .then(null, Atomic.e);
 
-// Carousel with Buttons
-Atomic.load('components/button', 'components/carousel')
-.then(Atomic.expand(function(Button, Carousel) {
-  var next = new Button(document.getElementById('carousel-next'));
-  var prev = new Button(document.getElementById('carousel-prev'));
-  var carousel = new Carousel(document.getElementById('carousel'));
-
-  // carousel.assign(carousel.nodes.Items, document.getElementById('carousel').getElementsByTagName('li'));
-  carousel.assign(carousel.elements.FOOOOO, document.body);
-
-  carousel.load()
-  .then(next.load())
-  .then(prev.load())
-  .then(function() {
-    carousel.bind(next, next.events.USE, 'next');
-    carousel.bind(prev, prev.events.USE, 'previous');
-    console.log('The Carousel with Buttons has been loaded');
-  })
-  .then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
-
-
 // Simple Select
 Atomic.load('components/select', 'components/carousel')
 .then(Atomic.expand(function(Select) {
@@ -126,10 +103,6 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
   var prev = new Button(document.getElementById('carousel-fetch-prev'));
   var carousel = new Carousel(document.getElementById('carousel-fetch'));
 
-  // TODO: Should wirings be capitalized? Eric
-  // TODO: should we define a standard naming practice to help diffferentiate
-  //   Components vs wirings?  maybe wirings could start with an underscore? Eric
-
   // target in configuration, or in .nodes
   carousel.wireIn(fetch({
     // into: '#jquery.selector', // <= option 1
@@ -153,7 +126,7 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
       count: 10
     }, false, {
       success: function() {
-        carousel.refresh();
+        carousel.render();
       },
       failure: function() {
         console.log('wtf happened?');
