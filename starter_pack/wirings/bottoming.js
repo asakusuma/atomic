@@ -33,54 +33,57 @@ It can be configured with the following options:
   * local(boolean) if true, the local container will be watched instead of
     the window
 */
-((typeof define == 'function' && define.amd) ? define : Atomic)('wirings/bottoming', [], function() {
-  return function(config) {
-    var $;
+(function(define) {
+  define('wirings/bottoming', [], function() {
 
-    config = config || {};
-    config.delay = config.delay || 300;
-    config.direction = config.direction || 'y';
-    config.local = config.local || false;
-    config.tolerance = config.tolerance || 300;
+    return function(config) {
+      var $;
 
-    return {
-      events: {
-        'BOTTOMOUT': 'occurs when the container bottoms out'
-      },
-      init: function() {
-        $ = this.depends('jquery');
-        var last = 0;
-        var maximum = 0;
-        var self = this;
-        var $root = $(this.elements().root);
-        var $window = $(window);
-        if (config.local) {
-          $root.on('scroll', Atomic.debounce(function() {
-            var scroll = (config.direction === 'x') ? $root.scrollLeft() : $root.scrollTop();
-            if (scroll <= last) {
-              return;
-            }
-            last = scroll;
-            maximum = (config.direction === 'x') ? $root.width() : $root.height();
-            if (last + config.tolerance > maximum) {
-              self.trigger(self.events.BOTTOMOUT);
-            }
-          }, config.delay));
+      config = config || {};
+      config.delay = config.delay || 300;
+      config.direction = config.direction || 'y';
+      config.local = config.local || false;
+      config.tolerance = config.tolerance || 300;
+
+      return {
+        events: {
+          'BOTTOMOUT': 'occurs when the container bottoms out'
+        },
+        init: function() {
+          $ = this.depends('jquery');
+          var last = 0;
+          var maximum = 0;
+          var self = this;
+          var $root = $(this.elements().root);
+          var $window = $(window);
+          if (config.local) {
+            $root.on('scroll', Atomic.debounce(function() {
+              var scroll = (config.direction === 'x') ? $root.scrollLeft() : $root.scrollTop();
+              if (scroll <= last) {
+                return;
+              }
+              last = scroll;
+              maximum = (config.direction === 'x') ? $root.width() : $root.height();
+              if (last + config.tolerance > maximum) {
+                self.trigger(self.events.BOTTOMOUT);
+              }
+            }, config.delay));
+          }
+          else {
+            $window.on('scroll', Atomic.debounce(function() {
+              var scroll = (config.direction === 'x') ? $window.scrollLeft() : $window.scrollTop();
+              if (scroll <= last) {
+                return;
+              }
+              last = scroll;
+              maximum = ((config.direction === 'x') ? $root.offset().left + $root.width() : $root.offset().top + $root.height());
+              if (last + $window.height() > maximum - config.tolerance) {
+                self.trigger(self.events.BOTTOMOUT);
+              }
+            }, config.delay));
+          }
         }
-        else {
-          $window.on('scroll', Atomic.debounce(function() {
-            var scroll = (config.direction === 'x') ? $window.scrollLeft() : $window.scrollTop();
-            if (scroll <= last) {
-              return;
-            }
-            last = scroll;
-            maximum = ((config.direction === 'x') ? $root.offset().left + $root.width() : $root.offset().top + $root.height());
-            if (last + $window.height() > maximum - config.tolerance) {
-              self.trigger(self.events.BOTTOMOUT);
-            }
-          }, config.delay));
-        }
-      }
+      };
     };
-  };
-});
+  });
+}(typeof define == 'function' && define.amd ? define : Atomic));

@@ -33,26 +33,27 @@ component whos logic resides solely in wiring. This is actually
 a great choice if as a developer everything you need already
 exists in wirings.
 */
-((typeof define == 'function' && define.amd) ? define : Atomic)('components/generic', ['Atomic/Component'], function(Component) {
-
-  // calls the Atomic Component constructor
-  return Component({
-    // the ID for this component
-    id: 'components/generic',
+(function(define) {
+  define('components/generic', ['Atomic/Component'], function(Component) {
+    // calls the Atomic Component constructor
+    return Component({
+      // the ID for this component
+      id: 'components/generic',
     
-    // a common name to assist in debugging
-    name: 'Generic Component by @jakobo',
+      // a common name to assist in debugging
+      name: 'Generic Component by @jakobo',
 
-    // no dependencies
-    depends: [],
+      // no dependencies
+      depends: [],
 
-    // no additional nodes needed
-    elements: {},
+      // no additional nodes needed
+      elements: {},
 
-    // no events
-    events: {},
+      // no events
+      events: {},
 
-    // wiring functions to make this work
-    init: function() {}
+      // wiring functions to make this work
+      init: function() {}
+    });
   });
-});
+}(typeof define == 'function' && define.amd ? define : Atomic));
