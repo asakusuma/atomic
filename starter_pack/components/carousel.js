@@ -63,23 +63,14 @@ The Carousel Component provides an API for manipulating a
        */
       init: function() {
         $ = this.depends('jquery');
-        this._index = 0;
-        this._$items = null;
-        this.refresh();
-        this.go(this._index);
-      },
+        this.state({
+          index: 0
+        });
 
-      /**
-       * refresh the list of nodes inside of this component
-       * if you change the DOM structure, you will use this
-       * method to update the component
-       * @method Carousel#refresh
-       * @returns this
-       */
-      refresh: function() {
-        this._$items = $(this.elements().root).children();
-        this._$items.addClass(this.BEM('item'));
-        return this;
+        this.observe('index', this.proxy(this.update, this));
+
+        this._$items = null;
+        this.render();
       },
 
       /**
@@ -101,24 +92,37 @@ The Carousel Component provides an API for manipulating a
           this.trigger(this.events.LAST);
         }
 
-        this._paint(to);
+        this.state('index', to);
+        return this;
+      },
+    
+      /**
+       * refresh the list of nodes inside of this component
+       * if you change the DOM structure, you will use this
+       * method to update the component
+       * @method Carousel#render
+       * @returns this
+       */
+      render: function() {
+        this._$items = $(this.elements().root).children();
+        this._$items.addClass(this.BEM('item'));
+        this._$items.removeClass(this.BEM('item', 'current'));
+        this._$items.eq(this.state('index')).addClass(this.BEM('item', 'current'));
         return this;
       },
 
       /**
        * "repaints" the carousel, changing the selected class
-       * @method Carousel#_paint
+       * @method Carousel#update
        * @private
        * @param {Number} at - the index to change to
        * @returns this
        */
-      _paint: function(at) {
-        var lastValue = this._index;
-
-        this._index = at;
+      update: function(newValue, oldValue, revision) {
+        // detect changes
         this._$items.removeClass(this.BEM('item', 'current'));
-        this._$items.eq(this._index).addClass(this.BEM('item', 'current'));
-        this.trigger(this.events.CHANGE, lastValue, at);
+        this._$items.eq(this.state('index')).addClass(this.BEM('item', 'current'));
+        this.trigger(this.events.CHANGE, oldValue, newValue);
         return this;
       },
 
@@ -151,7 +155,7 @@ The Carousel Component provides an API for manipulating a
        * @method Carousel#next
        */
       next: function() {
-        return this.go(this._index + 1);
+        return this.go(this.state('index') + 1);
       },
 
       /**
@@ -159,7 +163,7 @@ The Carousel Component provides an API for manipulating a
        * @method Carousel#previous
        */
       previous: function() {
-        return this.go(this._index - 1);
+        return this.go(this.state('index') - 1);
       }
     });
   });

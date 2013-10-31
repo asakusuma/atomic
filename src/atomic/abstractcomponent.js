@@ -16,6 +16,8 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
+var INVALID_CLASS_CHARACTERS = /[^A-Z0-9\-\_]/gi;
+
 /**
  * Add an initialization function to an instance object
  * this places the function onto the _inits property
@@ -34,40 +36,6 @@ function addInit(obj, func, addFront) {
   else {
     obj._inits.push(func);
   }
-}
-
-/**
- * Adds a class to a node (helper method)
- * @method AbstractComponent.addClass
- * @private
- * @param {HTMLElement} el - an html element
- * @param {String} klass - a class name to apply
- * @returns {HTMLElement}
- */
-function addClass(el, klass) {
-  var className = el.className;
-  if (!hasClass(el, klass)) {
-    className += ' ' + klass.replace(/[^A-Z0-9\-\_]/gi, '-');
-    className = className.replace(/^\s+|\s+$/g, '');
-  }
-  el.className = className;
-  return el;
-}
-
-/**
- * Removes a class from a node
- * @method AbstractComponent.removeClass
- * @private
- * @param {HTMLElement} el - an html element
- * @param {String} klass - a class name to remove
- * @returns {HTMLElement}
- */
-function removeClass(el, klass) {
-  var className = el.className;
-  className = className.replace(new RegExp('(?:^|\\s)' + klass.replace(/[^A-Z0-9\-\_]/gi, '-') + '(?!\\S)', 'g') , '');
-  className = className.replace(/^\s+|\s+$/g, '');
-  el.className = className;
-  return el;
 }
 
 /**
@@ -262,6 +230,13 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @private
      */
     _inits: [],
+    
+    /**
+     * The internal state object
+     * @property {Object} AbstractComponent#_state
+     * @private
+     */
+    _state: {},
 
     /**
      * A local event emitter
@@ -269,6 +244,14 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @private
      */
     _eventEmitter: null,
+    
+    /**
+     * A local event emitter
+     * used for the observer channel to forcibly separate events from observe
+     * @property {EventEmitter} AbstractComponent#_observableEmitter
+     * @private
+     */
+    _observableEmitter: null,
 
     /**
      * Has this object been destroyed
@@ -292,9 +275,14 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       this._inits = [];
       this.config = {};
       this._eventEmitter = new Atomic._.EventEmitter({
-        wildcard: true,
+        wildcard: false,
         newListener: false,
         maxListeners: 20
+      });
+      this._observableEmitter = new Atomic._.EventEmitter({
+        wildcard: false,
+        newListener: false,
+        maxListeners: 0
       });
       
       this.elements.root = 'The root HTML node of this component (automatically generated)';
@@ -386,7 +374,12 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Function} fn - the callback function
      */
     on: function (name, fn) {
-      this._eventEmitter.on(name, fn);
+      if (name ===  '*') {
+        this._eventEmitter.onAny(fn);
+      }
+      else {
+        this._eventEmitter.on(name, fn);
+      }
       return this;
     },
 
@@ -397,27 +390,17 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
      */
     off: function (name, fn /* optional */) {
-      this._eventEmitter.off(name, fn);
-      return this;
-    },
-
-    /**
-     * Listen to all events emitted from this Component
-     * @method AbstractComponent#onAny
-     * @param {Function} fn - a function to fire on all events
-     */
-    onAny: function (fn) {
-      this._eventEmitter.onAny(fn);
-      return this;
-    },
-
-    /**
-     * Remove a listener from the "listen to everything" group
-     * @method AbstractComponent#offAny
-     * @param {Function} fn - the callback to remove
-     */
-    offAny: function (fn) {
-      this._eventEmitter.offAny(fn);
+      if (name === '*') {
+        if (!fn) {
+          this._eventEmitter.offAll(name);
+        }
+        else {
+          this._eventEmitter.offAny(fn);
+        }
+      }
+      else {
+        this._eventEmitter.off(name, fn);
+      }
       return this;
     },
 
@@ -429,28 +412,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      */
     onOnce: function (name, fn) {
       this._eventEmitter.onOnce(name, fn);
-      return this;
-    },
-
-    /**
-     * Queue a callback to run X times, and then remove itself
-     * @method AbstractComponent#on
-     * @param {String} name - the event name
-     * @param {Number} count - a number of times to invoke the callback
-     * @param {Function} fn - the callback function
-     */
-    onMany: function (name, count, fn) {
-      this._eventEmitter.onMany(name, count, fn);
-      return this;
-    },
-
-    /**
-     * Remove all of the listeners from the given namespace
-     * @method AbstractComponent#offAll
-     * @param {String} name - the event name
-     */
-    offAll: function (name) {
-      this._eventEmitter.offAll(name);
       return this;
     },
 
@@ -489,19 +450,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     trigger: function () {
       var args = [].slice.call(arguments, 0);
       this._eventEmitter.emit.apply(this._eventEmitter, args);
-      return this;
-    },
-
-    /**
-     * Broadcast a global event
-     * Trigger an event on the global event bus
-     * @method AbstractComponent#broadcast
-     * @param {String} name, the event name
-     * @param {Object} ... - any additional arguments to pass in the event
-     */
-    broadcast: function () {
-      var args = [].slice.call(arguments, 0);
-      Atomic.trigger.apply(Atomic, args);
       return this;
     },
 
@@ -591,11 +539,25 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       };
       return this;
     },
+    
+    /**
+     * Proxy a function into a new scope.
+     * @method AbstractComponent#proxy
+     * @param {Function} fn - a function to proxy
+     * @param {Object} scope - the scope to run the function in
+     * @returns {Function}
+     */
+    proxy: function(fn, scope) {
+      return function() {
+        fn.apply(scope, arguments);
+      };
+    },
 
     /**
      * Attach an element to this Component
      * @method AbstractComponent#attach
      * @param {HTMLElement} el - an HTML element to attach
+     * @returns this
      */
     attach: function (el) {
       this.assign('root', el);
@@ -603,13 +565,23 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * get root node
+     * get the root node
      * @method AbstractComponent#getRoot
+     * @returns {HTMLElement}
      */
     getRoot: function () {
       return this.elements().root;
     },
     
+    /**
+     * Provides a helper for Block__Element--Modifier syntax
+     * We use BEM internally in the objects in order to provide a consistent way to
+     * manage CSS classes. The BEM helper creates class names in BEM syntax style
+     * @method AbstractComponent#BEM
+     * @param {String} element - the element part of the BEM syntax or null
+     * @param {String} modifier - the modifer part of the BEM syntax or null
+     * @returns {String}
+     */
     BEM: function(element, modifier) {
       var className = this.id.replace(/[^A-Z0-9\-\_]/gi, '-');
       if (element) {
@@ -621,12 +593,36 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       return className;
     },
     
-    addClass: function(el, className) {
-      return addClass(el, className);
+    /**
+     * Add a class to an element, helper in case jQuery or such isn't available
+     * @method AbstractComponent#addClass
+     * @param {HTMLElement} el - the HTML element
+     * @param {String} klass - the classname to add
+     * @returns this
+     */
+    addClass: function(el, klass) {
+      var className = el.className;
+      if (!hasClass(el, klass)) {
+        className += ' ' + klass.replace(/[^A-Z0-9\-\_]/gi, '-');
+        className = className.replace(/^\s+|\s+$/g, '');
+      }
+      el.className = className;
+      return this;
     },
     
-    removeClass: function(el, className) {
-      return removeClass(el, className);
+    /**
+     * Removes a class from an element, helper in case jQuery or such isn't available
+     * @method AbstractComponent#removeClass
+     * @param {HTMLElement} el - the HTML element
+     * @param {String} klass - the classname to add
+     * @returns this
+     */
+    removeClass: function(el, klass) {
+      var className = el.className;
+      className = className.replace(new RegExp('(?:^|\\s)' + klass.replace(INVALID_CLASS_CHARACTERS, '-') + '(?!\\S)', 'g') , '');
+      className = className.replace(/^\s+|\s+$/g, '');
+      el.className = className;
+      return this;
     },
 
     /**
@@ -636,9 +632,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Object} cb - a callback to run when this is loaded
      */
     load: function (cb) {
-      this.addClass(this.elements().root, this.BEM());
-      this.addClass(this.elements().root, this.BEM(this.elements.root));
-      this.addClass(this.elements().root, this.BEM(null, 'loading'));
+      if (this.elements().root) {
+        this.addClass(this.elements().root, this.BEM());
+        this.addClass(this.elements().root, this.BEM(this.elements.root));
+        this.addClass(this.elements().root, this.BEM(null, 'loading'));
+      }
       var deferred = Atomic.deferred();
       var self = this;
       var fetch = [];
@@ -712,15 +710,19 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       .then(function() {
         var els = self.elements._.raw();
         for (var name in els) {
-          if (els.hasOwnProperty(name)) {
+          if (els.hasOwnProperty(name) && self.elements()[name]) {
             self.addClass(self.elements()[name], self.BEM(name));
           }
         }
-        self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+        if (self.elements().root) {
+          self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+        }
         deferred.resolve();
       }, function(err) {
-        self.removeClass(self.elements().root, self.BEM(null, 'loading'));
-        self.addClass(self.elements().root, self.BEM(null, 'failed'));
+        if (self.elements().root) {
+          self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+          self.addClass(self.elements().root, self.BEM(null, 'failed'));
+        }
         deferred.reject(err);
       });
 
@@ -754,7 +756,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       else {
         for (name in wiring) {
           if (name === 'events') {
-            // TODO: Broken
             for (eventsName in wiring.events) {
               if (wiring.events.hasOwnProperty(eventsName)) {
                 this.events._.add(eventsName, wiring.events[eventsName]);
@@ -791,60 +792,116 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
     /**
      * Overloaded state function for setting and getting the state
-     * @method state
+     * @method AbstractComponent#state
      * @param {Object|String} Either the key to be retrieved or set, or an object
-     * literal representing the new state or an extension of the new state
-     * @param {*} value - Either the value to be set, or a config object for a state
-     * mutation operation.
-     *    @param {Boolean} value.extend - If false, will throw away the old state 
-     *    completely and assign the new object to be the state. Otherwise, will extend
-     *    the state. Defaults to true.
-     *    @param {Boolean} value.overwrite - If reset is set to false, will only extend
-     *    properties that are undefined. Defaults to true.
+     *   literal representing the new state or an extension of the new state
+     * @param {*} value - Either the value to be set, or a boolean specifying the object
+     *   in arg[0] should overwrite the existing state
      */
-    state: function(firstArg, secondArg) {
-      if(typeof firstArg == 'object') {
-        //Setting the state object
+    state: function(one, two, undefined) {
+      var args = [].slice.call(arguments, 0);
+      var name;
+      var values = {};
+      var stateChanges = [];
+      var newState = null;
 
-        //Declare config defaults
-        var config = {
-          extend: true,
-          overwrite: true
-        };
-        if(typeof secondArg == 'object') {
-          _.extend(config, secondArg);
+      if (typeof args[1] === 'undefined') {
+        if (typeof args[0] === 'undefined') {
+          for (name in this._state) {
+            if (this._state.hasOwnProperty(name)) {
+              values[name] = this._state[name].value;
+            }
+          }
+          return values;
         }
-
-        if(config.extend && config.overwrite) {
-          //If we are extending, and want to overwrite
-          //old state properties with new state properties
-          _.extend(this.state, firstArg);
-
-        } else if(config.extend) {
-          //If we are extending, but we don't want to mutate
-          //any existing properties
-          _.defaults(this.state, firstArg);
-
-        } else {
-          //If we want to reset the state comletely with
-          //the new state
-          this.state = obj;
+        else if (typeof args[0] === 'string') {
+          return this._state[args[0]].value;
         }
-        this.render();
-
-      } else if(typeof firstArg == 'string' && secondArg) {
-        //Setting a state property
-        this.state[firstArg] = secondArg;
-        this.render();
-
-      } else if(typeof firstArg == 'string') {
-        //Retrieve a state property
-        return this.state[firstArg];
-
-      } else {
-        //Retrieve the entire state object
-        return this.state;
       }
+      
+      if(typeof args[0] === 'object') {
+        for (name in args[0]) {
+          if (args[0].hasOwnProperty(name)) {
+            // overwrite if "true" or not set yet
+            if (args[1]) {
+              // overwrite
+              this._state[name].rev++;
+              this._state[name].lastValue = this._state[name].value;
+              this._state[name].value = args[0][name];
+            }
+            else if (typeof this._state[name] === 'undefined') {
+              // never defined, new state object
+              this._state[name] = {
+                rev: 0,
+                value: args[0][name],
+                lastValue: undefined
+              };
+            }
+              
+            stateChanges.push(name);
+          }
+        }
+      }
+      
+      if (typeof args[0] === 'string') {
+        if (typeof this._state[args[0]] === 'undefined') {
+          this._state[args[0]] = {
+            rev: 0,
+            value: args[1],
+            lastValue: undefined
+          };
+        }
+        else {
+          this._state[args[0]].rev++;
+          this._state[args[0]].lastValue = this._state[args[0]].value;
+          this._state[args[0]].value = args[1];
+        }
+        stateChanges.push(args[0]);
+      }
+      
+      // we should have a set of items in stateChanges we need to now trigger observer
+      // changes for each changed item
+      for (var i = 0, len = stateChanges.length; i < len; i++) {
+        newState = this._state[stateChanges[i]];
+        this._observableEmitter.emit(stateChanges[i], newState.value, newState.lastValue, newState.rev);
+      }
+    },
+    
+    /**
+     * Listen for data changes in the state
+     * @method AbstractComponent#observe
+     * @param {String} name - the data name
+     * @param {Function} fn - the callback function
+     */
+    observe: function (name, fn) {
+      if (name ===  '*') {
+        this._observableEmitter.onAny(fn);
+      }
+      else {
+        this._observableEmitter.on(name, fn);
+      }
+      return this;
+    },
+
+    /**
+     * Remove a listener for data changes
+     * @method AbstractComponent#unobserve
+     * @param {String} name - the data name to remove callbacks from
+     * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
+     */
+    unobserve: function (name, fn /* optional */) {
+      if (name === '*') {
+        if (!fn) {
+          this._observableEmitter.offAll(name);
+        }
+        else {
+          this._observableEmitter.offAny(fn);
+        }
+      }
+      else {
+        this._observableEmitter.off(name, fn);
+      }
+      return this;
     },
 
     /**
@@ -853,17 +910,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @returns this
      */
     render: function() {
-      return this;
-    },
-
-    /**
-     * Can be overridden to update the component's internal state based on the
-     * current DOM. This is really useful when you are pulling in content via
-     * innerHTML, and want the component to reflect this new information
-     * @method AbstractComponent#update
-     * @returns this
-     */
-    update: function() {
       return this;
     }
   };

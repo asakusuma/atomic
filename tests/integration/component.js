@@ -141,49 +141,26 @@ asyncTest('sanity test for on/off/emit', 2, function() {
 
 // ======================================================================
 
-module('verification of wiring functionality', {
-  setup: function() {
-    var deferred = Atomic.deferred();
-    deferred.resolve();
-    ATOMIC_LOAD_STUB = sinon.stub(Atomic, 'load');
-    ATOMIC_LOAD_STUB.returns(deferred.promise);
-  },
-  teardown: function() {
-    Atomic.load.restore();
-  }
-});
-
-asyncTest('augmentation via wirings', 7, function() {
-  var counter = 0;
+module('verification of observer functionality');
+asyncTest('observable events triggered using state', 3, function() {
   var Component = Atomic.Component({
     init: function() {
-      ok(true, 'main init function called');
-      counter++;
-      equal(counter, 1, 'init chain: main init called in first slot');
+      this.state({
+        foo: 3
+      });
     }
   });
-  
-  var component = new Component();
-  component.wireIn({
-    init: function() {
-      ok(true, 'wiring init function called');
-      counter++;
-      equal(counter, 2, 'init chain: wiring init called in second slot');
-    },
-    events: {
-      'NEW': 'this event did not exist before'
-    },
-    testMethod: function() {
-      ok(true, 'test method exists and can be called');
-    }
-  });
-  
-  equal(typeof component.testMethod, 'function', 'wired in methods are immediately available');
-  equal(typeof component.events.NEW, 'string', 'wired in events are immediately available');
 
-  component.load()
+  var foo = new Component();
+  foo.load()
   .then(function() {
-    component.testMethod();
-    start();
-  });
+    foo.observe('foo', function(newV, oldV, rev) {
+      equal(newV, 5, 'new value exists');
+      equal(oldV, 3, 'old value exists');
+      equal(rev, 1, 'revision set');
+      start();
+    });
+    foo.state('foo', 5);
+  }, Atomic.e)
+  .then(null, Atomic.e);
 });
