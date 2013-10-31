@@ -1,9 +1,9 @@
 {
+  "private": true,
   "name": "atomic",
   "version": "0.0.0",
   "description": "Atomic Build Utilities",
   "author": "LinkedIn",
-  "private": true,
   "maintainers": [],
   "licenses": [
     {
@@ -14,6 +14,7 @@
   "repositories": [],
   "implements": [],
   "devDependencies": {
+    "fiber": "~1.0.4",
     "express": "3.0.0",
     "grunt": "~0.4.0",
     "grunt-contrib-compress": "~0.4.1",
@@ -25,6 +26,7 @@
     "grunt-shell": "~0.2.1",
     "grunt-express": "~0.2.0",
     "grunt-include-replace": "~0.1.0",
+    "grunt-bower-task": "~0.3.2",
     "venus": "~2.1.14"
   },
   "dependencies": {},

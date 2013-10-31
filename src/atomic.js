@@ -55,6 +55,7 @@ governing permissions and limitations under the License.
   var module;
   var exports;
   var process;
+  var require = null;
   var define = null;
 
   // imported APIs
@@ -181,6 +182,7 @@ governing permissions and limitations under the License.
    * @private
    */
   function resetCjs() {
+    require = undefined;
     module = undefined;
     exports = undefined;
     process = undefined;
@@ -196,7 +198,8 @@ governing permissions and limitations under the License.
   // FIBER
   // --------------------------------------------------
   cjsHarness();
-  //@@include('./lib/fiber.js')
+  // from external library
+  //@@include('../tmp/lib/fiber/fiber.js')
   Atomic._.Fiber = module.exports;
   resetCjs();
 
@@ -204,7 +207,8 @@ governing permissions and limitations under the License.
   // EVENT EMITTER 2
   // --------------------------------------------------
   cjsHarness();
-  //@@include('./lib/eventemitter2.js')
+  // from external library
+  //@@include('../tmp/lib/eventemitter2/eventemitter2.js')
   Atomic._.EventEmitter = module.exports.EventEmitter2;
   resetCjs();
 
@@ -212,7 +216,8 @@ governing permissions and limitations under the License.
   // WHEN.JS Promises/A+
   // --------------------------------------------------
   cjsHarness();
-  //@@include('./lib/when.js')
+  // from external library
+  //@@include('../tmp/lib/when/when.js')
   Atomic._.When = module.exports;
   resetCjs();
 
