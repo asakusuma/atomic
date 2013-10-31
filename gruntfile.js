@@ -108,6 +108,11 @@ module.exports = function (grunt) {
      * copy: copy files that need no modification
      */
     copy: {
+      fiber: {
+        files: [
+          {src: ['./node_modules/fiber/src/fiber.js'], dest: './tmp/lib/fiber/fiber.js', filter: 'isFile'}
+        ]
+      },
       atomic: {
         files: [
           {src: './tmp/atomic.js', dest: '<%=output_files.main %>', filter: 'isFile'},
@@ -135,6 +140,22 @@ module.exports = function (grunt) {
           {expand: true, cwd: './src/compat/', src: ['**'], dest: '<%= output_files.compat %>'},
           {expand: true, cwd: './src/compat/', src: ['**'], dest: '<%= last_output_files.compat %>'}
         ]
+      }
+    },
+    
+    /**
+     * Do a bower install of browser-ready components Atomic needs
+     */
+    bower: {
+      install: {
+        options: {
+          targetDir: './tmp/lib',
+          layout: 'byComponent',
+          install: true,
+          verbose: false,
+          cleanTargetDir: true,
+          cleanBowerDir: true
+        }
       }
     },
 
@@ -252,6 +273,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-contrib-compress');
+  grunt.loadNpmTasks('grunt-bower-task');
 
   // from https://github.com/gruntjs/grunt/issues/236
   grunt.registerMultiTask('wait', 'Wait for a set amount of time.', function () {
@@ -269,6 +291,8 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('build', [
+    'bower:install',
+    'copy:fiber', // fiber is in NPM, not bower, so copy it over
     'jshint',
     'shell:tag',
     'includereplace:atomic',

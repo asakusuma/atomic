@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "atomic",
+  "version": "0.0.0",
+  "homepage": "",
+  "authors": [
+    "LinkedIn"
+  ],
+  "description": "UI Framework Build Dependencies",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "eventemitter2": "~0.4.13",
+    "when": "~2.5.1"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
