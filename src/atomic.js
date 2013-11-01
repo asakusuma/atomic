@@ -38,6 +38,9 @@ governing permissions and limitations under the License.
   };
   Atomic.loader = {
     init: function() {},
+    register: function(id, exports) {
+      Atomic._.modules[id] = exports;
+    },
     load: function(deps) {
       var resolved = [];
       for (var i = 0, len = deps.length; i < len; i++) {

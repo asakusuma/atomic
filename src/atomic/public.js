@@ -103,8 +103,13 @@ var __Atomic_Public_API__ = {
       initPromise = Atomic.when(true);
     }
     else {
+      // as part of init, save atomic/component and atomic into the loader system
       Atomic_load_initialized = true;
       initPromise = Atomic.when(Atomic.loader.init());
+      initPromise.then(function() {
+        Atomic.loader.register('Atomic', Atomic);
+        Atomic.loader.register('Atomic/Component', Atomic.Component);
+      });
     }
 
     // when initialization is complete, then call load
