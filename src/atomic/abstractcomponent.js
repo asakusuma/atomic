@@ -624,6 +624,32 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       el.className = className;
       return this;
     },
+    
+    /**
+     * Wait for the async completion of a function
+     * @see Atomic.when
+     */
+    when: function() {
+      return Atomic.when.apply(Atomic, arguments);
+    },
+    
+    /**
+     * Wait for the async completion of a collection of functions
+     * @see Atomic.whenAll
+     */
+    whenAll: function() {
+      return Atomic.whenAll.apply(Atomic, arguments);
+    },
+    
+    /**
+     * Wait for the async completion of a collection of functions
+     * Unlike whenAll, these are ran one after another instead of in
+     * parallel.
+     * @see Atomic.whenAllSync
+     */
+    whenAllSync: function() {
+      return Atomic.whenAllSync.apply(Atomic, arguments);
+    },
 
     /**
      * Load the Component, resolve all dependencies
