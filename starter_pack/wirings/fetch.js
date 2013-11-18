@@ -30,8 +30,8 @@ governing permissions and limitations under the License.
 // 3) require static nodes
 // Eric
 (function(define) {
-  define('wirings/fetch', [], function() {
-    return function(config) {
+  define('wirings/fetch', ['Atomic/Wiring'], function(Wiring) {
+    return Wiring(function(config) {
       config = config || {};
 
       var endpoint = config.endpoint;
@@ -88,7 +88,7 @@ governing permissions and limitations under the License.
             else {
               self.elements().root.innerHTML += response;
             }
-            deferred.resolve();
+            deferred.fulfill();
           }).error(function(err) {
             deferred.reject(err);
           });
@@ -96,6 +96,6 @@ governing permissions and limitations under the License.
           return deferred.promise;
         }
       };
-    };
+    });
   });
 }(typeof define == 'function' && define.amd ? define : Atomic));

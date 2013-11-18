@@ -23,14 +23,24 @@ governing permissions and limitations under the License.
  */
 
 /**
- * A helper method to return the When object. Aids in unit
+ * A helper method to return the promises library object. Aids in unit
  * testing the public functions
- * @method Atomic.getWhen
+ * @method Atomic.getPromiseLibrary
  * @private
- * @returns {Object} the When.js interface
+ * @returns {Object} the promise library
  */
-function getWhen() {
-  return Atomic._.When;
+function getPromiseLibrary() {
+  return Atomic._.Bluebird;
+}
+
+/**
+ * A helper method to test if the supplied object is an array
+ * @method Atomic.isArray
+ * @private
+ * @returns {Boolean}
+ */
+function isArray(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
 }
 
 // holds the previous Atomic reference
@@ -78,10 +88,6 @@ var __Atomic_Public_API__ = {
     var deferred = Atomic.deferred();
     var args = [].slice.call(arguments, 0);
 
-    function isArray(obj) {
-      return Object.prototype.toString.call(obj) === '[object Array]';
-    }
-
     // wrap the callback if it exists
     if (typeof args[args.length - 1] === 'function') {
       deferred.promise.then(args[args.length - 1]);
@@ -119,7 +125,7 @@ var __Atomic_Public_API__ = {
       return Atomic.when(Atomic.loader.load(args));
     })
     .then(function(needs) {
-      return deferred.resolve(needs);
+      return deferred.fulfill(needs);
     }, function(reason) {
       return deferred.reject(reason);
     });
@@ -287,11 +293,12 @@ var __Atomic_Public_API__ = {
    * @returns {Object} Promise
    */
   deferred: function(promise) {
+    var lib = getPromiseLibrary();
     if (promise) {
-      return getWhen()(promise);
+      lib.cast(promise);
     }
     else {
-      return getWhen().defer();
+      return lib.pending();
     }
   },
 
@@ -305,13 +312,19 @@ var __Atomic_Public_API__ = {
    * @returns {Object} Promise
    */
   when: function(whennable) {
-    var deferred = Atomic.deferred();
-    getWhen()(whennable, function(resolveResult) {
-      return deferred.resolve(resolveResult);
-    }, function(rejectResult) {
-      return deferred.reject(rejectResult);
-    });
-    return deferred.promise;
+    return getPromiseLibrary().cast(whennable);
+  },
+  
+  /**
+   * Convert a collection of functions into a promise that runs in paralell
+   * This is useful when loading a bunch of components inside of a control and
+   * want to simply listen for when all of them are ready
+   * @method Atomic.whenAll
+   * @param {Array} the array of functions to convert to a single promise
+   * @returns {Object} Promise
+   */
+  whenAll: function(whens) {
+    return getPromiseLibrary().all(whens);
   },
 
   /**

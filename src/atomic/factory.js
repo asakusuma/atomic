@@ -35,7 +35,7 @@ var __Atomic_Private_Factory_Methods__ = {
       'elements':       false,
       'events':         false,
       'init':           true,
-      '_inits':         true,
+      '_init':          true,
       '_eventEmitter':  true,
       '_isDestroyed':   true
     };
@@ -63,7 +63,7 @@ var __Atomic_Private_Factory_Methods__ = {
       additionalMethods.init = function() {
         base.init.apply(this, arguments);
         if (typeof objLiteral.init === 'function') {
-          this.wireIn(objLiteral.init, true);
+          this._init = objLiteral.init;
         }
       };
 
@@ -88,6 +88,11 @@ var __Atomic_Public_Factory_Methods__ = {
    */
   Component: function(objLiteral) {
     return __Atomic_Private_Factory_Methods__.Factory(objLiteral);
+  },
+  
+  Wiring: function(wiring) {
+    wiring.__atomic = true;
+    return wiring;
   }
 };
 

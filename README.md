@@ -21,10 +21,9 @@ Why would you avoid Atomic?
 
 First, add a script loader to the page. Any loader that supports AMD or CommonJS will work. Offhand, we can think of a few:
 
-* [Inject](http://www.injectjs.com) (AMD, CJS)
+* [Inject](http://www.injectjs.com) (AMD)
 * [RequireJS](http://www.requirejs.org) (AMD)
-* [Curl](https://github.com/cujojs/curl) (AMD, CJS)
-* [Cajon](https://github.com/requirejs/cajon) (CJS)
+* [Curl](https://github.com/cujojs/curl) (AMD)
 
 You'll then want to "link" the loader to Atomic. This is done by augmenting `Atomic.Loader` with your needed method:
 
@@ -37,7 +36,8 @@ Atomic.augment(Atomic.loader, {
   load: function(dependencies) {
     var deferred = Atomic.deferred();
     // call your loader's asynchronous download function
-    // and then return a promise
+    // and then fulfill your promise with the modules
+    // deferred.fulfill([your, deps, here])
     return deferred.promise;
   }
 });
@@ -92,7 +92,7 @@ You got it. The examples/ directory shows how you can use Atomic in many differe
 "grunt test" or "grunt itest" if you like using your own browser.
 
 # Built on Greatness
-* [When](https://github.com/cujojs/when) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
+* [Bluebird](https://github.com/petkaantonov/bluebird) and a great read about why [Promises are pretty sweet](https://gist.github.com/domenic/3889970)
 * [Fiber](https://github.com/linkedin/Fiber) for OOP sugar internally
 * [Eventemitter2](https://github.com/hij1nx/EventEmitter2) for a standalone event system
 

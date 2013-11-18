@@ -24,7 +24,7 @@ Atomic.load('components/button', 'wirings/debugtracer')
   // build the button and add echo wiring
   var button = new Button(document.getElementById('my-button'));
   
-  button.wireIn(debugtracer());
+  button.wire(debugtracer());
 
   button.load().then(function() {
     console.log('The Button with Debug Tracer wiring has loaded');
@@ -51,9 +51,11 @@ Atomic.load('components/button', 'components/carousel')
   // sample assignment
   carousel.assign(carousel.elements.FOOOOO, document.body);
 
-  carousel.load()
-  .then(next.load())
-  .then(prev.load())
+  Atomic.whenAll([
+    carousel.load(),
+    next.load(),
+    prev.load()
+  ])
   .then(function() {
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
@@ -71,7 +73,7 @@ Atomic.load('components/button', 'components/carousel')
   var carousel = new Carousel(document.getElementById('carousel-wraps'));
 
   // example of an inline wiring to add wrapping functionality
-  carousel.wireIn(function() {
+  carousel.wire(function() {
     carousel.wrap('go', function(go, to) {
       if (to < 0) {
         to = this.size() - 1;
@@ -104,7 +106,7 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
   var carousel = new Carousel(document.getElementById('carousel-fetch'));
 
   // target in configuration, or in .nodes
-  carousel.wireIn(fetch({
+  carousel.wire(fetch({
     // into: '#jquery.selector', // <= option 1
     // append: true,
     endpoint: 'data.html'

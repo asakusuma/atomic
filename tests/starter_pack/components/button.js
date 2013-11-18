@@ -4,29 +4,25 @@
  * @venus-include ../../_resources/jquery-1.9.1.min.js
  * @venus-include ../../_resources/sinon.js
  * @venus-include ../../../dist/recent/atomic.js
- * @venus-include ../../../starter_pack/extras/atomic-test.js
+ * @venus-include ../../../tmp/lib/redefine/redefine.js
  * @venus-include ../../../starter_pack/components/button.js
  */
 
+redefine().save.as('button')
+.let('Atomic/Component').be(Atomic.Component);
+
 module('starter pack button', {
-  setup: function() {
-    AMD.init();
-    define.callsArgWith(2, Atomic.Component);
-  },
-  teardown: function() {
-    AMD.restore();
-  }
+  setup: function() {},
+  teardown: function() {}
 });
 asyncTest('exists', 1, function() {
-  AMD.run();
-  var Button = AMD.exports[0];
+  var Button = redefine.exports('button');
   ok(Button, 'exists');
   start();
 });
 
 asyncTest('interaction', 1, function() {
-  AMD.run();
-  var Button = AMD.exports[0];
+  var Button = redefine.exports('button');
   
   $('body').append('<button id="yay">yay</button>');
   var button = new Button($('#yay').get(0));

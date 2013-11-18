@@ -220,8 +220,8 @@ governing permissions and limitations under the License.
   // --------------------------------------------------
   cjsHarness();
   // from external library
-  //@@include('../tmp/lib/when/when.js')
-  Atomic._.When = module.exports;
+  //@@include('../tmp/lib/bluebird/js/browser/bluebird.js')
+  Atomic._.Bluebird = module.exports;
   resetCjs();
 
   // --------------------------------------------------
@@ -256,4 +256,5 @@ governing permissions and limitations under the License.
   var defineCall = (typeof define == 'function' && define.amd) ? define : Atomic;
   defineCall('Atomic', [], function() { return Atomic; });
   defineCall('Atomic/Component', [], function() { return Atomic.Component; });
+  defineCall('Atomic/Wiring', [], function() { return Atomic.Wiring; });
 })(this);

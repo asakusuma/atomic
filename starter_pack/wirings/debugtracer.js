@@ -20,27 +20,29 @@ governing permissions and limitations under the License.
 This wiring adds debugging ability to all methods within a component
 */
 (function(define) {
-  define('wirings/debugtracer', [], function() {
-    return function(config) {
+  define('wirings/debugtracer', ['Atomic/Wiring'], function(Wiring) {
+    return Wiring(function(config) {
       return {
         init: function() {
           var ignore = {
-            before: 1,
-            after: 1,
+            wrap: 1,
             needs: 1,
             nodes: 1,
-            events: 1
+            events: 1,
+            elements: 1
           };
           var self = this;
           var tracerId = 0;
           var callId = 0;
           var callDebugged = function(name) {
             tracerId++;
-            self.before(name, function() {
-              console.log(tracerId + '-' + (++callId) + ': calling ' + name + ' with ', arguments);
-            });
-            self.after(name, function() {
+            self.wrap(name, function(original) {
+              var args = [].slice.call(arguments);
+              args.shift();
+              console.log(tracerId + '-' + (++callId) + ': calling ' + name + ' with ', args);
+              var ret = original.apply(self, args);
               console.log(tracerId + '-' + (callId--) + ': completed ' + name);
+              return ret;
             });
           };
 
@@ -52,6 +54,6 @@ This wiring adds debugging ability to all methods within a component
           }
         }
       };
-    };
+    });
   });
 }(typeof define == 'function' && define.amd ? define : Atomic));
