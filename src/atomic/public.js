@@ -33,6 +33,16 @@ function getWhen() {
   return Atomic._.When;
 }
 
+/**
+ * A helper method to test if the supplied object is an array
+ * @method Atomic.isArray
+ * @private
+ * @returns {Boolean}
+ */
+function isArray(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
 // holds the previous Atomic reference
 var Atomic_noConflict_oldAtomic = context.Atomic;
 
@@ -77,10 +87,6 @@ var __Atomic_Public_API__ = {
   load: function() {
     var deferred = Atomic.deferred();
     var args = [].slice.call(arguments, 0);
-
-    function isArray(obj) {
-      return Object.prototype.toString.call(obj) === '[object Array]';
-    }
 
     // wrap the callback if it exists
     if (typeof args[args.length - 1] === 'function') {
@@ -306,11 +312,107 @@ var __Atomic_Public_API__ = {
    */
   when: function(whennable) {
     var deferred = Atomic.deferred();
+    
     getWhen()(whennable, function(resolveResult) {
       return deferred.resolve(resolveResult);
     }, function(rejectResult) {
       return deferred.reject(rejectResult);
     });
+
+    return deferred.promise;
+  },
+  
+  /**
+   * Convert a collection of functions into a promise that runs in paralell
+   * This is useful when loading a bunch of components inside of a control and
+   * want to simply listen for when all of them are ready
+   * @method Atomic.whenAll
+   * @param {Array} the array of functions to convert to a single promise
+   * @returns {Object} Promise
+   */
+  whenAll: function(whens) {
+    var deferred = Atomic.deferred();
+    var count = whens.length;
+    var resultsObject = {};
+    var rejectsObject = {};
+    var resultsArray = [];
+    var rejectsArray = [];
+    var rejected = false;
+    
+    function resolved() {
+      if (--count > 0) {
+        return;
+      }
+
+      for (var i = 0, len = whens.length; i < len; i++) {
+        if (resultsObject.hasOwnProperty('_' + i)) {
+          resultsArray.push(resultsObject[i]);
+          rejectsArray.push(null);
+        }
+        else if (rejectsObject.hasOwnProperty('_' + i)) {
+          rejected = true;
+          resultsArray.push(null);
+          rejectsArray.push(rejectsObject[i]);
+        }
+      }
+      
+      if (rejected) {
+        return deferred.reject(rejectsArray);
+      }
+      else {
+        return deferred.resolve(resultsArray);
+      }
+    }
+    
+    function arrayWhen(idx, statement) {
+      getWhen()(statement, function(resolveResult) {
+        resultsObject['_' + idx] = resolveResult;
+        resolved();
+      }, function(rejectResult) {
+        rejectsObject['_' + idx] = rejectResult;
+        resolved();
+      });
+    }
+    
+    for (i = 0, len = whens.length; i < len; i++) {
+      arrayWhen(i, whens[i]);
+    }
+    
+    return deferred.promise;
+  },
+  
+  /**
+   * A synchronous version of whenAll
+   * @see Atomic.whenAll
+   */
+  whenAllSync: function(whens) {
+    var deferred = Atomic.deferred();
+    var resultsArray = [];
+    var rejectsArray = [];
+    var tempWhens = whens;
+    
+    function promise(statement) {
+      getWhen()(statement, function(resolveResult) {
+        resultsArray.push(resolveResult);
+        rejectsArray.push(null);
+        var nextWhen = tempWhens.shift();
+        
+        if (!nextWhen) {
+          return deferred.resolve(resultsArray);
+        }
+        else {
+          promise(nextWhen);
+        }
+      }, function(rejectResult) {
+        resultsArray.push(null);
+        rejectsArray.push(rejectResult);
+        
+        return deferred.reject(rejectsArray);
+      });
+    }
+    
+    promise(tempWhens.shift());
+    
     return deferred.promise;
   },
 

@@ -51,9 +51,11 @@ Atomic.load('components/button', 'components/carousel')
   // sample assignment
   carousel.assign(carousel.elements.FOOOOO, document.body);
 
-  carousel.load()
-  .then(next.load())
-  .then(prev.load())
+  Atomic.whenAll([
+    carousel.load(),
+    next.load(),
+    prev.load()
+  ])
   .then(function() {
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
