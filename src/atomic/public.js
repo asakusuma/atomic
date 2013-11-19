@@ -43,6 +43,16 @@ function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]';
 }
 
+/**
+ * A helper method to test if the supplied object is an array
+ * @method Atomic.isArray
+ * @private
+ * @returns {Boolean}
+ */
+function isArray(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
 // holds the previous Atomic reference
 var Atomic_noConflict_oldAtomic = context.Atomic;
 
