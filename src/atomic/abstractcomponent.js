@@ -19,26 +19,6 @@ governing permissions and limitations under the License.
 var INVALID_CLASS_CHARACTERS = /[^A-Z0-9\-\_]/gi;
 
 /**
- * Add an initialization function to an instance object
- * this places the function onto the _inits property
- * of the instance, and can optionally put it at the front
- * of the init collection
- * @method AbstractComponent.addInit
- * @private
- * @param {Object} obj - the object to augment with a new init
- * @param {Function} func - the function to add to obj
- * @param {Boolean} addFront - if true, the Func is placed at the front
- */
-function addInit(obj, func, addFront) {
-  if (addFront) {
-    obj._inits.unshift(func);
-  }
-  else {
-    obj._inits.push(func);
-  }
-}
-
-/**
  * Tests if an element has a class
  * @method AbstractComponent.hasClass
  * @private
@@ -224,12 +204,12 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     config: {},
 
     /**
-     * An array of async functions, responsible for "wiring" everything together
+     * The real initialization function when called in response to load
      * This is where app logic resides
-     * @property {Array} AbstractComponent#_inits
+     * @property {Array} AbstractComponent#_init
      * @private
      */
-    _inits: [],
+    _init: null,
     
     /**
      * The internal state object
@@ -271,8 +251,8 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     init: function (el, overrides) {
       var name, nodeName;
 
-      // set inits, assigned, etc all to local instance-level variables
-      this._inits = [];
+      // set assigned, etc all to local instance-level variables
+      this._init = function() {};
       this.config = {};
       this._eventEmitter = new Atomic._.EventEmitter({
         wildcard: false,
@@ -491,38 +471,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * augment a method by executing a custom function before executing a method
-     * @method AbstractComponent#before
-     * @param {String} method - method to augment
-     * @param {Function} fn - custom function to execute before executing the method
-     */
-    before: function(method, fn) {
-      var old = this[method];
-      var that = this;
-      this[method] = function() {
-        fn.apply(that, arguments);
-        old.apply(that, arguments);
-      };
-      return this;
-    },
-
-    /**
-     * augment a method by executing a custom function after executing a method
-     * @method AbstractComponent#before
-     * @param {String} method - method to augment
-     * @param {Function} fn - custom function to execute after executing the method
-     */
-    after: function(method, fn) {
-      var old = this[method];
-      var that = this;
-      this[method] = function() {
-        old.apply(that, arguments);
-        fn.apply(that, arguments);
-      };
-      return this;
-    },
-
-    /**
      * Wrap a method with a new function
      * The new function gets the old function as its first parameter
      * @method AbstractComponent#wrap
@@ -535,7 +483,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       this[method] = function() {
         var args = [].slice.call(arguments, 0);
         args.unshift(old);
-        fn.apply(that, args);
+        return fn.apply(that, args);
       };
       return this;
     },
@@ -680,13 +628,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       Atomic.load.apply(Atomic, fetch)
       .then(function(values) {
         var wiringDeferred = Atomic.deferred(),
-            inits,
-            len,
             promise,
-            createWiringCall,
             i,
             n;
-
 
         // populate values resolution into the this.depends()
         for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
@@ -694,25 +638,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         }
 
         // dynamically create promise chain
-        // inits[0] runs automatically
-        inits = self._inits;
-        len = inits.length;
-        promise = Atomic.when(inits[0].call(self)),
-
-        // creates a call to a wiring function. Done outside of the
-        // wiring for-loop
-        createWiringCall = function(fn) {
-          return function() {
-            // run only on then() resolution to prevent premature
-            // resolution of the promise chain
-            fn.call(self);
-          };
-        };
-
-        // replace itself with a new promise
-        for (n = 1; n < len; n++) {
-          promise = promise.then(createWiringCall(inits[n]));
-        }
+        promise = Atomic.when(self._init.call(self));
 
         // if there is a callback, we can then handle it
         // by attaching it to the end of the promise chain
@@ -756,61 +682,115 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     },
 
     /**
-     * Adds additional wiring commands to this Component
-     * wiring is done in response to a load() call. An optional idx
-     * can be provided, allowing you to insert your wiring wherever you
-     * need to.
-     * @method AbstractComponent#wireIn
-     * @param {Function|Object} wiring - a functon to run in response to load(), or an object
+     * Adds additional functions and properties to this Component
+     * wiring is done in response to a load() call.
+     * @method AbstractComponent#wire
+     * @param {Function|Object|AbstractWiring} wiring - a functon to run in response to load(), or an object
      *  literal containing an init function to be executed with load(), and public methods
      *  to decorate the component instance
-     * @param {Boolean} addFront - if false, add the wiring to the end of the
-     *  wirings array. If true, add the wiring to the beginning of the array.
-     *  by default, addFront is false
      */
-    wireIn: function(wiring, addFront) {
-      var name, nodesName, eventsName, i, len;
-
-      // wiring can be set to a single function which defaults
-      // to an initializer
-      if (typeof wiring === 'function') {
-        addInit(this, wiring, addFront);
+    wire: function(wiring) {
+      var name, nodesName, eventsName, i, len, properties, cleanName;
+      var wrapsPre = /^[\[\]]/;
+      var wrapsPost = /[\[\]]$/;
+      var self = this;
+      
+      function noop() {
+        return function() {};
       }
-      // wiring can also be an object literal.  In this case, iterate through
-      // the keys, add the init function, and append the other methods to the
-      // class prototype
+      
+      function wrapInit(obj, fn) {
+        obj.wrap('_init', function(prev) {
+          prev();
+          fn.call(obj);
+        });
+      }
+      
+      // if the wiring is a function and has the __atomic property, error
+      // if just a function, it's an "init"
+      // if it's an object, it's already a wiring ready to go
+      if (typeof wiring === 'function') {
+        if (wiring.__atomic) {
+          throw new Error('please configure a wiring before calling wire()');
+        }
+        properties = {
+          init: wiring
+        };
+      }
       else {
-        for (name in wiring) {
-          if (name === 'events') {
-            for (eventsName in wiring.events) {
-              if (wiring.events.hasOwnProperty(eventsName)) {
-                this.events._.add(eventsName, wiring.events[eventsName]);
-              }
+        properties = wiring;
+      }
+      
+      // iterate through the keys. For each key, handle it
+      for (name in properties) {
+        if (!properties.hasOwnProperty(name)) {
+          continue;
+        }
+        
+        cleanName = name.replace(wrapsPre, '').replace(wrapsPost, '');
+        
+        if (cleanName == '_init') {
+          throw new Error('You cannot wire in "_init". Please use "init" without the underscore.');
+        }
+        
+        // events requires special handling as a property
+        if (name === 'events') {
+          for (eventsName in properties.events) {
+            if (properties.events.hasOwnProperty(eventsName)) {
+              this.properties._.add(eventsName, properties.events[eventsName]);
             }
           }
-          else if (name === 'elements') {
-            for (nodesName in wiring.elements) {
-              if (this.elements[nodesName]) {
-                continue; // we do not overwrite if the Implementor has defined
-              }
-              this.elements._.add(nodesName, wiring.elements[nodesName]);
+          continue;
+        }
+        
+        // the elements collection requires special handling, and doesn't overwrite
+        // any elements that may have been already defined
+        if (name === 'elements') {
+          for (nodesName in properties.elements) {
+            if (this.elements[nodesName]) {
+              continue; // we do not overwrite if the Implementor has defined
             }
+            this.elements._.add(nodesName, properties.elements[nodesName]);
           }
-          else if (name === 'depends') {
-            for (i = 0, len = wiring.depends.length; i < len; i++) {
-              this.depends._.add(wiring.depends[i]);
+          continue;
+        }
+        
+        // the depends collection requires special handling
+        if (name === 'depends') {
+          for (i = 0, len = properties.depends.length; i < len; i++) {
+            this.depends._.add(properties.depends[i]);
+          }
+          continue;
+        }
+        
+        // by default, init is a wrapped function unless you turn on clobbering
+        if (name === 'init' || cleanName === 'init') {
+          // init methods are always done with wrapping unless disabled
+          if (name === ']init[') {
+            this._init = properties[name];
+          }
+          else {
+            wrapInit(this, properties[name]);
+          }
+          continue;
+        }
+        
+        if (typeof properties[name] === 'function') {
+          if (!this[cleanName]) {
+            this[cleanName] = noop();
+          }
+
+          // the default behavior is to clobber
+          // however, if we are told to wrap, we will
+          if (cleanName !== name) {
+            if (name.indexOf('[') === 0) {
+              this.wrap(cleanName, properties[name]);
             }
           }
           else {
-            if (wiring.hasOwnProperty(name)) {
-              if (name === 'init') {
-                addInit(this, wiring[name], addFront);
-              }
-              else {
-                this[name] = wiring[name];
-              }
-            }
+            this[cleanName] = properties[name];
           }
+          continue;
         }
       }
       return this;

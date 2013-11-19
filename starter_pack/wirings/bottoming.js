@@ -34,28 +34,26 @@ It can be configured with the following options:
     the window
 */
 (function(define) {
-  define('wirings/bottoming', [], function() {
-
-    return function(config) {
-      var $;
-
-      config = config || {};
-      config.delay = config.delay || 300;
-      config.direction = config.direction || 'y';
-      config.local = config.local || false;
-      config.tolerance = config.tolerance || 300;
-
+  define('wirings/bottoming', ['Atomic/Wiring'], function(Wiring) {
+    return Wiring(function(config) {
       return {
+        depends: ['jquery'],
         events: {
           'BOTTOMOUT': 'occurs when the container bottoms out'
         },
         init: function() {
+          config.delay = config.delay || 300;
+          config.direction = config.direction || 'y';
+          config.local = config.local || false;
+          config.tollerance = config.tollerance || 300;
+          
           $ = this.depends('jquery');
           var last = 0;
           var maximum = 0;
           var self = this;
           var $root = $(this.elements().root);
           var $window = $(window);
+          
           if (config.local) {
             $root.on('scroll', Atomic.debounce(function() {
               var scroll = (config.direction === 'x') ? $root.scrollLeft() : $root.scrollTop();
@@ -84,6 +82,6 @@ It can be configured with the following options:
           }
         }
       };
-    };
+    });
   });
 }(typeof define == 'function' && define.amd ? define : Atomic));

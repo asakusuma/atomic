@@ -35,8 +35,8 @@ It exposes the following methods:
     manually fetch additional content and attach it to the container
 */
 (function(define) {
-  define('wirings/infinitecontent', [], function() {
-    return function(config) {
+  define('wirings/infinitecontent', ['Atomic/Wiring'], function(Wiring) {
+    return Wiring(function(config) {
       var $;
 
       return {
@@ -69,6 +69,6 @@ It exposes the following methods:
           }
         }
       };
-    };
+    });
   });
 }(typeof define == 'function' && define.amd ? define : Atomic));

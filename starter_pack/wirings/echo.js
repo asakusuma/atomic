@@ -21,8 +21,8 @@ A reusable wiring.
 This is a sample wiring. Go ahead and include it and add "echo" methods
 */
 (function(define) {
-  define('wirings/echo', [], function() {
-    return function(config) {
+  define('wirings/echo', ['Atomic/Wiring'], function(Wiring) {
+    return Wiring(function(config) {
       return {
         init: function() {
           this.echo('Initialized Echo wiring');
@@ -39,6 +39,6 @@ This is a sample wiring. Go ahead and include it and add "echo" methods
           console.warn(msg);
         }
       };
-    };
+    });
   });
 }(typeof define == 'function' && define.amd ? define : Atomic));
