@@ -16,7 +16,7 @@ governing permissions and limitations under the License.
 */
 
 // atomic.js
-(function(context, undefined) {
+(function(context, getDefine, undefined) {
   if (context.Atomic) {
     return;
   }
@@ -60,6 +60,12 @@ governing permissions and limitations under the License.
   var process;
   var require = null;
   var define = null;
+  var globalDefine = null;
+  
+  try {
+    globalDefine = getDefine();
+  }
+  catch(e) {}
 
   // imported APIs
   var __Atomic_AbstractComponent__;
@@ -253,8 +259,8 @@ governing permissions and limitations under the License.
   context.Atomic = Atomic;
   
   // assign all the pieces to modules
-  var defineCall = (typeof define == 'function' && define.amd) ? define : Atomic;
+  var defineCall = (typeof globalDefine == 'function' && globalDefine.amd) ? globalDefine : Atomic;
   defineCall('Atomic', [], function() { return Atomic; });
   defineCall('Atomic/Component', [], function() { return Atomic.Component; });
   defineCall('Atomic/Wiring', [], function() { return Atomic.Wiring; });
-})(this);
+})(this, function() { return define; });
