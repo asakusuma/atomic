@@ -55,7 +55,7 @@ asyncTest('can get a list of elements and assign them', 3, function() {
 module('managing this.depends', {
   setup: function() {
     var deferred = Atomic.deferred();
-    deferred.resolve();
+    deferred.fulfill();
 
     ATOMIC_LOAD_STUB = sinon.stub(Atomic, 'load');
     ATOMIC_LOAD_STUB.returns(deferred.promise);
@@ -77,7 +77,7 @@ asyncTest('can get a list of dependencies and they are loaded with atomic.load',
   equal(component.depends('two'), null, 'second dependency is unresolved');
 
   var deferred = Atomic.deferred();
-  deferred.resolve();
+  deferred.fulfill();
   ATOMIC_LOAD_STUB.withArgs('one', 'two').returns(deferred.promise);
 
   component.load();
@@ -98,7 +98,7 @@ asyncTest('manually resolved dependencies are not passed to Atomic.load', 2, fun
   equal(component.depends('one'), oneDep, 'first dependency is manually resolved');
   
   var deferred = Atomic.deferred();
-  deferred.resolve();
+  deferred.fulfill();
   ATOMIC_LOAD_STUB.withArgs('two').returns(deferred.promise);
   
   component.load();

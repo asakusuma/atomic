@@ -23,14 +23,24 @@ governing permissions and limitations under the License.
  */
 
 /**
- * A helper method to return the When object. Aids in unit
+ * A helper method to return the promises library object. Aids in unit
  * testing the public functions
- * @method Atomic.getWhen
+ * @method Atomic.getPromiseLibrary
  * @private
- * @returns {Object} the When.js interface
+ * @returns {Object} the promise library
  */
-function getWhen() {
-  return Atomic._.When;
+function getPromiseLibrary() {
+  return Atomic._.Bluebird;
+}
+
+/**
+ * A helper method to test if the supplied object is an array
+ * @method Atomic.isArray
+ * @private
+ * @returns {Boolean}
+ */
+function isArray(obj) {
+  return Object.prototype.toString.call(obj) === '[object Array]';
 }
 
 /**
@@ -125,7 +135,7 @@ var __Atomic_Public_API__ = {
       return Atomic.when(Atomic.loader.load(args));
     })
     .then(function(needs) {
-      return deferred.resolve(needs);
+      return deferred.fulfill(needs);
     }, function(reason) {
       return deferred.reject(reason);
     });
@@ -293,11 +303,12 @@ var __Atomic_Public_API__ = {
    * @returns {Object} Promise
    */
   deferred: function(promise) {
+    var lib = getPromiseLibrary();
     if (promise) {
-      return getWhen()(promise);
+      lib.cast(promise);
     }
     else {
-      return getWhen().defer();
+      return lib.pending();
     }
   },
 
@@ -311,15 +322,7 @@ var __Atomic_Public_API__ = {
    * @returns {Object} Promise
    */
   when: function(whennable) {
-    var deferred = Atomic.deferred();
-    
-    getWhen()(whennable, function(resolveResult) {
-      return deferred.resolve(resolveResult);
-    }, function(rejectResult) {
-      return deferred.reject(rejectResult);
-    });
-
-    return deferred.promise;
+    return getPromiseLibrary().cast(whennable);
   },
   
   /**
@@ -331,89 +334,7 @@ var __Atomic_Public_API__ = {
    * @returns {Object} Promise
    */
   whenAll: function(whens) {
-    var deferred = Atomic.deferred();
-    var count = whens.length;
-    var resultsObject = {};
-    var rejectsObject = {};
-    var resultsArray = [];
-    var rejectsArray = [];
-    var rejected = false;
-    
-    function resolved() {
-      if (--count > 0) {
-        return;
-      }
-
-      for (var i = 0, len = whens.length; i < len; i++) {
-        if (resultsObject.hasOwnProperty('_' + i)) {
-          resultsArray.push(resultsObject[i]);
-          rejectsArray.push(null);
-        }
-        else if (rejectsObject.hasOwnProperty('_' + i)) {
-          rejected = true;
-          resultsArray.push(null);
-          rejectsArray.push(rejectsObject[i]);
-        }
-      }
-      
-      if (rejected) {
-        return deferred.reject(rejectsArray);
-      }
-      else {
-        return deferred.resolve(resultsArray);
-      }
-    }
-    
-    function arrayWhen(idx, statement) {
-      getWhen()(statement, function(resolveResult) {
-        resultsObject['_' + idx] = resolveResult;
-        resolved();
-      }, function(rejectResult) {
-        rejectsObject['_' + idx] = rejectResult;
-        resolved();
-      });
-    }
-    
-    for (i = 0, len = whens.length; i < len; i++) {
-      arrayWhen(i, whens[i]);
-    }
-    
-    return deferred.promise;
-  },
-  
-  /**
-   * A synchronous version of whenAll
-   * @see Atomic.whenAll
-   */
-  whenAllSync: function(whens) {
-    var deferred = Atomic.deferred();
-    var resultsArray = [];
-    var rejectsArray = [];
-    var tempWhens = whens;
-    
-    function promise(statement) {
-      getWhen()(statement, function(resolveResult) {
-        resultsArray.push(resolveResult);
-        rejectsArray.push(null);
-        var nextWhen = tempWhens.shift();
-        
-        if (!nextWhen) {
-          return deferred.resolve(resultsArray);
-        }
-        else {
-          promise(nextWhen);
-        }
-      }, function(rejectResult) {
-        resultsArray.push(null);
-        rejectsArray.push(rejectResult);
-        
-        return deferred.reject(rejectsArray);
-      });
-    }
-    
-    promise(tempWhens.shift());
-    
-    return deferred.promise;
+    return getPromiseLibrary().all(whens);
   },
 
   /**

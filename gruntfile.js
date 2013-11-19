@@ -51,7 +51,7 @@ module.exports = function (grunt) {
      */
     clean: {
       tmp: ['./tmp'],
-      dist: ['./dist']
+      dist: ['./dist/atomic*']
     },
 
     /**
@@ -308,11 +308,14 @@ module.exports = function (grunt) {
   // access to hot reload and cleanly scans files
   grunt.registerTask('test', [
     'build',
-    'shell:venus'
+    'bower:install',
+    'shell:venus',
+    'clean:tmp'
   ]);
 
   grunt.registerTask('itest', [
     'build',
+    'bower:install',
     'shell:venus_browser'
   ]);
 

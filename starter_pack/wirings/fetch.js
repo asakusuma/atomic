@@ -88,7 +88,7 @@ governing permissions and limitations under the License.
             else {
               self.elements().root.innerHTML += response;
             }
-            deferred.resolve();
+            deferred.fulfill();
           }).error(function(err) {
             deferred.reject(err);
           });

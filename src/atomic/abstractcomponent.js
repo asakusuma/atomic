@@ -588,16 +588,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     whenAll: function() {
       return Atomic.whenAll.apply(Atomic, arguments);
     },
-    
-    /**
-     * Wait for the async completion of a collection of functions
-     * Unlike whenAll, these are ran one after another instead of in
-     * parallel.
-     * @see Atomic.whenAllSync
-     */
-    whenAllSync: function() {
-      return Atomic.whenAllSync.apply(Atomic, arguments);
-    },
 
     /**
      * Load the Component, resolve all dependencies
@@ -648,7 +638,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
         // set resolution for the internal promise
         promise.then(function() {
-          wiringDeferred.resolve();
+          wiringDeferred.fulfill();
         }, function(err) {
           wiringDeferred.reject(err);
         });
@@ -669,7 +659,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         if (self.elements().root) {
           self.removeClass(self.elements().root, self.BEM(null, 'loading'));
         }
-        deferred.resolve();
+        deferred.fulfill();
       }, function(err) {
         if (self.elements().root) {
           self.removeClass(self.elements().root, self.BEM(null, 'loading'));

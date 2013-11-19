@@ -220,8 +220,8 @@ governing permissions and limitations under the License.
   // --------------------------------------------------
   cjsHarness();
   // from external library
-  //@@include('../tmp/lib/when/when.js')
-  Atomic._.When = module.exports;
+  //@@include('../tmp/lib/bluebird/js/browser/bluebird.js')
+  Atomic._.Bluebird = module.exports;
   resetCjs();
 
   // --------------------------------------------------

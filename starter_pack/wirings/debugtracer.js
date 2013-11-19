@@ -25,11 +25,11 @@ This wiring adds debugging ability to all methods within a component
       return {
         init: function() {
           var ignore = {
-            before: 1,
-            after: 1,
+            wrap: 1,
             needs: 1,
             nodes: 1,
-            events: 1
+            events: 1,
+            elements: 1
           };
           var self = this;
           var tracerId = 0;
