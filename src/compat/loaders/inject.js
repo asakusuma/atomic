@@ -33,8 +33,6 @@ Atomic.augment(Atomic.loader, {
     if (Atomic.loader.devMode) {
       Inject.setExpires(0);
     }
-
-    define('atomic', [], window.Atomic);
   },
   load: function(deps) {
     var results = [];
@@ -57,4 +55,3 @@ Atomic.augment(Atomic.loader, {
     return deferred.promise;
   }
 });
-Atomic.load(['atomic']); // sanity check and triggers init
