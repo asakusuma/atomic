@@ -30,8 +30,6 @@ Atomic.augment(Atomic.loader, {
     require.config({
       baseUrl: Atomic.loader.moduleRoot
     });
-
-    define('atomic', [], window.Atomic);
   },
   load: function(deps) {
     var results = {};
@@ -54,4 +52,3 @@ Atomic.augment(Atomic.loader, {
     return deferred.promise;
   }
 });
-Atomic.load(['atomic']); // sanity check and triggers init
