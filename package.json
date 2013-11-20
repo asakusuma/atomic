@@ -27,7 +27,9 @@
     "grunt-express": "~0.2.0",
     "grunt-include-replace": "~0.1.0",
     "grunt-bower-task": "~0.3.2",
-    "venus": "~2.1.14"
+    "venus": "~2.1.14",
+    "grunt-bumpup": "~0.4.2",
+    "grunt-conventional-changelog": "~1.0.0"
   },
   "dependencies": {},
   "engine": "node >= 0.8.10"
