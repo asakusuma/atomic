@@ -42,7 +42,7 @@ Atomic.augment(Atomic.loader, {
           results[deps[i]] = require(deps[i]);
         }
 
-        deferred.resolve(results);
+        deferred.fulfill(results);
       }
       catch(e) {
         deferred.reject(e);
