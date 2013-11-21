@@ -10,7 +10,7 @@ Many parts of Atomic are customizable to work with existing infrastructure. This
 Contains libraries external to Atomic, but are so fundamental, we must include them in the build. We are currently including
 * Fiber - oop javascript system
 * EventEmitter2 - event system
-* When - Promises
+* Bluebird - Promises
 
 ## atomic.js
 This file holds all the insertions from the `atomic/*` directory.
