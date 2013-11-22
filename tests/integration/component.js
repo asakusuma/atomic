@@ -144,6 +144,9 @@ asyncTest('sanity test for on/off/emit', 2, function() {
 module('verification of observer functionality');
 asyncTest('observable events triggered using state', 3, function() {
   var Component = Atomic.Component({
+    states: {
+      'foo': 'a foo'
+    },
     init: function() {
       this.state({
         foo: 3
