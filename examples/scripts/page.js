@@ -77,7 +77,7 @@ Atomic.load('components/textinput', 'components/carousel')
   ])
   .then(function() {
     textInput.observe('text', function(index) {
-      var num = parseInt(index);
+      var num = parseInt(index, 10);
       if(!isNaN(num)) {
         carousel.state('index', num);
       }
