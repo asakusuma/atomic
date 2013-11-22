@@ -155,6 +155,10 @@ governing permissions and limitations under the License.
       }, Atomic.e))
       .then(null, Atomic.e);
     }
+    else if (typeof component === 'function') {
+      var c = new component();
+      printComponent(c);
+    }
     else {
       printComponent(component);
     }
