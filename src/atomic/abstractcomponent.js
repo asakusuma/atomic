@@ -194,6 +194,16 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @property {Object} AbstractComponent#events
      */
     events: {},
+    
+    /**
+     * A key/string collection of states
+     * These allow a developer to document the states used in the
+     * component. In order to set state using this.state(), you will
+     * also need to have the state object registered here
+     * to ensure all states are documented.
+     * @property {Object} AbstractComponent#states
+     */
+    states: {},
 
     /**
      * A configuration for this instance of the object
@@ -271,6 +281,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       // nodes and needs can accept overwriting
       this.elements = createDisplayable(this.elements, true);
       this.events = createDisplayable(this.events, true, true);
+      this.states = createDisplayable(this.states, true, true);
       this.depends = createDisplayable(this.depends);
 
       // attach the el
@@ -800,6 +811,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var values = {};
       var stateChanges = [];
       var newState = null;
+      var statesLookup = this.states();
 
       if (typeof args[1] === 'undefined') {
         if (typeof args[0] === 'undefined') {
@@ -818,6 +830,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       if(typeof args[0] === 'object') {
         for (name in args[0]) {
           if (args[0].hasOwnProperty(name)) {
+            if (!statesLookup[name]) {
+              throw new Error('Invalid state: ' + name + '. Only states defined in this.states:{} may be used for setting state');
+            }
             // overwrite if "true" or not set yet
             if (args[1]) {
               // overwrite

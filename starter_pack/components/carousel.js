@@ -49,6 +49,11 @@ The Carousel Component provides an API for manipulating a
 
       // no additional nodes needed
       elements: {},
+      
+      // states
+      states: {
+        index: 'represents the position of the carousel'
+      },
 
       // events
       events: {

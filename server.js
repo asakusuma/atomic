@@ -31,7 +31,7 @@ exec('git describe HEAD', function(err, version) {
   });
 
   app.use(express.static(path.normalize(path.join(__dirname))));
-  app.use(express.static(path.normalize(path.join(__dirname, './', 'dist', 'atomic-' + atomicVersion))));
+  app.use(express.static(path.normalize(path.join(__dirname, './', 'dist', 'recent'))));
 
   console.log('server initialized for version ' + atomicVersion);
 });
