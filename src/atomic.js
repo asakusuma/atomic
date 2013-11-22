@@ -100,6 +100,69 @@ governing permissions and limitations under the License.
   };
   
   /**
+   * Describe a component for the purpose of exploration or documentation
+   * being able to see all the self-documenting code of Atomic Components is
+   * a major feature. Using describe() will tell you about the component via
+   * console.log if available, and return a promise with the JSON structure
+   * @method Atomic.describe
+   * @param {String} component - the component to get a description of
+   * @param {Boolean} output - (optional) should the description be printed to the console
+   */
+  Atomic.describe = function(component, output) {
+    if (typeof output == 'undefined') {
+      output = true;
+    }
+    
+    var d = Atomic.deferred();
+    
+    function printComponent(Component) {
+      var c = new Component();
+      var strOut = [];
+      var objOut = {};
+      objOut.component = component;
+      objOut.name = c.name;
+      objOut.depends = c.depends._.raw();
+      objOut.events = c.events._.raw();
+      objOut.states = c.states._.raw();
+
+      strOut = [
+        component + ': ' + c.name,
+        '=====',
+        'BEM id: ' + c.BEM(),
+        'dependencies: ' + c.depends._.raw().join(', '),
+        '',
+        'ELEMENTS',
+        c.elements.toString(),
+        '',
+        'EVENTS',
+        c.events.toString(),
+        '',
+        'STATES',
+        c.states.toString()
+      ];
+      
+      if (output && context.console && typeof context.console.log == 'function') {
+        context.console.log(strOut.join('\n'));
+      }
+      
+      d.fulfill(objOut);
+    }
+    
+    if (typeof component === 'string') {
+      Atomic.load([component])
+      .then(Atomic.expand(function(Component) {
+        printComponent(Component);
+      }, Atomic.e))
+      .then(null, Atomic.e);
+    }
+    else {
+      printComponent(component);
+    }
+    
+    return d.promise;
+  };
+  
+  /**
    * Shims the global define when an AMD loader doesn't exist
    * very useful when running unit tests, so you are not tied to a loader's structure
    * @method Atomic.define

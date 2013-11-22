@@ -107,6 +107,24 @@ function createDisplayable(obj, writeBack, preResolved) {
     raw: function() {
       return obj;
     },
+    exists: function(key) {
+      if (type === 'array') {
+        for (var i = 0, len = obj.length; i < len; i++) {
+          if (obj[i] === key) {
+            return true;
+          }
+        }
+        return false;
+      }
+      else {
+        for (var name in obj) {
+          if (obj.hasOwnProperty(name) && name === key) {
+            return true;
+          }
+        }
+        return false;
+      }
+    },
     add: function() {
       if (type === 'array') {
         if (!registry[arguments[0]]) {
@@ -151,6 +169,7 @@ function createDisplayable(obj, writeBack, preResolved) {
 
   return iface;
 }
+
 /**
  * AbstractComponent a template for creating Components in Atomic
  * Components are the lego blocks of Atomic. They emit events
@@ -329,6 +348,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {HTMLElement} el - an element to assign to the role.
      */
     assign: function(name, el) {
+      // make sure this is an element that is allowed
+      if (!this.elements._.exists(name)) {
+        throw new Error('Invalid element: ' + name + '. Only elements defined in this.elements:{} may be assigned');
+      }
+      
       this.elements._.set(name, el);
       return this;
     },
@@ -340,6 +364,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @param {Object} obj - the resolved object
      */
     resolve: function(name, obj) {
+      // make sure this is an dependency that is allowed to be resolved
+      if (!this.depends._.exists(name)) {
+        throw new Error('Invalid dependency: ' + name + '. Only dependencies defined in this.depends:[] may be resolved');
+      }
+      
       this.depends._.set(name, obj);
       return this;
     },
@@ -440,6 +469,13 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      */
     trigger: function () {
       var args = [].slice.call(arguments, 0);
+      var name = args[0];
+      
+      // make sure this is an event that is allowed to be triggered
+      if (!this.events._.exists(name)) {
+        throw new Error('Invalid event: ' + name + '. Only events defined in this.events:{} may be triggered');
+      }
+      
       this._eventEmitter.emit.apply(this._eventEmitter, args);
       return this;
     },
@@ -712,7 +748,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       // if it's an object, it's already a wiring ready to go
       if (typeof wiring === 'function') {
         if (wiring.__atomic) {
-          throw new Error('please configure a wiring before calling wire()');
+          throw new Error('Atomic Wirings must be configured (by invoking their function) and passing their return value into wire()');
         }
         properties = {
           init: wiring
@@ -731,7 +767,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         cleanName = name.replace(wrapsPre, '').replace(wrapsPost, '');
         
         if (cleanName == '_init') {
-          throw new Error('You cannot wire in "_init". Please use "init" without the underscore.');
+          throw new Error('You cannot wire in "_init" as it\'s a reserved method. Please use "init" without the underscore.');
         }
         
         // events requires special handling as a property
@@ -811,7 +847,6 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var values = {};
       var stateChanges = [];
       var newState = null;
-      var statesLookup = this.states();
 
       if (typeof args[1] === 'undefined') {
         if (typeof args[0] === 'undefined') {
@@ -830,8 +865,8 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       if(typeof args[0] === 'object') {
         for (name in args[0]) {
           if (args[0].hasOwnProperty(name)) {
-            if (!statesLookup[name]) {
-              throw new Error('Invalid state: ' + name + '. Only states defined in this.states:{} may be used for setting state');
+            if (!this.states._.exists(name)) {
+              throw new Error('Invalid state: ' + name + '. Only states defined in this.states:{} may be set');
             }
             // overwrite if "true" or not set yet
             if (args[1]) {

@@ -48,9 +48,6 @@ Atomic.load('components/button', 'components/carousel')
   var prev = new Button(document.getElementById('carousel-prev'));
   var carousel = new Carousel(document.getElementById('carousel'));
 
-  // sample assignment
-  carousel.assign(carousel.elements.FOOOOO, document.body);
-
   Atomic.whenAll([
     carousel.load(),
     next.load(),
