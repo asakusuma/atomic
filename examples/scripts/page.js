@@ -65,6 +65,29 @@ Atomic.load('components/button', 'components/carousel')
 }))
 .then(null, Atomic.e);
 
+// Carousel with Text Input with state
+Atomic.load('components/textinput', 'components/carousel')
+.then(Atomic.expand(function(Button, Carousel) {
+  var textInput = new Button(document.getElementById('text-input'));
+  var carousel = new Carousel(document.getElementById('carousel-state'));
+
+  Atomic.whenAll([
+    carousel.load(),
+    textInput.load()
+  ])
+  .then(function() {
+    textInput.observe('text', function(index) {
+      var num = parseInt(index);
+      if(!isNaN(num)) {
+        carousel.state('index', num);
+      }
+    });
+    textInput.state('text', '0');
+  })
+  .then(null, Atomic.e);
+}))
+.then(null, Atomic.e);
+
 // Carousel with Buttons that Wraps
 Atomic.load('components/button', 'components/carousel')
 .then(Atomic.expand(function(Button, Carousel) {
