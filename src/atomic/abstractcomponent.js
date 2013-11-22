@@ -876,6 +876,12 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         newState = this._state[stateChanges[i]];
         this._observableEmitter.emit(stateChanges[i], newState.value, newState.lastValue, newState.rev);
       }
+
+      if(stateChanges.length > 0) {
+        return this.render();
+      }
+      
+      return this;
     },
     
     /**
