@@ -57,6 +57,11 @@ nodes.
       events: {
         CHANGED: 'Triggered when the text is changed'
       },
+      
+      // states
+      states: {
+        text: 'the text value currently in the text input component'
+      },
 
       render: function() {
         var text = this.state('text');

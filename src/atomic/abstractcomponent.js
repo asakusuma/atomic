@@ -890,6 +890,9 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       }
       
       if (typeof args[0] === 'string') {
+        if (!this.states._.exists(args[0])) {
+          throw new Error('Invalid state: ' + args[0] + '. Only states defined in this.states:{} may be set');
+        }
         if (typeof this._state[args[0]] === 'undefined') {
           this._state[args[0]] = {
             rev: 0,
