@@ -7280,7 +7280,7 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 // this file sets the Atomic Version string at build time
-Atomic.version = '0.0.8';
+Atomic.version = '0.0.9';
 
   // assign public interface in window scope
   context.Atomic = Atomic;
