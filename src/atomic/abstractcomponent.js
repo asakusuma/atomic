@@ -184,7 +184,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @property {String} AbstractComponent#name
      */
     name: 'AbstractComponent. Override me to improve debugging',
-    
+
     /**
      * The module path for this. Used in debugging and BEM syntax
      * @property {String} id
@@ -213,7 +213,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @property {Object} AbstractComponent#events
      */
     events: {},
-    
+
     /**
      * A key/string collection of states
      * These allow a developer to document the states used in the
@@ -239,7 +239,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @private
      */
     _init: null,
-    
+
     /**
      * The internal state object
      * @property {Object} AbstractComponent#_state
@@ -253,7 +253,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
      * @private
      */
     _eventEmitter: null,
-    
+
     /**
      * A local event emitter
      * used for the observer channel to forcibly separate events from observe
@@ -293,7 +293,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         newListener: false,
         maxListeners: 0
       });
-      
+
       this.elements.root = 'The root HTML node of this component (automatically generated)';
 
       // localize the nodes/events/needs variable BEFORE the user starts configuring
@@ -352,11 +352,11 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       if (!this.elements._.exists(name)) {
         throw new Error('Invalid element: ' + name + '. Only elements defined in this.elements:{} may be assigned');
       }
-      
+
       this.elements._.set(name, el);
       return this;
     },
-	
+
     /**
      * Assign a dependency to the component.depends collection
      * @method AbstractComponent#resolve
@@ -368,7 +368,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       if (!this.depends._.exists(name)) {
         throw new Error('Invalid dependency: ' + name + '. Only dependencies defined in this.depends:[] may be resolved');
       }
-      
+
       this.depends._.set(name, obj);
       return this;
     },
@@ -470,12 +470,12 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     trigger: function () {
       var args = [].slice.call(arguments, 0);
       var name = args[0];
-      
+
       // make sure this is an event that is allowed to be triggered
       if (!this.events._.exists(name)) {
         throw new Error('Invalid event: ' + name + '. Only events defined in this.events:{} may be triggered');
       }
-      
+
       this._eventEmitter.emit.apply(this._eventEmitter, args);
       return this;
     },
@@ -534,7 +534,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       };
       return this;
     },
-    
+
     /**
      * Proxy a function into a new scope.
      * @method AbstractComponent#proxy
@@ -567,7 +567,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     getRoot: function () {
       return this.elements().root;
     },
-    
+
     /**
      * Provides a helper for Block__Element--Modifier syntax
      * We use BEM internally in the objects in order to provide a consistent way to
@@ -587,7 +587,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       }
       return className;
     },
-    
+
     /**
      * Add a class to an element, helper in case jQuery or such isn't available
      * @method AbstractComponent#addClass
@@ -604,7 +604,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       el.className = className;
       return this;
     },
-    
+
     /**
      * Removes a class from an element, helper in case jQuery or such isn't available
      * @method AbstractComponent#removeClass
@@ -619,7 +619,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       el.className = className;
       return this;
     },
-    
+
     /**
      * Wait for the async completion of a function
      * @see Atomic.when
@@ -627,7 +627,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
     when: function() {
       return Atomic.when.apply(Atomic, arguments);
     },
-    
+
     /**
      * Wait for the async completion of a collection of functions
      * @see Atomic.whenAll
@@ -654,7 +654,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var allDependencies = this.depends._.raw();
       var allResolvedDependencies = this.depends();
       var fetchLen;
-      
+
       // only fetch things we don't have a resolved value for
       for (var i = 0, len = allDependencies.length; i < len; i++) {
         if (!allResolvedDependencies[allDependencies[i]]) {
@@ -671,7 +671,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
         // populate values resolution into the this.depends()
         for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
-          self.depends._.set(fetch[i], values[i]);
+          self.depends._.set(fetch[i], values[fetch[i]]);
         }
 
         // dynamically create promise chain
@@ -731,18 +731,18 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       var wrapsPre = /^[\[\]]/;
       var wrapsPost = /[\[\]]$/;
       var self = this;
-      
+
       function noop() {
         return function() {};
       }
-      
+
       function wrapInit(obj, fn) {
         obj.wrap('_init', function(prev) {
           prev();
           fn.call(obj);
         });
       }
-      
+
       // if the wiring is a function and has the __atomic property, error
       // if just a function, it's an "init"
       // if it's an object, it's already a wiring ready to go
@@ -757,19 +757,19 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       else {
         properties = wiring;
       }
-      
+
       // iterate through the keys. For each key, handle it
       for (name in properties) {
         if (!properties.hasOwnProperty(name)) {
           continue;
         }
-        
+
         cleanName = name.replace(wrapsPre, '').replace(wrapsPost, '');
-        
+
         if (cleanName == '_init') {
           throw new Error('You cannot wire in "_init" as it\'s a reserved method. Please use "init" without the underscore.');
         }
-        
+
         // events requires special handling as a property
         if (name === 'events') {
           for (eventsName in properties.events) {
@@ -779,7 +779,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
           }
           continue;
         }
-        
+
         // the elements collection requires special handling, and doesn't overwrite
         // any elements that may have been already defined
         if (name === 'elements') {
@@ -791,7 +791,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
           }
           continue;
         }
-        
+
         // the depends collection requires special handling
         if (name === 'depends') {
           for (i = 0, len = properties.depends.length; i < len; i++) {
@@ -799,7 +799,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
           }
           continue;
         }
-        
+
         // by default, init is a wrapped function unless you turn on clobbering
         if (name === 'init' || cleanName === 'init') {
           // init methods are always done with wrapping unless disabled
@@ -811,7 +811,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
           }
           continue;
         }
-        
+
         if (typeof properties[name] === 'function') {
           if (!this[cleanName]) {
             this[cleanName] = noop();
@@ -861,7 +861,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
           return this._state[args[0]].value;
         }
       }
-      
+
       if(typeof args[0] === 'object') {
         for (name in args[0]) {
           if (args[0].hasOwnProperty(name)) {
@@ -883,12 +883,12 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
                 lastValue: undefined
               };
             }
-              
+
             stateChanges.push(name);
           }
         }
       }
-      
+
       if (typeof args[0] === 'string') {
         if (!this.states._.exists(args[0])) {
           throw new Error('Invalid state: ' + args[0] + '. Only states defined in this.states:{} may be set');
@@ -907,7 +907,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
         }
         stateChanges.push(args[0]);
       }
-      
+
       // we should have a set of items in stateChanges we need to now trigger observer
       // changes for each changed item
       for (var i = 0, len = stateChanges.length; i < len; i++) {
@@ -918,10 +918,10 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
       if(stateChanges.length > 0) {
         return this.render();
       }
-      
+
       return this;
     },
-    
+
     /**
      * Listen for data changes in the state
      * @method AbstractComponent#observe

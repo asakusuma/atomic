@@ -20,7 +20,7 @@ governing permissions and limitations under the License.
 /*
  * @venus-library qunit
  * @venus-include ../../../src/atomic.js
- * @venus-include ../../../src/lib/eventemitter2.js
+ * @venus-include ../../../tmp/lib/eventemitter2/eventemitter2.js
  * @venus-include _harness.js
  * @venus-include ../../../src/atomic/events.js
  */
