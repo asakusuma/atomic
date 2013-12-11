@@ -671,7 +671,7 @@ var __Atomic_AbstractComponent__ = Atomic._.Fiber.extend(function (base) {
 
         // populate values resolution into the this.depends()
         for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
-          self.depends._.set(fetch[i], values[fetch[i]]);
+          self.depends._.set(fetch[i], values[i]);
         }
 
         // dynamically create promise chain
