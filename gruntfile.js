@@ -32,7 +32,7 @@ module.exports = function (grunt) {
       return str.replace(/__ATOMIC__VERSION__/g, version);
     }
 
-    // set the inject version everywhere we need to
+    // set the atomic version everywhere we need to
     grunt.config.set('anonymous_footer', addVersion(foot));
     grunt.config.set('version_string', addVersion(version_string));
     for (type in output_files) {
@@ -94,7 +94,7 @@ module.exports = function (grunt) {
         }
       },
       git_commit_release: {
-        command: 'git commit -m "chore(*): Release of Inject <%= version_string %> (via grunt)"',
+        command: 'git commit -m "chore(*): Release of Atomic <%= version_string %> (via grunt)"',
         options: {
           callback: function(err, stdout, stderr, next) {
             next();
