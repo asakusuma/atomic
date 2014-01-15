@@ -15,43 +15,44 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
+(function(Atomic) {
+  Atomic.augment(Atomic.loader, {
 
-Atomic.augment(Atomic.loader, {
+    moduleRoot:   'YOUR_BASE_URL_HERE', // Set this to your base URL for modules
+    devMode:      true,                 // if true, no caching will be enabled
 
-  moduleRoot:   'YOUR_BASE_URL_HERE', // Set this to your base URL for modules
-  devMode:      true,                 // if true, no caching will be enabled
+    // ====== Do not edit below this line ======
+    // ==========================================================================
+    init: function() {
+      if (!Inject) {
+        throw new Error('Inject must be defined on the page');
+      }
 
-  // ====== Do not edit below this line ======
-  // ==========================================================================
-  init: function() {
-    if (!Inject) {
-      throw new Error('Inject must be defined on the page');
-    }
+      Inject.setModuleRoot(Atomic.loader.moduleRoot);
 
-    Inject.setModuleRoot(Atomic.loader.moduleRoot);
+      if (Atomic.loader.devMode) {
+        Inject.setExpires(0);
+      }
+    },
+    load: function(deps) {
+      var results = [];
+      var deferred = Atomic.deferred();
 
-    if (Atomic.loader.devMode) {
-      Inject.setExpires(0);
-    }
-  },
-  load: function(deps) {
-    var results = [];
-    var deferred = Atomic.deferred();
+      deps.unshift('require');
+      require(deps, function(require) {
+        try {
+          for (var i = 0, len = deps.length; i < len; i++) {
+            results[i] = require(deps[i]);
+          }
 
-    deps.unshift('require');
-    require(deps, function(require) {
-      try {
-        for (var i = 0, len = deps.length; i < len; i++) {
-          results[i] = require(deps[i]);
+          deferred.fulfill(results);
         }
+        catch(e) {
+          deferred.reject(e);
+        }
+      });
 
-        deferred.fulfill(results);
-      }
-      catch(e) {
-        deferred.reject(e);
-      }
-    });
-
-    return deferred.promise;
-  }
-});
+      return deferred.promise;
+    }
+  });
+}(Atomic));

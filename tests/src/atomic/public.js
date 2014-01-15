@@ -31,7 +31,7 @@ test('allows for argument expansion: converts an array of 3 items to 3 arguments
     equal(two, 2, 'is argument 2');
     equal(three, 'three', 'is argument 3');
   };
-  var testFn = __Atomic_Public_API__.expand(caller);
+  var testFn = Atomic.expand(caller);
   testFn(['one', 2, 'three']);
 });
 
@@ -39,7 +39,7 @@ test('arrays size of 1 are the same as arrays size of N', function() {
   var caller = function(one) {
     equal(one, 1, 'has correct argument');
   };
-  var testFn = __Atomic_Public_API__.expand(caller);
+  var testFn = Atomic.expand(caller);
   testFn([1]);
 });
 
@@ -52,7 +52,7 @@ test('returns result of proxied function', function() {
 	var func = function() {
 		return this.count;
 	};
-	equal(__Atomic_Public_API__.proxy(func, obj)(), 8, 'is returned result');
+	equal(Atomic.proxy(func, obj)(), 8, 'is returned result');
 });
 
 module('keys()');
@@ -62,7 +62,7 @@ test('returned array has an item for each key', function() {
     name: 'John Doe',
     age: 23
   };
-  var keys = __Atomic_Public_API__.keys(obj);
+  var keys = Atomic.keys(obj);
   equal(keys.length, 3, 'has correct length');
   equal(keys[0], 'count', 'equals first item');
   equal(keys[1], 'name', 'equals second item');
@@ -76,7 +76,7 @@ test('items in returned array are all strings', function() {
     age: 23,
     8: 5
   };
-  var keys = __Atomic_Public_API__.keys(obj);
+  var keys = Atomic.keys(obj);
   strictEqual(keys.length, 4, 'has correct length');
   ok(obj[keys[0]], keys[0] + ' found');
   ok(obj[keys[1]], keys[1] + ' found');

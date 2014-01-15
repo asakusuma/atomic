@@ -9,7 +9,8 @@ if (!context) {
 }
 
 if (!window.Atomic) {
-  window.Atomic = {};
+  window.Atomic = function() {};
+  Atomic.Events = {};
 }
 
 if (!Atomic._) {

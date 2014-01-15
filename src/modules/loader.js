@@ -15,5 +15,24 @@ IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
 express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
-// this file sets the Atomic Version string at build time
-Atomic.version = '//@@ATOMIC_VERSION';
+
+(function(Atomic) {
+  Atomic.augment(Atomic, {
+    loader: {
+      init: function() {},
+      register: function(id, exports) {
+        Atomic._.modules[id] = exports;
+      },
+      load: function(deps) {
+        var resolved = [];
+        for (var i = 0, len = deps.length; i < len; i++) {
+          if (!Atomic._.modules[deps[i]]) {
+            throw new Error('Module ID is not defined: ' + deps[i]);
+          }
+          resolved.push(Atomic._.modules[deps[i]]);
+        }
+        return resolved;
+      }
+    }
+  });
+}(Atomic));

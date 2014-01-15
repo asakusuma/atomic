@@ -24,18 +24,19 @@ governing permissions and limitations under the License.
  * @venus-include _harness.js
  * @venus-include ../../../src/atomic/events.js
  */
+
 module('event based APIs');
 test('has on(), off()', function() {
-  ok(__Atomic_Events_API__.on);
-  ok(__Atomic_Events_API__.off);
+  ok(Atomic.Events.on);
+  ok(Atomic.Events.off);
 });
 
 test('simple event firing sanity check', function() {
   var triggered = false;
-  __Atomic_Events_API__.on('foo', function() {
+  Atomic.Events.on('foo', function() {
     triggered = true;
   });
 
-  __Atomic_Events_API__.trigger('foo');
+  Atomic.Events.trigger('foo');
   ok(triggered, 'basic event triggering is working');
 });

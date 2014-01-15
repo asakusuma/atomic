@@ -16,39 +16,41 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-Atomic.augment(Atomic.loader, {
+(function(Atomic) {
+  Atomic.augment(Atomic.loader, {
 
-  moduleRoot:   'YOUR_BASE_URL_HERE', // Set this to your base URL for modules
+    moduleRoot:   'YOUR_BASE_URL_HERE', // Set this to your base URL for modules
 
-  // ====== Do not edit below this line ======
-  // ==========================================================================
-  init: function() {
-    if (!require) {
-      throw new Error('RequireJS must be defined on the page before loading');
-    }
+    // ====== Do not edit below this line ======
+    // ==========================================================================
+    init: function() {
+      if (!require) {
+        throw new Error('RequireJS must be defined on the page before loading');
+      }
 
-    require.config({
-      baseUrl: Atomic.loader.moduleRoot
-    });
-  },
-  load: function(deps) {
-    var results = {};
-    var deferred = Atomic.deferred();
+      require.config({
+        baseUrl: Atomic.loader.moduleRoot
+      });
+    },
+    load: function(deps) {
+      var results = {};
+      var deferred = Atomic.deferred();
 
-    deps.unshift('require');
-    require(deps, function(require) {
-      try {
-        for (var i = 0, len = deps.length; i < len; i++) {
-          results[deps[i]] = require(deps[i]);
+      deps.unshift('require');
+      require(deps, function(require) {
+        try {
+          for (var i = 0, len = deps.length; i < len; i++) {
+            results[deps[i]] = require(deps[i]);
+          }
+
+          deferred.fulfill(results);
         }
+        catch(e) {
+          deferred.reject(e);
+        }
+      });
 
-        deferred.fulfill(results);
-      }
-      catch(e) {
-        deferred.reject(e);
-      }
-    });
-
-    return deferred.promise;
-  }
-});
+      return deferred.promise;
+    }
+  });
+}(Atomic);
