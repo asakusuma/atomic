@@ -518,7 +518,7 @@ governing permissions and limitations under the License.
 
           // populate values resolution into the this.depends()
           for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
-            self.depends._.set(fetch[i], values[i]);
+            self.depends._.set(fetch[i], values[fetch[i]]);
           }
 
           // dynamically create promise chain
