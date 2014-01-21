@@ -101,21 +101,7 @@ governing permissions and limitations under the License.
   // --------------------------------------------------
   //@@include('./includes/constants.js')
   //@@include('./includes/globals.js')
-  
-  // --------------------------------------------------
-  // CLASSES
-  // --------------------------------------------------
-  //@@include('./classes/abstractcomponent.js')
-  
-  // --------------------------------------------------
-  // MODULES
-  // --------------------------------------------------
-  //@@include('./modules/events.js')
-  //@@include('./modules/factory.js')
-  //@@include('./modules/loader.js')
-  //@@include('./modules/public.js')
-  //@@include('./modules/version.js')
-  
+
   // --------------------------------------------------
   // EXTERNAL LIBRARIES (using harnesses)
   // --------------------------------------------------
@@ -138,7 +124,21 @@ governing permissions and limitations under the License.
     //@@include('../tmp/lib/semver/semver.js')
     Atomic._.SemVer = module.exports;
   });
+
+  // --------------------------------------------------
+  // CLASSES
+  // --------------------------------------------------
+  //@@include('./classes/abstractcomponent.js')
   
+  // --------------------------------------------------
+  // MODULES
+  // --------------------------------------------------
+  //@@include('./modules/events.js')
+  //@@include('./modules/factory.js')
+  //@@include('./modules/loader.js')
+  //@@include('./modules/public.js')
+  //@@include('./modules/version.js')
+
   // assign all the pieces to modules
   var defineCall = (typeof globalDefine == 'function' && globalDefine.amd) ? globalDefine : Atomic;
   defineCall('Atomic', [], function() { return Atomic; });
