@@ -88,7 +88,7 @@ governing permissions and limitations under the License.
      * @return {Object} an object that extends AbstractComponent
      */
     Component: function(objLiteral) {
-      return __Atomic_Private_Factory_Methods__.Factory(objLiteral);
+      return Atomic._.Factory(objLiteral);
     },
   
     Wiring: function(wiring) {
