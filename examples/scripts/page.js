@@ -28,18 +28,15 @@ Atomic.load('components/button', 'wirings/debugtracer')
 
   button.load().then(function() {
     console.log('The Button with Debug Tracer wiring has loaded');
-  })
-  .then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
+  });
+}));
 
 // Simple Select
 Atomic.load('components/select', 'components/carousel')
 .then(Atomic.expand(function(Select) {
   var select = new Select(document.getElementById('simple-select'));
-  select.load().then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
+  select.load();
+}));
 
 // Carousel with Buttons
 Atomic.load('components/button', 'components/carousel')
@@ -57,10 +54,8 @@ Atomic.load('components/button', 'components/carousel')
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
     console.log('The Carousel with Buttons has been loaded');
-  })
-  .then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
+  });
+}));
 
 // Carousel with Text Input with state
 Atomic.load('components/textinput', 'components/carousel')
@@ -80,10 +75,8 @@ Atomic.load('components/textinput', 'components/carousel')
       }
     });
     textInput.state('text', '0');
-  })
-  .then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
+  });
+}));
 
 // Carousel with Buttons that Wraps
 Atomic.load('components/button', 'components/carousel')
@@ -112,10 +105,8 @@ Atomic.load('components/button', 'components/carousel')
     carousel.bind(next, next.events.USE, 'next');
     carousel.bind(prev, prev.events.USE, 'previous');
     console.log('The Carousel with Buttons (Wrapping) has been loaded');
-  })
-  .then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
+  });
+}));
 
 
 // // Carousel with Buttons and Fetch
@@ -154,7 +145,5 @@ Atomic.load('components/button', 'components/carousel', 'wirings/fetch')
         console.log('wtf happened?');
       }
     });
-  })
-  .then(null, Atomic.e);
-}))
-.then(null, Atomic.e);
+  });
+}));

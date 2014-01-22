@@ -297,1622 +297,7 @@ governing permissions and limitations under the License.
 
     return iface;
   }
-  
-  // --------------------------------------------------
-  // CLASSES
-  // --------------------------------------------------
-  /*global Atomic:true */
-  /*
-  Atomic
-  Copyright 2013 LinkedIn
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied.   See the License for the specific language
-  governing permissions and limitations under the License.
-  */
-
-  /**
-   * AbstractComponent a template for creating Components in Atomic
-   * Components are the lego blocks of Atomic. They emit events
-   * at interesting moments, and can be combined with additional
-   * components to create Composites.
-   * @class AbstractComponent
-   */
-  (function(Atomic) {
-    var AbstractComponent = Atomic._.Fiber.extend(function (base) {
-      return {
-        /**
-         * A simple ID to be overridden. Useful in debugging
-         * @property {String} AbstractComponent#name
-         */
-        name: 'AbstractComponent. Override me to improve debugging',
-      
-        /**
-         * The module path for this. Used in debugging and BEM syntax
-         * @property {String} id
-         */
-        id: 'abstractcomponent',
-
-        /**
-         * An array of dependencies this module needs to run
-         * These are modules the implementing component needs
-         * @property {Array} AbstractComponent#depends
-         */
-        depends: [],
-
-        /**
-         * A key/string collection of nodes and their purpose
-         * These are nodes that components need to have in order to function.
-         * This object is overriden with an instance variable during the constructor
-         * @property {Object} AbstractComponent#elements
-         */
-        elements: {},
-
-        /**
-         * A key/string collection of events
-         * These are events that the AbstractComponent can emit
-         * Overriden with an instance variable during the constructor
-         * @property {Object} AbstractComponent#events
-         */
-        events: {},
-      
-        /**
-         * A key/string collection of states
-         * These allow a developer to document the states used in the
-         * component. In order to set state using this.state(), you will
-         * also need to have the state object registered here
-         * to ensure all states are documented.
-         * @property {Object} AbstractComponent#states
-         */
-        states: {},
-
-        /**
-         * A configuration for this instance of the object
-         * contains any unknown key/value pairs passed into the
-         * constructor
-         * @property {Object} AbstractComponent#config
-         */
-        config: {},
-
-        /**
-         * The real initialization function when called in response to load
-         * This is where app logic resides
-         * @property {Array} AbstractComponent#_init
-         * @private
-         */
-        _init: null,
-      
-        /**
-         * The internal state object
-         * @property {Object} AbstractComponent#_state
-         * @private
-         */
-        _state: {},
-
-        /**
-         * A local event emitter
-         * @property {EventEmitter} AbstractComponent#_eventEmitter
-         * @private
-         */
-        _eventEmitter: null,
-      
-        /**
-         * A local event emitter
-         * used for the observer channel to forcibly separate events from observe
-         * @property {EventEmitter} AbstractComponent#_observableEmitter
-         * @private
-         */
-        _observableEmitter: null,
-
-        /**
-         * Has this object been destroyed
-         * @property {Boolean} AbstractComponent#_isDestroyed
-         * @private
-         */
-        _isDestroyed: false,
-
-        /**
-         * The initializer for a component
-         * The optional el, if provided, will then perform an attach on
-         * your behalf.
-         * @constructor
-         * @param {HTMLElement} el - an optional HTML element
-         * @param {Object} overrides - any configuration overrides to provide to this object
-         */
-        init: function (el, overrides) {
-          var name, nodeName;
-
-          // set assigned, etc all to local instance-level variables
-          this._init = function() {};
-          this.config = {};
-          this._eventEmitter = new Atomic._.EventEmitter({
-            wildcard: false,
-            newListener: false,
-            maxListeners: 20
-          });
-          this._observableEmitter = new Atomic._.EventEmitter({
-            wildcard: false,
-            newListener: false,
-            maxListeners: 0
-          });
-        
-          this.elements.root = 'The root HTML node of this component (automatically generated)';
-
-          // localize the nodes/events/needs variable BEFORE the user starts configuring
-          // nodes and needs can accept overwriting
-          this.elements = createDisplayableObject(this.elements, true);
-          this.events = createDisplayableObject(this.events, true, true);
-          this.states = createDisplayableObject(this.states, true, true);
-          this.depends = createDisplayableObject(this.depends);
-
-          // attach the el
-          if (el) {
-            this.attach(el);
-          }
-
-          // handle overrides
-          if (overrides) {
-            for (name in overrides) {
-              if (!overrides.hasOwnProperty(name)) {
-                continue;
-              }
-              if (typeof(this[name]) === 'function') {
-                // can't override a function here
-                continue;
-              }
-              else if (name.indexOf('_') === 0) {
-                // can't override a _ property here
-                continue;
-              }
-              else if (name === 'depends' || name === 'events' || name === 'config') {
-                // needs and events should be wired in. using config for this is just silly
-                continue;
-              }
-              else if (name === 'elements') {
-                for (nodeName in overrides.elements) {
-                  if (overrides.elements.hasOwnProperty(nodeName)) {
-                    this.elements._.set(nodeName, overrides.elements[nodeName]);
-                  }
-                }
-              }
-              else {
-                // everything else is assigned to config
-                this.config[name] = overrides[name];
-              }
-            }
-          }
-        },
-
-        /**
-         * Assign a node to the component.elements collection
-         * @method AbstractComponent#assign
-         * @param {String} name - the node to assign. Use a component.elements reference
-         * @param {HTMLElement} el - an element to assign to the role.
-         */
-        assign: function(name, el) {
-          // make sure this is an element that is allowed
-          if (!this.elements._.exists(name)) {
-            throw new Error('Invalid element: ' + name + '. Only elements defined in this.elements:{} may be assigned');
-          }
-        
-          this.elements._.set(name, el);
-          return this;
-        },
-  	
-        /**
-         * Assign a dependency to the component.depends collection
-         * @method AbstractComponent#resolve
-         * @param {String} name - the dependency to resolve. Use a component.depends reference
-         * @param {Object} obj - the resolved object
-         */
-        resolve: function(name, obj) {
-          // make sure this is an dependency that is allowed to be resolved
-          if (!this.depends._.exists(name)) {
-            throw new Error('Invalid dependency: ' + name + '. Only dependencies defined in this.depends:[] may be resolved');
-          }
-        
-          this.depends._.set(name, obj);
-          return this;
-        },
-
-        /**
-         * Destroy the object, removing DOM element and event bindings
-         * @method AbstractComponent#destroy
-         */
-        destroy: function () {
-          this._isDestroyed = true;
-          this.offAny();
-          if(this.elements().root.parentNode) {
-            this.elements().root.parentNode.removeChild(this.elements().root);
-          }
-          this.removeAllListeners();
-          return null;
-        },
-
-        /**
-         * Listen for events emitted by the Component
-         * @method AbstractComponent#on
-         * @param {String} name - the event name
-         * @param {Function} fn - the callback function
-         */
-        on: function (name, fn) {
-          if (name ===  '*') {
-            this._eventEmitter.onAny(fn);
-          }
-          else {
-            this._eventEmitter.on(name, fn);
-          }
-          return this;
-        },
-
-        /**
-         * Remove an event added via on
-         * @method AbstractComponent#off
-         * @param {String} name - the name to remove callbacks from
-         * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
-         */
-        off: function (name, fn /* optional */) {
-          if (name === '*') {
-            if (!fn) {
-              this._eventEmitter.offAll(name);
-            }
-            else {
-              this._eventEmitter.offAny(fn);
-            }
-          }
-          else {
-            this._eventEmitter.off(name, fn);
-          }
-          return this;
-        },
-
-        /**
-         * Queue a callback to run once, and then remove itself
-         * @method AbstractComponent#onOnce
-         * @param {String} name - the event name
-         * @param {Function} fn - the callback function
-         */
-        onOnce: function (name, fn) {
-          this._eventEmitter.onOnce(name, fn);
-          return this;
-        },
-
-        /**
-         * set the maximum number of listeners this component can support
-         * highly interactive components can increase the base number,
-         * but setting arbitrarily large numbers should be a performance
-         * warning.
-         * @method AbstractComponent#setMaxListeners
-         * @param {Number} count - the max number of listeners
-         */
-        setMaxListeners: function (count) {
-          this._eventEmitter.setMaxListeners(count);
-          return this;
-        },
-
-        /**
-         * Get a list of all the current listeners
-         * @method AbstractComponent#listeners
-         * @returns {Array}
-         */
-        listeners: function (name) {
-          var anyListeners = this._eventEmitter.listenersAny();
-          var listeners = this._eventEmitter.listeners(name);
-          return listeners.concat(anyListeners);
-        },
-
-        /**
-         * Trigger an event
-         * This triggers the specified event string, calling all
-         * listeners that are subscribed to it.
-         * @method AbstractComponent#trigger
-         * @param {String} name - the event name
-         * @param {Object} ... - any additional arguments to pass in the event
-         */
-        trigger: function () {
-          var args = [].slice.call(arguments, 0);
-          var name = args[0];
-        
-          // make sure this is an event that is allowed to be triggered
-          if (!this.events._.exists(name)) {
-            throw new Error('Invalid event: ' + name + '. Only events defined in this.events:{} may be triggered');
-          }
-        
-          this._eventEmitter.emit.apply(this._eventEmitter, args);
-          return this;
-        },
-
-        /**
-         * Provides an easy way to link an event and method
-         * @method AbstractComponent#bind
-         * @param {Object} eventing - an eventing object
-         * @param {String} eventName - the name of the event to listen to
-         * @param {String|Function} method - the method to invoke. If a string, resolves under this.*
-         */
-        bind: function (eventing, eventName, method) {
-          if (typeof method === 'string') {
-            eventing.on(eventName, Atomic.proxy(this[method], this));
-          }
-          else {
-            eventing.on(eventName, method);
-          }
-          return this;
-        },
-
-        /**
-         * Remove a bind() operation
-         * @method AbstractComponent#unbind
-         * @param {Object} eventing - an eventing object
-         * @param {String} eventName - optional. an event name to unsubscribe from
-         * @param {String|Function} method - optional. the method to remove. If a string, resolves under this.*
-         */
-        unbind: function (eventing, eventName, method) {
-          if (typeof method === 'string') {
-            eventing.off(eventName, this[method]);
-          }
-          else if (typeof method === 'function') {
-            eventing.off(eventName, method);
-          }
-          else {
-            eventing.off(eventName);
-          }
-          return this;
-        },
-
-        /**
-         * Wrap a method with a new function
-         * The new function gets the old function as its first parameter
-         * @method AbstractComponent#wrap
-         * @param {String} method - method to augment
-         * @param {Function} fn - custom function to execute. Gets the original function as the first arg
-         */
-        wrap: function(method, fn) {
-          var old = Atomic.proxy(this[method], this);
-          var that = this;
-          this[method] = function() {
-            var args = [].slice.call(arguments, 0);
-            args.unshift(old);
-            return fn.apply(that, args);
-          };
-          return this;
-        },
-      
-        /**
-         * Proxy a function into a new scope.
-         * @method AbstractComponent#proxy
-         * @param {Function} fn - a function to proxy
-         * @param {Object} scope - the scope to run the function in
-         * @returns {Function}
-         */
-        proxy: function(fn, scope) {
-          return function() {
-            fn.apply(scope, arguments);
-          };
-        },
-
-        /**
-         * Attach an element to this Component
-         * @method AbstractComponent#attach
-         * @param {HTMLElement} el - an HTML element to attach
-         * @returns this
-         */
-        attach: function (el) {
-          this.assign('root', el);
-          return this;
-        },
-
-        /**
-         * get the root node
-         * @method AbstractComponent#getRoot
-         * @returns {HTMLElement}
-         */
-        getRoot: function () {
-          return this.elements().root;
-        },
-      
-        /**
-         * Provides a helper for Block__Element--Modifier syntax
-         * We use BEM internally in the objects in order to provide a consistent way to
-         * manage CSS classes. The BEM helper creates class names in BEM syntax style
-         * @method AbstractComponent#BEM
-         * @param {String} element - the element part of the BEM syntax or null
-         * @param {String} modifier - the modifer part of the BEM syntax or null
-         * @returns {String}
-         */
-        BEM: function(element, modifier) {
-          var className = this.id.replace(/[^A-Z0-9\-\_]/gi, '-');
-          if (element) {
-            className += '__' + element;
-          }
-          if (modifier) {
-            className += '--' + modifier;
-          }
-          return className;
-        },
-      
-        /**
-         * Add a class to an element, helper in case jQuery or such isn't available
-         * @method AbstractComponent#addClass
-         * @param {HTMLElement} el - the HTML element
-         * @param {String} klass - the classname to add
-         * @returns this
-         */
-        addClass: function(el, klass) {
-          var className = el.className;
-          if (!hasClass(el, klass)) {
-            className += ' ' + klass.replace(/[^A-Z0-9\-\_]/gi, '-');
-            className = className.replace(/^\s+|\s+$/g, '');
-          }
-          el.className = className;
-          return this;
-        },
-      
-        /**
-         * Removes a class from an element, helper in case jQuery or such isn't available
-         * @method AbstractComponent#removeClass
-         * @param {HTMLElement} el - the HTML element
-         * @param {String} klass - the classname to add
-         * @returns this
-         */
-        removeClass: function(el, klass) {
-          var className = el.className;
-          className = className.replace(new RegExp('(?:^|\\s)' + klass.replace(INVALID_CLASS_CHARACTERS, '-') + '(?!\\S)', 'g') , '');
-          className = className.replace(/^\s+|\s+$/g, '');
-          el.className = className;
-          return this;
-        },
-      
-        /**
-         * Wait for the async completion of a function
-         * @see Atomic.when
-         */
-        when: function() {
-          return Atomic.when.apply(Atomic, arguments);
-        },
-      
-        /**
-         * Wait for the async completion of a collection of functions
-         * @see Atomic.whenAll
-         */
-        whenAll: function() {
-          return Atomic.whenAll.apply(Atomic, arguments);
-        },
-
-        /**
-         * Load the Component, resolve all dependencies
-         * calls the ready method
-         * @method AbstractComponent#load
-         * @param {Object} cb - a callback to run when this is loaded
-         */
-        load: function (cb) {
-          if (this.elements().root) {
-            this.addClass(this.elements().root, this.BEM());
-            this.addClass(this.elements().root, this.BEM(this.elements.root));
-            this.addClass(this.elements().root, this.BEM(null, 'loading'));
-          }
-          var deferred = Atomic.deferred();
-          var self = this;
-          var fetch = [];
-          var allDependencies = this.depends._.raw();
-          var allResolvedDependencies = this.depends();
-          var fetchLen;
-        
-          // only fetch things we don't have a resolved value for
-          for (var i = 0, len = allDependencies.length; i < len; i++) {
-            if (!allResolvedDependencies[allDependencies[i]]) {
-              fetch.push(allDependencies[i]);
-            }
-          }
-
-          Atomic.load.apply(Atomic, fetch)
-          .then(function(values) {
-            var wiringDeferred = Atomic.deferred(),
-                promise,
-                i,
-                n;
-
-            // populate values resolution into the this.depends()
-            for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
-              self.depends._.set(fetch[i], values[i]);
-            }
-
-            // dynamically create promise chain
-            promise = Atomic.when(self._init.call(self));
-
-            // if there is a callback, we can then handle it
-            // by attaching it to the end of the promise chain
-            if (cb) {
-              promise = promise.then(cb);
-            }
-
-            // set resolution for the internal promise
-            promise.then(function() {
-              wiringDeferred.fulfill();
-            }, function(err) {
-              wiringDeferred.reject(err);
-            });
-
-            // return the promise to the outer function
-            // if we hit a throw(), it'll automatically bubble out
-            // to the outer promise layer thanks to the promise chain
-            // above
-            return wiringDeferred.promise;
-          })
-          .then(function() {
-            var els = self.elements._.raw();
-            for (var name in els) {
-              if (els.hasOwnProperty(name) && self.elements()[name]) {
-                self.addClass(self.elements()[name], self.BEM(name));
-              }
-            }
-            if (self.elements().root) {
-              self.removeClass(self.elements().root, self.BEM(null, 'loading'));
-            }
-            deferred.fulfill();
-          }, function(err) {
-            if (self.elements().root) {
-              self.removeClass(self.elements().root, self.BEM(null, 'loading'));
-              self.addClass(self.elements().root, self.BEM(null, 'failed'));
-            }
-            deferred.reject(err);
-          });
-
-          return deferred.promise;
-        },
-
-        /**
-         * Adds additional functions and properties to this Component
-         * wiring is done in response to a load() call.
-         * @method AbstractComponent#wire
-         * @param {Function|Object|AbstractWiring} wiring - a functon to run in response to load(), or an object
-         *  literal containing an init function to be executed with load(), and public methods
-         *  to decorate the component instance
-         */
-        wire: function(wiring) {
-          var name, nodesName, eventsName, i, len, properties, cleanName;
-          var wrapsPre = /^[\[\]]/;
-          var wrapsPost = /[\[\]]$/;
-          var self = this;
-        
-          function noop() {
-            return function() {};
-          }
-        
-          function wrapInit(obj, fn) {
-            obj.wrap('_init', function(prev) {
-              prev();
-              fn.call(obj);
-            });
-          }
-        
-          // if the wiring is a function and has the __atomic property, error
-          // if just a function, it's an "init"
-          // if it's an object, it's already a wiring ready to go
-          if (typeof wiring === 'function') {
-            if (wiring.__atomic) {
-              throw new Error('Atomic Wirings must be configured (by invoking their function) and passing their return value into wire()');
-            }
-            properties = {
-              init: wiring
-            };
-          }
-          else {
-            properties = wiring;
-          }
-        
-          // iterate through the keys. For each key, handle it
-          for (name in properties) {
-            if (!properties.hasOwnProperty(name)) {
-              continue;
-            }
-          
-            cleanName = name.replace(wrapsPre, '').replace(wrapsPost, '');
-          
-            if (cleanName == '_init') {
-              throw new Error('You cannot wire in "_init" as it\'s a reserved method. Please use "init" without the underscore.');
-            }
-          
-            // events requires special handling as a property
-            if (name === 'events') {
-              for (eventsName in properties.events) {
-                if (properties.events.hasOwnProperty(eventsName)) {
-                  this.properties._.add(eventsName, properties.events[eventsName]);
-                }
-              }
-              continue;
-            }
-          
-            // the elements collection requires special handling, and doesn't overwrite
-            // any elements that may have been already defined
-            if (name === 'elements') {
-              for (nodesName in properties.elements) {
-                if (this.elements[nodesName]) {
-                  continue; // we do not overwrite if the Implementor has defined
-                }
-                this.elements._.add(nodesName, properties.elements[nodesName]);
-              }
-              continue;
-            }
-          
-            // the depends collection requires special handling
-            if (name === 'depends') {
-              for (i = 0, len = properties.depends.length; i < len; i++) {
-                this.depends._.add(properties.depends[i]);
-              }
-              continue;
-            }
-          
-            // by default, init is a wrapped function unless you turn on clobbering
-            if (name === 'init' || cleanName === 'init') {
-              // init methods are always done with wrapping unless disabled
-              if (name === ']init[') {
-                this._init = properties[name];
-              }
-              else {
-                wrapInit(this, properties[name]);
-              }
-              continue;
-            }
-          
-            if (typeof properties[name] === 'function') {
-              if (!this[cleanName]) {
-                this[cleanName] = noop();
-              }
-
-              // the default behavior is to clobber
-              // however, if we are told to wrap, we will
-              if (cleanName !== name) {
-                if (name.indexOf('[') === 0) {
-                  this.wrap(cleanName, properties[name]);
-                }
-              }
-              else {
-                this[cleanName] = properties[name];
-              }
-              continue;
-            }
-          }
-          return this;
-        },
-
-        /**
-         * Overloaded state function for setting and getting the state
-         * @method AbstractComponent#state
-         * @param {Object|String} Either the key to be retrieved or set, or an object
-         *   literal representing the new state or an extension of the new state
-         * @param {*} value - Either the value to be set, or a boolean specifying the object
-         *   in arg[0] should overwrite the existing state
-         */
-        state: function(one, two, undefined) {
-          var args = [].slice.call(arguments, 0);
-          var name;
-          var values = {};
-          var stateChanges = [];
-          var newState = null;
-
-          if (typeof args[1] === 'undefined') {
-            if (typeof args[0] === 'undefined') {
-              for (name in this._state) {
-                if (this._state.hasOwnProperty(name)) {
-                  values[name] = this._state[name].value;
-                }
-              }
-              return values;
-            }
-            else if (typeof args[0] === 'string') {
-              return this._state[args[0]].value;
-            }
-          }
-        
-          if(typeof args[0] === 'object') {
-            for (name in args[0]) {
-              if (args[0].hasOwnProperty(name)) {
-                if (!this.states._.exists(name)) {
-                  throw new Error('Invalid state: ' + name + '. Only states defined in this.states:{} may be set');
-                }
-                // overwrite if "true" or not set yet
-                if (args[1]) {
-                  // overwrite
-                  this._state[name].rev++;
-                  this._state[name].lastValue = this._state[name].value;
-                  this._state[name].value = args[0][name];
-                }
-                else if (typeof this._state[name] === 'undefined') {
-                  // never defined, new state object
-                  this._state[name] = {
-                    rev: 0,
-                    value: args[0][name],
-                    lastValue: undefined
-                  };
-                }
-                
-                stateChanges.push(name);
-              }
-            }
-          }
-        
-          if (typeof args[0] === 'string') {
-            if (!this.states._.exists(args[0])) {
-              throw new Error('Invalid state: ' + args[0] + '. Only states defined in this.states:{} may be set');
-            }
-            if (typeof this._state[args[0]] === 'undefined') {
-              this._state[args[0]] = {
-                rev: 0,
-                value: args[1],
-                lastValue: undefined
-              };
-            }
-            else {
-              this._state[args[0]].rev++;
-              this._state[args[0]].lastValue = this._state[args[0]].value;
-              this._state[args[0]].value = args[1];
-            }
-            stateChanges.push(args[0]);
-          }
-        
-          // we should have a set of items in stateChanges we need to now trigger observer
-          // changes for each changed item
-          for (var i = 0, len = stateChanges.length; i < len; i++) {
-            newState = this._state[stateChanges[i]];
-            this._observableEmitter.emit(stateChanges[i], newState.value, newState.lastValue, newState.rev);
-          }
-
-          if(stateChanges.length > 0) {
-            return this.render();
-          }
-        
-          return this;
-        },
-      
-        /**
-         * Listen for data changes in the state
-         * @method AbstractComponent#observe
-         * @param {String} name - the data name
-         * @param {Function} fn - the callback function
-         */
-        observe: function (name, fn) {
-          if (name ===  '*') {
-            this._observableEmitter.onAny(fn);
-          }
-          else {
-            this._observableEmitter.on(name, fn);
-          }
-          return this;
-        },
-
-        /**
-         * Remove a listener for data changes
-         * @method AbstractComponent#unobserve
-         * @param {String} name - the data name to remove callbacks from
-         * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
-         */
-        unobserve: function (name, fn /* optional */) {
-          if (name === '*') {
-            if (!fn) {
-              this._observableEmitter.offAll(name);
-            }
-            else {
-              this._observableEmitter.offAny(fn);
-            }
-          }
-          else {
-            this._observableEmitter.off(name, fn);
-          }
-          return this;
-        },
-
-        /**
-         * Can be overriden to apply the component's internal state to the DOM
-         * @method render
-         * @returns this
-         */
-        render: function() {
-          return this;
-        }
-      };
-    });
-    
-    Atomic._.AbstractComponent = AbstractComponent;
-  }(Atomic));
-
-  
-  // --------------------------------------------------
-  // MODULES
-  // --------------------------------------------------
-  /*global Atomic:true */
-  /*
-  Atomic
-  Copyright 2013 LinkedIn
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied.   See the License for the specific language
-  governing permissions and limitations under the License.
-  */
-  (function(Atomic) {
-    var emitter = new Atomic._.EventEmitter({
-      wildcard: true,
-      newListener: false,
-      maxListeners: 20
-    });
-
-    Atomic.augment(Atomic.Events, {
-      /**
-       * Listen for events emitted by the global Atomic Object
-       * @method Atomic.on
-       * @param {String} name - the event name
-       * @param {Function} fn - the callback function
-       */
-      on: function (name, fn) {
-        emitter.on(name, fn);
-        return Atomic;
-      },
-
-      /**
-       * Remove an event added via on
-       * @method Atomic#off
-       * @param {String} name - the name to remove callbacks from
-       * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
-       */
-      off: function (name, fn /* optional */) {
-        emitter.off(name, fn);
-        return Atomic;
-      },
-
-      /**
-       * Listen to all events emitted from the global Atomic Object
-       * @method Atomic#onAny
-       * @param {Function} fn - a function to fire on all events
-       */
-      onAny: function (fn) {
-        emitter.onAny(fn);
-        return Atomic;
-      },
-
-      /**
-       * Remove a listener from the "listen to everything" group
-       * @method Atomic#offAny
-       * @param {Function} fn - the callback to remove
-       */
-      offAny: function (fn) {
-        emitter.offAny(fn);
-        return Atomic;
-      },
-
-      /**
-       * Queue a callback to run once, and then remove itself
-       * @method Atomic#onOnce
-       * @param {String} name - the event name
-       * @param {Function} fn - the callback function
-       */
-      onOnce: function (name, fn) {
-        emitter.onOnce(name, fn);
-        return Atomic;
-      },
-
-      /**
-       * Queue a callback to run X times, and then remove itself
-       * @method Atomic#on
-       * @param {String} name - the event name
-       * @param {Number} count - a number of times to invoke the callback
-       * @param {Function} fn - the callback function
-       */
-      onMany: function (name, count, fn) {
-        emitter.onMany(name, count, fn);
-        return Atomic;
-      },
-
-      /**
-       * Remove all of the listeners from the given namespace
-       * @method Atomic#offAll
-       * @param {String} name - the event name
-       */
-      offAll: function (name) {
-        emitter.offAll(name);
-        return Atomic;
-      },
-
-      /**
-       * set the maximum number of listeners the global Atomic Object can support
-       * highly interactive pages can increase the base number,
-       * but setting arbitrarily large numbers should be a performance
-       * warning.
-       * @method Atomic#setMaxListeners
-       * @param {Number} count - the max number of listeners
-       */
-      setMaxListeners: function (count) {
-        emitter.setMaxListeners(count);
-        return Atomic;
-      },
-
-      /**
-       * Get a list of all the current listeners
-       * @method Atomic#listeners
-       * @returns {Array}
-       */
-      listeners: function (name) {
-        var anyListeners = emitter.listenersAny();
-        var listeners = emitter.listeners(name);
-        return listeners.concat(anyListeners);
-      },
-
-      /**
-       * Trigger an event
-       * This triggers the specified event string, calling all
-       * listeners that are subscribed to it.
-       * @method Atomic#trigger
-       * @param {String} name - the event name
-       * @param {Object} ... - any additional arguments to pass in the event
-       */
-      trigger: function () {
-        var args = [].slice.call(arguments, 0);
-        emitter.emit.apply(emitter, args);
-        return Atomic;
-      }
-    });
-  }(Atomic));
-
-  /*global Atomic:true */
-  /*
-  Atomic
-  Copyright 2013 LinkedIn
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied.   See the License for the specific language
-  governing permissions and limitations under the License.
-  */
-
-  (function(Atomic) {
-    Atomic.augment(Atomic._, {
-      /**
-       * The Internal Factory function hides most of the logic
-       * for creating Atomic Components. It's split out to keep the
-       * interface separate from the Fiber integration
-       * @method Atomic.Factory
-       * @private
-       * @see Atomic.Component
-       */
-      Factory: function(objLiteral) {
-        // certain items are "reserved" and cannot be overridden in a wiring
-        var reserved = {
-          // these are "special" but are okay to set using wiring
-          // we are calling them out for readability's sake
-          // wiring has a special use case below
-          'depends':        false,
-          'elements':       false,
-          'events':         false,
-          'init':           true,
-          '_init':          true,
-          '_eventEmitter':  true,
-          '_isDestroyed':   true
-        };
-
-        // currently, we aren't doing anything fancy here
-        // fiber requires an object literal that defines the interface
-        // and we create the interface from the object literal
-        // provided. For every item, if it's not in our reserved list,
-        // we place it onto the additionalMethods collection.
-        //
-        // We then create an init() method that puts the wiring value
-        // as first on the stack of wiring items.
-        //
-        // When a component is created, the wirings are pulled in
-        // and ran in order.
-        var component = Atomic._.AbstractComponent.extend(function(base) {
-          var additionalMethods = {};
-          // add all other extras
-          for (var name in objLiteral) {
-            if (!objLiteral.hasOwnProperty(name) || reserved[name]) {
-              continue;
-            }
-            additionalMethods[name] = objLiteral[name];
-          }
-          additionalMethods.init = function() {
-            base.init.apply(this, arguments);
-            if (typeof objLiteral.init === 'function') {
-              this._init = objLiteral.init;
-            }
-          };
-
-          return additionalMethods;
-        });
-
-        return component;
-      }
-    });
-    
-    Atomic.augment(Atomic, {
-      /**
-       * Creates an Atomic Component
-       * An Atomic Component consists of the following items in its object literal:
-       * depends - an array of dependencies required for this component
-       * elements - an object literal of node name / purpose
-       * events - an object literal of event name / purpose
-       * wiring - a function or object literal compatible with AbstractComponent#wireIn
-       * @method Atomic.Component
-       * @param {Object} objLiteral - the object literal to create a component from
-       * @return {Object} an object that extends AbstractComponent
-       */
-      Component: function(objLiteral) {
-        return __Atomic_Private_Factory_Methods__.Factory(objLiteral);
-      },
-    
-      Wiring: function(wiring) {
-        wiring.__atomic = true;
-        return wiring;
-      }
-    });
-  }(Atomic));
-
-  /*global Atomic:true */
-  /*
-  Atomic
-  Copyright 2013 LinkedIn
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied.   See the License for the specific language
-  governing permissions and limitations under the License.
-  */
-
-  (function(Atomic) {
-    Atomic.augment(Atomic, {
-      loader: {
-        init: function() {},
-        register: function(id, exports) {
-          Atomic._.modules[id] = exports;
-        },
-        load: function(deps) {
-          var resolved = [];
-          for (var i = 0, len = deps.length; i < len; i++) {
-            if (!Atomic._.modules[deps[i]]) {
-              throw new Error('Module ID is not defined: ' + deps[i]);
-            }
-            resolved.push(Atomic._.modules[deps[i]]);
-          }
-          return resolved;
-        }
-      }
-    });
-  }(Atomic));
-  /*global Atomic:true, context:true */
-  /*
-  Atomic
-  Copyright 2013 LinkedIn
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied.   See the License for the specific language
-  governing permissions and limitations under the License.
-  */
-
-  /**
-   * This file contains the public Atomic APIs. Anything
-   * we wish to attach to Atomic.___ at a top level should
-   * be exposed in this file.
-   */
-
-  (function(Atomic, context) {
-    // holds the previous Atomic reference
-    var Atomic_noConflict_oldAtomic = context.Atomic;
-
-    // holds the initialized state of the framework
-    var Atomic_load_initialized = false;
-
-    // holds the config for if Atomic is AMD optimized
-    var Atomic_amd_optimized = false;
-
-    Atomic.augment(Atomic, {
-      /**
-       * prevent conflicts with an existing variable
-       * if it is named "Atomic". Returns the current
-       * Atomic reference
-       * @method Atomic.noConflict
-       * @return Object - the current Atomic reference
-       */
-      noConflict: function () {
-        var thisAtomic = context.Atomic;
-        context.Atomic = Atomic_noConflict_oldAtomic;
-        return thisAtomic;
-      },
-
-      /**
-       * Set the pre-optimized flag for Atomic. If you have
-       * used an AMD optimizer before running Atomic, you
-       * should use this, as all your modules are going to
-       * be properly named.
-       */
-      amdOptimized: function() {
-        Atomic_amd_optimized = true;
-      },
-
-      /**
-       * load the specified dependencies, then run the callback
-       * with the dependencies as arguments. This abstracts
-       * away any loader framework implementations
-       * @method Atomic.load
-       * @param Array depend - an array of dependencies or a list of dependencies
-       * @param Function then - a callback to run with dependencies as arguments
-       */
-      load: function() {
-        var deferred = Atomic.deferred();
-        var args = [].slice.call(arguments, 0);
-
-        // wrap the callback if it exists
-        if (typeof args[args.length - 1] === 'function') {
-          deferred.promise.then(args[args.length - 1]);
-          args.pop();
-        }
-
-        // if 2+ args, no need to expand further
-        if (args.length === 1) {
-          args = args[0];
-        }
-
-        if (!isArray(args)) {
-          args = [args];
-        }
-
-        // if not initialized, init, and then do the load step
-        var initPromise = null;
-        if (Atomic_load_initialized) {
-          initPromise = Atomic.when(true);
-        }
-        else {
-          // as part of init, save atomic/component and atomic into the loader system
-          Atomic_load_initialized = true;
-          initPromise = Atomic.when(Atomic.loader.init());
-          initPromise.then(function() {
-            Atomic.loader.register('Atomic', Atomic);
-            Atomic.loader.register('Atomic/Component', Atomic.Component);
-          });
-        }
-
-        // when initialization is complete, then call load
-        // on load, resolve the primary promise
-        initPromise
-        .then(function() {
-          return Atomic.when(Atomic.loader.load(args));
-        })
-        .then(function(needs) {
-          return deferred.fulfill(needs);
-        }, function(reason) {
-          return deferred.reject(reason);
-        });
-
-        // return the promise
-        return deferred.promise;
-      },
-
-      /**
-       * A basic proxy function. Makes it easier to wrap functionality
-       * @method Atomic.proxy
-       * @param {Function} fn - the function to wrap
-       * @param {Object} scope - the scope to apply fn within
-       * @returns {Function}
-       */
-      proxy: function(fn, scope) {
-        return function() {
-          return fn.apply(scope, arguments);
-        };
-      },
-
-      /**
-       * Throttle a function. Prevents a function from running again within X seconds
-       * this is really helpful for repeating key events, scrolling, or simply "noisy"
-       * events
-       * Visually, this can be interpreted as
-       * XXXXXXXXXXXX      XXXXXXXXXXXX
-       * I   I   I         I   I   I
-       *
-       * X = method called
-       * I = actual invocation
-       * 
-       * From https://github.com/documentcloud/underscore/blob/master/underscore.js
-       * @method Atomic.throttle
-       * @param {Function} func - the function to throttle
-       * @param {Number} wait - a number of milliseconds to wait
-       * @param {Boolean} immediate - run a trailing function when throttled
-       */
-      throttle: function(func, wait, immediate) {
-        var context, args, result;
-        var timeout = null;
-        var previous = 0;
-        var later = function() {
-          previous = new Date();
-          timeout = null;
-          result = func.apply(context, args);
-        };
-        return function() {
-          var now = new Date();
-          if (!previous && immediate === false) {
-            previous = now;
-          }
-          var remaining = wait - (now - previous);
-          context = this;
-          args = arguments;
-          if (remaining <= 0) {
-            clearTimeout(timeout);
-            timeout = null;
-            previous = now;
-            result = func.apply(context, args);
-          } else if (!timeout) {
-            timeout = setTimeout(later, remaining);
-          }
-          return result;
-        };
-      },
-
-      /**
-       * Debounces a function, by only letting it run after the user has taken
-       * no activity for X seconds. Similar to throttle, this is more useful
-       * when you want to limit the invocations to once for every burst of
-       * activity
-       *
-       * Visually, this can be interpreted as (immediate=true)
-       * XXXXXXXXXXXX      XXXXXXXXXXXX
-       * I                 I
-       *
-       * alternatively, this can be interpreted as (immediate=false)
-       * XXXXXXXXXXXX      XXXXXXXXXXXX
-       *                I                 I
-       *
-       * X = method called
-       * I = actual invocation
-       *
-       * Notice how the user needed to stop acting for a window in order
-       * for the trigger to reset
-       *
-       * From https://github.com/documentcloud/underscore/blob/master/underscore.js
-       * @method Atomic.debounce
-       * @param {Function} func - the function to wrap for debouncing
-       * @param {Number} wait - the number of milliseconds to wait until invoking
-       * @param {Boolean} immediate - if true, the event is on the leading edge
-       */
-      debounce: function(func, wait, immediate) {
-        var result;
-        var timeout = null;
-        return function() {
-          var context = this, args = arguments;
-          var later = function() {
-            timeout = null;
-            if (!immediate) {
-              result = func.apply(context, args);
-            }
-          };
-          var callNow = immediate && !timeout;
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-          if (callNow) {
-            result = func.apply(context, args);
-          }
-          return result;
-        };
-      },
-
-      /**
-       * Take a function (which takes 1 arg) and return a function that takes
-       * N args, where N is the length of the object or array in arguments[0]
-       * @method Atomic.expand
-       * @param {Function} fn - the function to expand
-       * @returns {Function} a function that takes N args
-       */
-      expand: function(fn) {
-        return function(args) {
-          var key;
-          var expanded = [];
-          if (Object.prototype.toString.call(args) === '[object Array]') {
-            expanded = args;
-          }
-          else {
-            for (key in args) {
-              if (args.hasOwnProperty(key)) {
-                expanded.push(args[key]);
-              }
-            }
-          }
-
-          fn.apply(fn, expanded);
-        };
-      },
-
-      /**
-       * Get the keys of an object
-       * @method Atomic.keys
-       */
-      keys: function(obj) {
-        var name;
-        var keys = [];
-        for (name in obj) {
-          if (obj.hasOwnProperty(name)) {
-            keys[keys.length] = name;
-          }
-        }
-        return keys;
-      },
-
-      /**
-       * Creates the ability to call Promises from within the
-       * wiring functions. This keeps us from having to pass
-       * in control functions, instead making everything
-       * synchronous by default. You may also pass it another
-       * library's promise, which will convert to a promise
-       * in the Atomic ecosystem.
-       * @param {Object} promise - optional. a promise from another framework
-       * @method Atomic.deferred
-       * @returns {Object} Promise
-       */
-      deferred: function(promise) {
-        var lib = getPromiseLibrary();
-        if (promise) {
-          lib.cast(promise);
-        }
-        else {
-          return lib.pending();
-        }
-      },
-
-      /**
-       * Convert a function value or promise return into
-       * a promise. Very useful when you don't know if the function
-       * is going to return a promise. This way, it's always a
-       * promise, all of the time
-       * @method Atomic.when
-       * @param {Function|Object} the item you want to convert to a promise
-       * @returns {Object} Promise
-       */
-      when: function(whennable) {
-        return getPromiseLibrary().cast(whennable);
-      },
-    
-      /**
-       * Convert a collection of functions into a promise that runs in paralell
-       * This is useful when loading a bunch of components inside of a control and
-       * want to simply listen for when all of them are ready
-       * @method Atomic.whenAll
-       * @param {Array} the array of functions to convert to a single promise
-       * @returns {Object} Promise
-       */
-      whenAll: function(whens) {
-        return getPromiseLibrary().all(whens);
-      },
-
-      /**
-       * the Atomic thrower is a function you can use to handle rejection
-       * of promises. It's easier than writing your own, and will output
-       * to console.error as a last resort
-       * @method Atomic.thrower
-       * @param {Object} err - the error from a rejection
-       */
-      error: function(err) {
-        /*global console:true */
-
-        // if exception, try to get the stack
-        var msg = '';
-        var stack = '';
-
-        if (typeof err === 'object') {
-          if (err.message) {
-            msg = err.message;
-          }
-          else if (err.toString) {
-            msg = err.toString();
-          }
-
-          if (err.stack) {
-            stack = err.stack;
-          }
-          else if (err.stacktrace) {
-            stack = err.stacktrace;
-          }
-        }
-        else if (typeof err === 'string') {
-          msg = err;
-        }
-
-        if (console && console.error) {
-          console.error(msg + '\n' + stack);
-        }
-      },
-      
-      /**
-       * Describe a component for the purpose of exploration or documentation
-       * being able to see all the self-documenting code of Atomic Components is
-       * a major feature. Using describe() will tell you about the component via
-       * console.log if available, and return a promise with the JSON structure
-       * @method Atomic.describe
-       * @param {String} component - the component to get a description of
-       * @param {Boolean} output - (optional) should the description be printed to the console
-       */
-      describe: function(component, output) {
-        if (typeof output == 'undefined') {
-          output = true;
-        }
-      
-        var d = Atomic.deferred();
-      
-        function printComponent(Component) {
-          var c = new Component();
-          var strOut = [];
-          var objOut = {};
-          objOut.component = component;
-          objOut.name = c.name;
-          objOut.depends = c.depends._.raw();
-          objOut.events = c.events._.raw();
-          objOut.states = c.states._.raw();
-
-          strOut = [
-            component + ': ' + c.name,
-            '=====',
-            'BEM id: ' + c.BEM(),
-            'dependencies: ' + c.depends._.raw().join(', '),
-            '',
-            'ELEMENTS',
-            c.elements.toString(),
-            '',
-            'EVENTS',
-            c.events.toString(),
-            '',
-            'STATES',
-            c.states.toString()
-          ];
-        
-          if (output && context.console && typeof context.console.log == 'function') {
-            context.console.log(strOut.join('\n'));
-          }
-        
-          d.fulfill(objOut);
-        }
-      
-        if (typeof component === 'string') {
-          Atomic.load([component])
-          .then(Atomic.expand(function(Component) {
-            printComponent(Component);
-          }, Atomic.e))
-          .then(null, Atomic.e);
-        }
-        else if (typeof component === 'function') {
-          var c = new component();
-          printComponent(c);
-        }
-        else {
-          printComponent(component);
-        }
-      
-        return d.promise;
-      },
-      
-      /**
-       * Shims the global define when an AMD loader doesn't exist
-       * very useful when running unit tests, so you are not tied to a loader's structure
-       * @method Atomic.define
-       * @param {String} id - the ID of the module
-       * @param {Array} depends - the dependencies array
-       * @param {Function} factory - the factory function that contains exports
-       */
-      define: function(id, depends, factory) {
-        if (typeof id !== 'string') {
-          throw new Error('you must specify an ID if you are not using a module loader system');
-        }
-        if (Object.prototype.toString.call(depends) !== '[object Array]') {
-          factory = depends;
-          depends = [];
-        }
-      
-        // a local require
-        var require = function(str) {
-          if (window.console && window.console.warn) {
-            window.console.warn('using runtime require() is dangerous without a module loader');
-          }
-          if (!Atomic._.modules[str]) {
-            throw new Error('Module not loaded: ' + str);
-          }
-          return Atomic._.modules[str];
-        };
-      
-        var module = {
-          exports: {}
-        };
-      
-        var resolved = [];
-        var result;
-        for (var i = 0, len = depends.length; i < len; i++) {
-          if (depends[i] === 'require') {
-            resolved.push(require);
-            continue;
-          }
-          if (depends[i] === 'module') {
-            resolved.push(module);
-            continue;
-          }
-          if (depends[i] === 'exports') {
-            resolved.push(module.exports);
-            continue;
-          }
-          if (!Atomic._.modules[depends[i]]) {
-            throw new Error('Module not loaded: ' + depends[i]);
-          }
-          resolved.push(Atomic._.modules[depends[i]]);
-        }
-      
-        if (typeof factory === 'function') {
-          result = factory.apply(factory, resolved);
-          if (result) {
-            Atomic._.modules[id] = result;
-          }
-          else {
-            Atomic._.modules[id] = module.exports;
-          }
-        }
-        else {
-          Atomic._.modules[id] = factory;
-        }
-      }
-    });
-  }(Atomic, context));
-
-  /*global Atomic:true */
-  /*
-  Atomic
-  Copyright 2013 LinkedIn
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an "AS
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-  express or implied.   See the License for the specific language
-  governing permissions and limitations under the License.
-  */
-
-  // this file sets the Atomic Version string at build time
-  (function(Atomic) {
-    Atomic.augment(Atomic, {
-      version: '0.0.9-1-ge618a36'
-    });
-  }(Atomic));
-  
   // --------------------------------------------------
   // EXTERNAL LIBRARIES (using harnesses)
   // --------------------------------------------------
@@ -8275,7 +6660,1622 @@ governing permissions and limitations under the License.
 
     Atomic._.SemVer = module.exports;
   });
+
+  // --------------------------------------------------
+  // CLASSES
+  // --------------------------------------------------
+  /*global Atomic:true */
+  /*
+  Atomic
+  Copyright 2013 LinkedIn
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an "AS
+  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied.   See the License for the specific language
+  governing permissions and limitations under the License.
+  */
+
+  /**
+   * AbstractComponent a template for creating Components in Atomic
+   * Components are the lego blocks of Atomic. They emit events
+   * at interesting moments, and can be combined with additional
+   * components to create Composites.
+   * @class AbstractComponent
+   */
+  (function(Atomic) {
+    var AbstractComponent = Atomic._.Fiber.extend(function (base) {
+      return {
+        /**
+         * A simple ID to be overridden. Useful in debugging
+         * @property {String} AbstractComponent#name
+         */
+        name: 'AbstractComponent. Override me to improve debugging',
+      
+        /**
+         * The module path for this. Used in debugging and BEM syntax
+         * @property {String} id
+         */
+        id: 'abstractcomponent',
+
+        /**
+         * An array of dependencies this module needs to run
+         * These are modules the implementing component needs
+         * @property {Array} AbstractComponent#depends
+         */
+        depends: [],
+
+        /**
+         * A key/string collection of nodes and their purpose
+         * These are nodes that components need to have in order to function.
+         * This object is overriden with an instance variable during the constructor
+         * @property {Object} AbstractComponent#elements
+         */
+        elements: {},
+
+        /**
+         * A key/string collection of events
+         * These are events that the AbstractComponent can emit
+         * Overriden with an instance variable during the constructor
+         * @property {Object} AbstractComponent#events
+         */
+        events: {},
+      
+        /**
+         * A key/string collection of states
+         * These allow a developer to document the states used in the
+         * component. In order to set state using this.state(), you will
+         * also need to have the state object registered here
+         * to ensure all states are documented.
+         * @property {Object} AbstractComponent#states
+         */
+        states: {},
+
+        /**
+         * A configuration for this instance of the object
+         * contains any unknown key/value pairs passed into the
+         * constructor
+         * @property {Object} AbstractComponent#config
+         */
+        config: {},
+
+        /**
+         * The real initialization function when called in response to load
+         * This is where app logic resides
+         * @property {Array} AbstractComponent#_init
+         * @private
+         */
+        _init: null,
+      
+        /**
+         * The internal state object
+         * @property {Object} AbstractComponent#_state
+         * @private
+         */
+        _state: {},
+
+        /**
+         * A local event emitter
+         * @property {EventEmitter} AbstractComponent#_eventEmitter
+         * @private
+         */
+        _eventEmitter: null,
+      
+        /**
+         * A local event emitter
+         * used for the observer channel to forcibly separate events from observe
+         * @property {EventEmitter} AbstractComponent#_observableEmitter
+         * @private
+         */
+        _observableEmitter: null,
+
+        /**
+         * Has this object been destroyed
+         * @property {Boolean} AbstractComponent#_isDestroyed
+         * @private
+         */
+        _isDestroyed: false,
+
+        /**
+         * The initializer for a component
+         * The optional el, if provided, will then perform an attach on
+         * your behalf.
+         * @constructor
+         * @param {HTMLElement} el - an optional HTML element
+         * @param {Object} overrides - any configuration overrides to provide to this object
+         */
+        init: function (el, overrides) {
+          var name, nodeName;
+
+          // set assigned, etc all to local instance-level variables
+          this._init = function() {};
+          this.config = {};
+          this._eventEmitter = new Atomic._.EventEmitter({
+            wildcard: false,
+            newListener: false,
+            maxListeners: 20
+          });
+          this._observableEmitter = new Atomic._.EventEmitter({
+            wildcard: false,
+            newListener: false,
+            maxListeners: 0
+          });
+        
+          this.elements.root = 'The root HTML node of this component (automatically generated)';
+
+          // localize the nodes/events/needs variable BEFORE the user starts configuring
+          // nodes and needs can accept overwriting
+          this.elements = createDisplayableObject(this.elements, true);
+          this.events = createDisplayableObject(this.events, true, true);
+          this.states = createDisplayableObject(this.states, true, true);
+          this.depends = createDisplayableObject(this.depends);
+
+          // attach the el
+          if (el) {
+            this.attach(el);
+          }
+
+          // handle overrides
+          if (overrides) {
+            for (name in overrides) {
+              if (!overrides.hasOwnProperty(name)) {
+                continue;
+              }
+              if (typeof(this[name]) === 'function') {
+                // can't override a function here
+                continue;
+              }
+              else if (name.indexOf('_') === 0) {
+                // can't override a _ property here
+                continue;
+              }
+              else if (name === 'depends' || name === 'events' || name === 'config') {
+                // needs and events should be wired in. using config for this is just silly
+                continue;
+              }
+              else if (name === 'elements') {
+                for (nodeName in overrides.elements) {
+                  if (overrides.elements.hasOwnProperty(nodeName)) {
+                    this.elements._.set(nodeName, overrides.elements[nodeName]);
+                  }
+                }
+              }
+              else {
+                // everything else is assigned to config
+                this.config[name] = overrides[name];
+              }
+            }
+          }
+        },
+
+        /**
+         * Assign a node to the component.elements collection
+         * @method AbstractComponent#assign
+         * @param {String} name - the node to assign. Use a component.elements reference
+         * @param {HTMLElement} el - an element to assign to the role.
+         */
+        assign: function(name, el) {
+          // make sure this is an element that is allowed
+          if (!this.elements._.exists(name)) {
+            throw new Error('Invalid element: ' + name + '. Only elements defined in this.elements:{} may be assigned');
+          }
+        
+          this.elements._.set(name, el);
+          return this;
+        },
+  	
+        /**
+         * Assign a dependency to the component.depends collection
+         * @method AbstractComponent#resolve
+         * @param {String} name - the dependency to resolve. Use a component.depends reference
+         * @param {Object} obj - the resolved object
+         */
+        resolve: function(name, obj) {
+          // make sure this is an dependency that is allowed to be resolved
+          if (!this.depends._.exists(name)) {
+            throw new Error('Invalid dependency: ' + name + '. Only dependencies defined in this.depends:[] may be resolved');
+          }
+        
+          this.depends._.set(name, obj);
+          return this;
+        },
+
+        /**
+         * Destroy the object, removing DOM element and event bindings
+         * @method AbstractComponent#destroy
+         */
+        destroy: function () {
+          this._isDestroyed = true;
+          this.offAny();
+          if(this.elements().root.parentNode) {
+            this.elements().root.parentNode.removeChild(this.elements().root);
+          }
+          this.removeAllListeners();
+          return null;
+        },
+
+        /**
+         * Listen for events emitted by the Component
+         * @method AbstractComponent#on
+         * @param {String} name - the event name
+         * @param {Function} fn - the callback function
+         */
+        on: function (name, fn) {
+          if (name ===  '*') {
+            this._eventEmitter.onAny(fn);
+          }
+          else {
+            this._eventEmitter.on(name, fn);
+          }
+          return this;
+        },
+
+        /**
+         * Remove an event added via on
+         * @method AbstractComponent#off
+         * @param {String} name - the name to remove callbacks from
+         * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
+         */
+        off: function (name, fn /* optional */) {
+          if (name === '*') {
+            if (!fn) {
+              this._eventEmitter.offAll(name);
+            }
+            else {
+              this._eventEmitter.offAny(fn);
+            }
+          }
+          else {
+            this._eventEmitter.off(name, fn);
+          }
+          return this;
+        },
+
+        /**
+         * Queue a callback to run once, and then remove itself
+         * @method AbstractComponent#onOnce
+         * @param {String} name - the event name
+         * @param {Function} fn - the callback function
+         */
+        onOnce: function (name, fn) {
+          this._eventEmitter.onOnce(name, fn);
+          return this;
+        },
+
+        /**
+         * set the maximum number of listeners this component can support
+         * highly interactive components can increase the base number,
+         * but setting arbitrarily large numbers should be a performance
+         * warning.
+         * @method AbstractComponent#setMaxListeners
+         * @param {Number} count - the max number of listeners
+         */
+        setMaxListeners: function (count) {
+          this._eventEmitter.setMaxListeners(count);
+          return this;
+        },
+
+        /**
+         * Get a list of all the current listeners
+         * @method AbstractComponent#listeners
+         * @returns {Array}
+         */
+        listeners: function (name) {
+          var anyListeners = this._eventEmitter.listenersAny();
+          var listeners = this._eventEmitter.listeners(name);
+          return listeners.concat(anyListeners);
+        },
+
+        /**
+         * Trigger an event
+         * This triggers the specified event string, calling all
+         * listeners that are subscribed to it.
+         * @method AbstractComponent#trigger
+         * @param {String} name - the event name
+         * @param {Object} ... - any additional arguments to pass in the event
+         */
+        trigger: function () {
+          var args = [].slice.call(arguments, 0);
+          var name = args[0];
+        
+          // make sure this is an event that is allowed to be triggered
+          if (!this.events._.exists(name)) {
+            throw new Error('Invalid event: ' + name + '. Only events defined in this.events:{} may be triggered');
+          }
+        
+          this._eventEmitter.emit.apply(this._eventEmitter, args);
+          return this;
+        },
+
+        /**
+         * Provides an easy way to link an event and method
+         * @method AbstractComponent#bind
+         * @param {Object} eventing - an eventing object
+         * @param {String} eventName - the name of the event to listen to
+         * @param {String|Function} method - the method to invoke. If a string, resolves under this.*
+         */
+        bind: function (eventing, eventName, method) {
+          if (typeof method === 'string') {
+            eventing.on(eventName, Atomic.proxy(this[method], this));
+          }
+          else {
+            eventing.on(eventName, method);
+          }
+          return this;
+        },
+
+        /**
+         * Remove a bind() operation
+         * @method AbstractComponent#unbind
+         * @param {Object} eventing - an eventing object
+         * @param {String} eventName - optional. an event name to unsubscribe from
+         * @param {String|Function} method - optional. the method to remove. If a string, resolves under this.*
+         */
+        unbind: function (eventing, eventName, method) {
+          if (typeof method === 'string') {
+            eventing.off(eventName, this[method]);
+          }
+          else if (typeof method === 'function') {
+            eventing.off(eventName, method);
+          }
+          else {
+            eventing.off(eventName);
+          }
+          return this;
+        },
+
+        /**
+         * Wrap a method with a new function
+         * The new function gets the old function as its first parameter
+         * @method AbstractComponent#wrap
+         * @param {String} method - method to augment
+         * @param {Function} fn - custom function to execute. Gets the original function as the first arg
+         */
+        wrap: function(method, fn) {
+          var old = Atomic.proxy(this[method], this);
+          var that = this;
+          this[method] = function() {
+            var args = [].slice.call(arguments, 0);
+            args.unshift(old);
+            return fn.apply(that, args);
+          };
+          return this;
+        },
+      
+        /**
+         * Proxy a function into a new scope.
+         * @method AbstractComponent#proxy
+         * @param {Function} fn - a function to proxy
+         * @param {Object} scope - the scope to run the function in
+         * @returns {Function}
+         */
+        proxy: function(fn, scope) {
+          return function() {
+            fn.apply(scope, arguments);
+          };
+        },
+
+        /**
+         * Attach an element to this Component
+         * @method AbstractComponent#attach
+         * @param {HTMLElement} el - an HTML element to attach
+         * @returns this
+         */
+        attach: function (el) {
+          this.assign('root', el);
+          return this;
+        },
+
+        /**
+         * get the root node
+         * @method AbstractComponent#getRoot
+         * @returns {HTMLElement}
+         */
+        getRoot: function () {
+          return this.elements().root;
+        },
+      
+        /**
+         * Provides a helper for Block__Element--Modifier syntax
+         * We use BEM internally in the objects in order to provide a consistent way to
+         * manage CSS classes. The BEM helper creates class names in BEM syntax style
+         * @method AbstractComponent#BEM
+         * @param {String} element - the element part of the BEM syntax or null
+         * @param {String} modifier - the modifer part of the BEM syntax or null
+         * @returns {String}
+         */
+        BEM: function(element, modifier) {
+          var className = this.id.replace(/[^A-Z0-9\-\_]/gi, '-');
+          if (element) {
+            className += '__' + element;
+          }
+          if (modifier) {
+            className += '--' + modifier;
+          }
+          return className;
+        },
+      
+        /**
+         * Add a class to an element, helper in case jQuery or such isn't available
+         * @method AbstractComponent#addClass
+         * @param {HTMLElement} el - the HTML element
+         * @param {String} klass - the classname to add
+         * @returns this
+         */
+        addClass: function(el, klass) {
+          var className = el.className;
+          if (!hasClass(el, klass)) {
+            className += ' ' + klass.replace(/[^A-Z0-9\-\_]/gi, '-');
+            className = className.replace(/^\s+|\s+$/g, '');
+          }
+          el.className = className;
+          return this;
+        },
+      
+        /**
+         * Removes a class from an element, helper in case jQuery or such isn't available
+         * @method AbstractComponent#removeClass
+         * @param {HTMLElement} el - the HTML element
+         * @param {String} klass - the classname to add
+         * @returns this
+         */
+        removeClass: function(el, klass) {
+          var className = el.className;
+          className = className.replace(new RegExp('(?:^|\\s)' + klass.replace(INVALID_CLASS_CHARACTERS, '-') + '(?!\\S)', 'g') , '');
+          className = className.replace(/^\s+|\s+$/g, '');
+          el.className = className;
+          return this;
+        },
+      
+        /**
+         * Wait for the async completion of a function
+         * @see Atomic.when
+         */
+        when: function() {
+          return Atomic.when.apply(Atomic, arguments);
+        },
+      
+        /**
+         * Wait for the async completion of a collection of functions
+         * @see Atomic.whenAll
+         */
+        whenAll: function() {
+          return Atomic.whenAll.apply(Atomic, arguments);
+        },
+
+        /**
+         * Load the Component, resolve all dependencies
+         * calls the ready method
+         * @method AbstractComponent#load
+         * @param {Object} cb - a callback to run when this is loaded
+         */
+        load: function (cb) {
+          if (this.elements().root) {
+            this.addClass(this.elements().root, this.BEM());
+            this.addClass(this.elements().root, this.BEM(this.elements.root));
+            this.addClass(this.elements().root, this.BEM(null, 'loading'));
+          }
+          var deferred = Atomic.deferred();
+          var self = this;
+          var fetch = [];
+          var allDependencies = this.depends._.raw();
+          var allResolvedDependencies = this.depends();
+          var fetchLen;
+        
+          // only fetch things we don't have a resolved value for
+          for (var i = 0, len = allDependencies.length; i < len; i++) {
+            if (!allResolvedDependencies[allDependencies[i]]) {
+              fetch.push(allDependencies[i]);
+            }
+          }
+
+          Atomic.load.apply(Atomic, fetch)
+          .then(function(values) {
+            var wiringDeferred = Atomic.deferred(),
+                promise,
+                i,
+                n;
+
+            // populate values resolution into the this.depends()
+            for (i = 0, fetchLen = fetch.length; i < fetchLen; i++) {
+              self.depends._.set(fetch[i], values[i]);
+            }
+
+            // dynamically create promise chain
+            promise = Atomic.when(self._init.call(self));
+
+            // if there is a callback, we can then handle it
+            // by attaching it to the end of the promise chain
+            if (cb) {
+              promise = promise.then(cb);
+            }
+
+            // set resolution for the internal promise
+            promise.then(function() {
+              wiringDeferred.fulfill();
+            }, function(err) {
+              wiringDeferred.reject(err);
+            });
+
+            // return the promise to the outer function
+            // if we hit a throw(), it'll automatically bubble out
+            // to the outer promise layer thanks to the promise chain
+            // above
+            return wiringDeferred.promise;
+          })
+          .then(function() {
+            var els = self.elements._.raw();
+            for (var name in els) {
+              if (els.hasOwnProperty(name) && self.elements()[name]) {
+                self.addClass(self.elements()[name], self.BEM(name));
+              }
+            }
+            if (self.elements().root) {
+              self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+            }
+            deferred.fulfill();
+          }, function(err) {
+            if (self.elements().root) {
+              self.removeClass(self.elements().root, self.BEM(null, 'loading'));
+              self.addClass(self.elements().root, self.BEM(null, 'failed'));
+            }
+            deferred.reject(err);
+          });
+
+          return deferred.promise;
+        },
+
+        /**
+         * Adds additional functions and properties to this Component
+         * wiring is done in response to a load() call.
+         * @method AbstractComponent#wire
+         * @param {Function|Object|AbstractWiring} wiring - a functon to run in response to load(), or an object
+         *  literal containing an init function to be executed with load(), and public methods
+         *  to decorate the component instance
+         */
+        wire: function(wiring) {
+          var name, nodesName, eventsName, i, len, properties, cleanName;
+          var wrapsPre = /^[\[\]]/;
+          var wrapsPost = /[\[\]]$/;
+          var self = this;
+        
+          function noop() {
+            return function() {};
+          }
+        
+          function wrapInit(obj, fn) {
+            obj.wrap('_init', function(prev) {
+              prev();
+              fn.call(obj);
+            });
+          }
+        
+          // if the wiring is a function and has the __atomic property, error
+          // if just a function, it's an "init"
+          // if it's an object, it's already a wiring ready to go
+          if (typeof wiring === 'function') {
+            if (wiring.__atomic) {
+              throw new Error('Atomic Wirings must be configured (by invoking their function) and passing their return value into wire()');
+            }
+            properties = {
+              init: wiring
+            };
+          }
+          else {
+            properties = wiring;
+          }
+        
+          // iterate through the keys. For each key, handle it
+          for (name in properties) {
+            if (!properties.hasOwnProperty(name)) {
+              continue;
+            }
+          
+            cleanName = name.replace(wrapsPre, '').replace(wrapsPost, '');
+          
+            if (cleanName == '_init') {
+              throw new Error('You cannot wire in "_init" as it\'s a reserved method. Please use "init" without the underscore.');
+            }
+          
+            // events requires special handling as a property
+            if (name === 'events') {
+              for (eventsName in properties.events) {
+                if (properties.events.hasOwnProperty(eventsName)) {
+                  this.properties._.add(eventsName, properties.events[eventsName]);
+                }
+              }
+              continue;
+            }
+          
+            // the elements collection requires special handling, and doesn't overwrite
+            // any elements that may have been already defined
+            if (name === 'elements') {
+              for (nodesName in properties.elements) {
+                if (this.elements[nodesName]) {
+                  continue; // we do not overwrite if the Implementor has defined
+                }
+                this.elements._.add(nodesName, properties.elements[nodesName]);
+              }
+              continue;
+            }
+          
+            // the depends collection requires special handling
+            if (name === 'depends') {
+              for (i = 0, len = properties.depends.length; i < len; i++) {
+                this.depends._.add(properties.depends[i]);
+              }
+              continue;
+            }
+          
+            // by default, init is a wrapped function unless you turn on clobbering
+            if (name === 'init' || cleanName === 'init') {
+              // init methods are always done with wrapping unless disabled
+              if (name === ']init[') {
+                this._init = properties[name];
+              }
+              else {
+                wrapInit(this, properties[name]);
+              }
+              continue;
+            }
+          
+            if (typeof properties[name] === 'function') {
+              if (!this[cleanName]) {
+                this[cleanName] = noop();
+              }
+
+              // the default behavior is to clobber
+              // however, if we are told to wrap, we will
+              if (cleanName !== name) {
+                if (name.indexOf('[') === 0) {
+                  this.wrap(cleanName, properties[name]);
+                }
+              }
+              else {
+                this[cleanName] = properties[name];
+              }
+              continue;
+            }
+          }
+          return this;
+        },
+
+        /**
+         * Overloaded state function for setting and getting the state
+         * @method AbstractComponent#state
+         * @param {Object|String} Either the key to be retrieved or set, or an object
+         *   literal representing the new state or an extension of the new state
+         * @param {*} value - Either the value to be set, or a boolean specifying the object
+         *   in arg[0] should overwrite the existing state
+         */
+        state: function(one, two, undefined) {
+          var args = [].slice.call(arguments, 0);
+          var name;
+          var values = {};
+          var stateChanges = [];
+          var newState = null;
+
+          if (typeof args[1] === 'undefined') {
+            if (typeof args[0] === 'undefined') {
+              for (name in this._state) {
+                if (this._state.hasOwnProperty(name)) {
+                  values[name] = this._state[name].value;
+                }
+              }
+              return values;
+            }
+            else if (typeof args[0] === 'string') {
+              return this._state[args[0]].value;
+            }
+          }
+        
+          if(typeof args[0] === 'object') {
+            for (name in args[0]) {
+              if (args[0].hasOwnProperty(name)) {
+                if (!this.states._.exists(name)) {
+                  throw new Error('Invalid state: ' + name + '. Only states defined in this.states:{} may be set');
+                }
+                // overwrite if "true" or not set yet
+                if (args[1]) {
+                  // overwrite
+                  this._state[name].rev++;
+                  this._state[name].lastValue = this._state[name].value;
+                  this._state[name].value = args[0][name];
+                }
+                else if (typeof this._state[name] === 'undefined') {
+                  // never defined, new state object
+                  this._state[name] = {
+                    rev: 0,
+                    value: args[0][name],
+                    lastValue: undefined
+                  };
+                }
+                
+                stateChanges.push(name);
+              }
+            }
+          }
+        
+          if (typeof args[0] === 'string') {
+            if (!this.states._.exists(args[0])) {
+              throw new Error('Invalid state: ' + args[0] + '. Only states defined in this.states:{} may be set');
+            }
+            if (typeof this._state[args[0]] === 'undefined') {
+              this._state[args[0]] = {
+                rev: 0,
+                value: args[1],
+                lastValue: undefined
+              };
+            }
+            else {
+              this._state[args[0]].rev++;
+              this._state[args[0]].lastValue = this._state[args[0]].value;
+              this._state[args[0]].value = args[1];
+            }
+            stateChanges.push(args[0]);
+          }
+        
+          // we should have a set of items in stateChanges we need to now trigger observer
+          // changes for each changed item
+          for (var i = 0, len = stateChanges.length; i < len; i++) {
+            newState = this._state[stateChanges[i]];
+            this._observableEmitter.emit(stateChanges[i], newState.value, newState.lastValue, newState.rev);
+          }
+
+          if(stateChanges.length > 0) {
+            return this.render();
+          }
+        
+          return this;
+        },
+      
+        /**
+         * Listen for data changes in the state
+         * @method AbstractComponent#observe
+         * @param {String} name - the data name
+         * @param {Function} fn - the callback function
+         */
+        observe: function (name, fn) {
+          if (name ===  '*') {
+            this._observableEmitter.onAny(fn);
+          }
+          else {
+            this._observableEmitter.on(name, fn);
+          }
+          return this;
+        },
+
+        /**
+         * Remove a listener for data changes
+         * @method AbstractComponent#unobserve
+         * @param {String} name - the data name to remove callbacks from
+         * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
+         */
+        unobserve: function (name, fn /* optional */) {
+          if (name === '*') {
+            if (!fn) {
+              this._observableEmitter.offAll(name);
+            }
+            else {
+              this._observableEmitter.offAny(fn);
+            }
+          }
+          else {
+            this._observableEmitter.off(name, fn);
+          }
+          return this;
+        },
+
+        /**
+         * Can be overriden to apply the component's internal state to the DOM
+         * @method render
+         * @returns this
+         */
+        render: function() {
+          return this;
+        }
+      };
+    });
+    
+    Atomic._.AbstractComponent = AbstractComponent;
+  }(Atomic));
+
   
+  // --------------------------------------------------
+  // MODULES
+  // --------------------------------------------------
+  /*global Atomic:true */
+  /*
+  Atomic
+  Copyright 2013 LinkedIn
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an "AS
+  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied.   See the License for the specific language
+  governing permissions and limitations under the License.
+  */
+  (function(Atomic) {
+    var emitter = new Atomic._.EventEmitter({
+      wildcard: true,
+      newListener: false,
+      maxListeners: 20
+    });
+
+    Atomic.augment(Atomic.Events, {
+      /**
+       * Listen for events emitted by the global Atomic Object
+       * @method Atomic.on
+       * @param {String} name - the event name
+       * @param {Function} fn - the callback function
+       */
+      on: function (name, fn) {
+        emitter.on(name, fn);
+        return Atomic;
+      },
+
+      /**
+       * Remove an event added via on
+       * @method Atomic#off
+       * @param {String} name - the name to remove callbacks from
+       * @param {Function} fn - optional. if excluded, it will remove all callbacks under "name"
+       */
+      off: function (name, fn /* optional */) {
+        emitter.off(name, fn);
+        return Atomic;
+      },
+
+      /**
+       * Listen to all events emitted from the global Atomic Object
+       * @method Atomic#onAny
+       * @param {Function} fn - a function to fire on all events
+       */
+      onAny: function (fn) {
+        emitter.onAny(fn);
+        return Atomic;
+      },
+
+      /**
+       * Remove a listener from the "listen to everything" group
+       * @method Atomic#offAny
+       * @param {Function} fn - the callback to remove
+       */
+      offAny: function (fn) {
+        emitter.offAny(fn);
+        return Atomic;
+      },
+
+      /**
+       * Queue a callback to run once, and then remove itself
+       * @method Atomic#onOnce
+       * @param {String} name - the event name
+       * @param {Function} fn - the callback function
+       */
+      onOnce: function (name, fn) {
+        emitter.onOnce(name, fn);
+        return Atomic;
+      },
+
+      /**
+       * Queue a callback to run X times, and then remove itself
+       * @method Atomic#on
+       * @param {String} name - the event name
+       * @param {Number} count - a number of times to invoke the callback
+       * @param {Function} fn - the callback function
+       */
+      onMany: function (name, count, fn) {
+        emitter.onMany(name, count, fn);
+        return Atomic;
+      },
+
+      /**
+       * Remove all of the listeners from the given namespace
+       * @method Atomic#offAll
+       * @param {String} name - the event name
+       */
+      offAll: function (name) {
+        emitter.offAll(name);
+        return Atomic;
+      },
+
+      /**
+       * set the maximum number of listeners the global Atomic Object can support
+       * highly interactive pages can increase the base number,
+       * but setting arbitrarily large numbers should be a performance
+       * warning.
+       * @method Atomic#setMaxListeners
+       * @param {Number} count - the max number of listeners
+       */
+      setMaxListeners: function (count) {
+        emitter.setMaxListeners(count);
+        return Atomic;
+      },
+
+      /**
+       * Get a list of all the current listeners
+       * @method Atomic#listeners
+       * @returns {Array}
+       */
+      listeners: function (name) {
+        var anyListeners = emitter.listenersAny();
+        var listeners = emitter.listeners(name);
+        return listeners.concat(anyListeners);
+      },
+
+      /**
+       * Trigger an event
+       * This triggers the specified event string, calling all
+       * listeners that are subscribed to it.
+       * @method Atomic#trigger
+       * @param {String} name - the event name
+       * @param {Object} ... - any additional arguments to pass in the event
+       */
+      trigger: function () {
+        var args = [].slice.call(arguments, 0);
+        emitter.emit.apply(emitter, args);
+        return Atomic;
+      }
+    });
+  }(Atomic));
+
+  /*global Atomic:true */
+  /*
+  Atomic
+  Copyright 2013 LinkedIn
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an "AS
+  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied.   See the License for the specific language
+  governing permissions and limitations under the License.
+  */
+
+  (function(Atomic) {
+    Atomic.augment(Atomic._, {
+      /**
+       * The Internal Factory function hides most of the logic
+       * for creating Atomic Components. It's split out to keep the
+       * interface separate from the Fiber integration
+       * @method Atomic.Factory
+       * @private
+       * @see Atomic.Component
+       */
+      Factory: function(objLiteral) {
+        // certain items are "reserved" and cannot be overridden in a wiring
+        var reserved = {
+          // these are "special" but are okay to set using wiring
+          // we are calling them out for readability's sake
+          // wiring has a special use case below
+          'depends':        false,
+          'elements':       false,
+          'events':         false,
+          'init':           true,
+          '_init':          true,
+          '_eventEmitter':  true,
+          '_isDestroyed':   true
+        };
+
+        // currently, we aren't doing anything fancy here
+        // fiber requires an object literal that defines the interface
+        // and we create the interface from the object literal
+        // provided. For every item, if it's not in our reserved list,
+        // we place it onto the additionalMethods collection.
+        //
+        // We then create an init() method that puts the wiring value
+        // as first on the stack of wiring items.
+        //
+        // When a component is created, the wirings are pulled in
+        // and ran in order.
+        var component = Atomic._.AbstractComponent.extend(function(base) {
+          var additionalMethods = {};
+          // add all other extras
+          for (var name in objLiteral) {
+            if (!objLiteral.hasOwnProperty(name) || reserved[name]) {
+              continue;
+            }
+            additionalMethods[name] = objLiteral[name];
+          }
+          additionalMethods.init = function() {
+            base.init.apply(this, arguments);
+            if (typeof objLiteral.init === 'function') {
+              this._init = objLiteral.init;
+            }
+          };
+
+          return additionalMethods;
+        });
+
+        return component;
+      }
+    });
+    
+    Atomic.augment(Atomic, {
+      /**
+       * Creates an Atomic Component
+       * An Atomic Component consists of the following items in its object literal:
+       * depends - an array of dependencies required for this component
+       * elements - an object literal of node name / purpose
+       * events - an object literal of event name / purpose
+       * wiring - a function or object literal compatible with AbstractComponent#wireIn
+       * @method Atomic.Component
+       * @param {Object} objLiteral - the object literal to create a component from
+       * @return {Object} an object that extends AbstractComponent
+       */
+      Component: function(objLiteral) {
+        return Atomic._.Factory(objLiteral);
+      },
+    
+      Wiring: function(wiring) {
+        wiring.__atomic = true;
+        return wiring;
+      }
+    });
+  }(Atomic));
+
+  /*global Atomic:true */
+  /*
+  Atomic
+  Copyright 2013 LinkedIn
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an "AS
+  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied.   See the License for the specific language
+  governing permissions and limitations under the License.
+  */
+
+  (function(Atomic) {
+    Atomic.augment(Atomic, {
+      loader: {
+        init: function() {},
+        register: function(id, exports) {
+          Atomic._.modules[id] = exports;
+        },
+        load: function(deps) {
+          var resolved = [];
+          for (var i = 0, len = deps.length; i < len; i++) {
+            if (!Atomic._.modules[deps[i]]) {
+              throw new Error('Module ID is not defined: ' + deps[i]);
+            }
+            resolved.push(Atomic._.modules[deps[i]]);
+          }
+          return resolved;
+        }
+      }
+    });
+  }(Atomic));
+  /*global Atomic:true, context:true */
+  /*
+  Atomic
+  Copyright 2013 LinkedIn
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an "AS
+  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied.   See the License for the specific language
+  governing permissions and limitations under the License.
+  */
+
+  /**
+   * This file contains the public Atomic APIs. Anything
+   * we wish to attach to Atomic.___ at a top level should
+   * be exposed in this file.
+   */
+
+  (function(Atomic, context) {
+    // holds the previous Atomic reference
+    var Atomic_noConflict_oldAtomic = context.Atomic;
+
+    // holds the initialized state of the framework
+    var Atomic_load_initialized = false;
+
+    // holds the config for if Atomic is AMD optimized
+    var Atomic_amd_optimized = false;
+
+    Atomic.augment(Atomic, {
+      /**
+       * prevent conflicts with an existing variable
+       * if it is named "Atomic". Returns the current
+       * Atomic reference
+       * @method Atomic.noConflict
+       * @return Object - the current Atomic reference
+       */
+      noConflict: function () {
+        var thisAtomic = context.Atomic;
+        context.Atomic = Atomic_noConflict_oldAtomic;
+        return thisAtomic;
+      },
+
+      /**
+       * Set the pre-optimized flag for Atomic. If you have
+       * used an AMD optimizer before running Atomic, you
+       * should use this, as all your modules are going to
+       * be properly named.
+       */
+      amdOptimized: function() {
+        Atomic_amd_optimized = true;
+      },
+
+      /**
+       * load the specified dependencies, then run the callback
+       * with the dependencies as arguments. This abstracts
+       * away any loader framework implementations
+       * @method Atomic.load
+       * @param Array depend - an array of dependencies or a list of dependencies
+       * @param Function then - a callback to run with dependencies as arguments
+       */
+      load: function() {
+        var deferred = Atomic.deferred();
+        var args = [].slice.call(arguments, 0);
+
+        // wrap the callback if it exists
+        if (typeof args[args.length - 1] === 'function') {
+          deferred.promise.then(args[args.length - 1]);
+          args.pop();
+        }
+
+        // if 2+ args, no need to expand further
+        if (args.length === 1) {
+          args = args[0];
+        }
+
+        if (!isArray(args)) {
+          args = [args];
+        }
+
+        // if not initialized, init, and then do the load step
+        var initPromise = null;
+        if (Atomic_load_initialized) {
+          initPromise = Atomic.when(true);
+        }
+        else {
+          // as part of init, save atomic/component and atomic into the loader system
+          Atomic_load_initialized = true;
+          initPromise = Atomic.when(Atomic.loader.init());
+          initPromise.then(function() {
+            Atomic.loader.register('Atomic', Atomic);
+            Atomic.loader.register('Atomic/Component', Atomic.Component);
+          });
+        }
+
+        // when initialization is complete, then call load
+        // on load, resolve the primary promise
+        initPromise
+        .then(function() {
+          return Atomic.when(Atomic.loader.load(args));
+        })
+        .then(function(needs) {
+          return deferred.fulfill(needs);
+        }, function(reason) {
+          return deferred.reject(reason);
+        });
+
+        // return the promise
+        return deferred.promise;
+      },
+
+      /**
+       * A basic proxy function. Makes it easier to wrap functionality
+       * @method Atomic.proxy
+       * @param {Function} fn - the function to wrap
+       * @param {Object} scope - the scope to apply fn within
+       * @returns {Function}
+       */
+      proxy: function(fn, scope) {
+        return function() {
+          return fn.apply(scope, arguments);
+        };
+      },
+
+      /**
+       * Throttle a function. Prevents a function from running again within X seconds
+       * this is really helpful for repeating key events, scrolling, or simply "noisy"
+       * events
+       * Visually, this can be interpreted as
+       * XXXXXXXXXXXX      XXXXXXXXXXXX
+       * I   I   I         I   I   I
+       *
+       * X = method called
+       * I = actual invocation
+       * 
+       * From https://github.com/documentcloud/underscore/blob/master/underscore.js
+       * @method Atomic.throttle
+       * @param {Function} func - the function to throttle
+       * @param {Number} wait - a number of milliseconds to wait
+       * @param {Boolean} immediate - run a trailing function when throttled
+       */
+      throttle: function(func, wait, immediate) {
+        var context, args, result;
+        var timeout = null;
+        var previous = 0;
+        var later = function() {
+          previous = new Date();
+          timeout = null;
+          result = func.apply(context, args);
+        };
+        return function() {
+          var now = new Date();
+          if (!previous && immediate === false) {
+            previous = now;
+          }
+          var remaining = wait - (now - previous);
+          context = this;
+          args = arguments;
+          if (remaining <= 0) {
+            clearTimeout(timeout);
+            timeout = null;
+            previous = now;
+            result = func.apply(context, args);
+          } else if (!timeout) {
+            timeout = setTimeout(later, remaining);
+          }
+          return result;
+        };
+      },
+
+      /**
+       * Debounces a function, by only letting it run after the user has taken
+       * no activity for X seconds. Similar to throttle, this is more useful
+       * when you want to limit the invocations to once for every burst of
+       * activity
+       *
+       * Visually, this can be interpreted as (immediate=true)
+       * XXXXXXXXXXXX      XXXXXXXXXXXX
+       * I                 I
+       *
+       * alternatively, this can be interpreted as (immediate=false)
+       * XXXXXXXXXXXX      XXXXXXXXXXXX
+       *                I                 I
+       *
+       * X = method called
+       * I = actual invocation
+       *
+       * Notice how the user needed to stop acting for a window in order
+       * for the trigger to reset
+       *
+       * From https://github.com/documentcloud/underscore/blob/master/underscore.js
+       * @method Atomic.debounce
+       * @param {Function} func - the function to wrap for debouncing
+       * @param {Number} wait - the number of milliseconds to wait until invoking
+       * @param {Boolean} immediate - if true, the event is on the leading edge
+       */
+      debounce: function(func, wait, immediate) {
+        var result;
+        var timeout = null;
+        return function() {
+          var context = this, args = arguments;
+          var later = function() {
+            timeout = null;
+            if (!immediate) {
+              result = func.apply(context, args);
+            }
+          };
+          var callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) {
+            result = func.apply(context, args);
+          }
+          return result;
+        };
+      },
+
+      /**
+       * Take a function (which takes 1 arg) and return a function that takes
+       * N args, where N is the length of the object or array in arguments[0]
+       * @method Atomic.expand
+       * @param {Function} fn - the function to expand
+       * @returns {Function} a function that takes N args
+       */
+      expand: function(fn) {
+        return function(args) {
+          var key;
+          var expanded = [];
+          if (Object.prototype.toString.call(args) === '[object Array]') {
+            expanded = args;
+          }
+          else {
+            for (key in args) {
+              if (args.hasOwnProperty(key)) {
+                expanded.push(args[key]);
+              }
+            }
+          }
+
+          fn.apply(fn, expanded);
+        };
+      },
+
+      /**
+       * Get the keys of an object
+       * @method Atomic.keys
+       */
+      keys: function(obj) {
+        var name;
+        var keys = [];
+        for (name in obj) {
+          if (obj.hasOwnProperty(name)) {
+            keys[keys.length] = name;
+          }
+        }
+        return keys;
+      },
+
+      /**
+       * Creates the ability to call Promises from within the
+       * wiring functions. This keeps us from having to pass
+       * in control functions, instead making everything
+       * synchronous by default. You may also pass it another
+       * library's promise, which will convert to a promise
+       * in the Atomic ecosystem.
+       * @param {Object} promise - optional. a promise from another framework
+       * @method Atomic.deferred
+       * @returns {Object} Promise
+       */
+      deferred: function(promise) {
+        var lib = getPromiseLibrary();
+        if (promise) {
+          lib.cast(promise);
+        }
+        else {
+          return lib.pending();
+        }
+      },
+
+      /**
+       * Convert a function value or promise return into
+       * a promise. Very useful when you don't know if the function
+       * is going to return a promise. This way, it's always a
+       * promise, all of the time
+       * @method Atomic.when
+       * @param {Function|Object} the item you want to convert to a promise
+       * @returns {Object} Promise
+       */
+      when: function(whennable) {
+        return getPromiseLibrary().cast(whennable);
+      },
+    
+      /**
+       * Convert a collection of functions into a promise that runs in paralell
+       * This is useful when loading a bunch of components inside of a control and
+       * want to simply listen for when all of them are ready
+       * @method Atomic.whenAll
+       * @param {Array} the array of functions to convert to a single promise
+       * @returns {Object} Promise
+       */
+      whenAll: function(whens) {
+        return getPromiseLibrary().all(whens);
+      },
+
+      /**
+       * the Atomic thrower is a function you can use to handle rejection
+       * of promises. It's easier than writing your own, and will output
+       * to console.error as a last resort
+       * @method Atomic.thrower
+       * @param {Object} err - the error from a rejection
+       */
+      error: function(err) {
+        /*global console:true */
+
+        // if exception, try to get the stack
+        var msg = '';
+        var stack = '';
+
+        if (typeof err === 'object') {
+          if (err.message) {
+            msg = err.message;
+          }
+          else if (err.toString) {
+            msg = err.toString();
+          }
+
+          if (err.stack) {
+            stack = err.stack;
+          }
+          else if (err.stacktrace) {
+            stack = err.stacktrace;
+          }
+        }
+        else if (typeof err === 'string') {
+          msg = err;
+        }
+
+        if (console && console.error) {
+          console.error(msg + '\n' + stack);
+        }
+      },
+      
+      /**
+       * Describe a component for the purpose of exploration or documentation
+       * being able to see all the self-documenting code of Atomic Components is
+       * a major feature. Using describe() will tell you about the component via
+       * console.log if available, and return a promise with the JSON structure
+       * @method Atomic.describe
+       * @param {String} component - the component to get a description of
+       * @param {Boolean} output - (optional) should the description be printed to the console
+       */
+      describe: function(component, output) {
+        if (typeof output == 'undefined') {
+          output = true;
+        }
+      
+        var d = Atomic.deferred();
+      
+        function printComponent(Component) {
+          var c = new Component();
+          var strOut = [];
+          var objOut = {};
+          objOut.component = component;
+          objOut.name = c.name;
+          objOut.depends = c.depends._.raw();
+          objOut.events = c.events._.raw();
+          objOut.states = c.states._.raw();
+
+          strOut = [
+            component + ': ' + c.name,
+            '=====',
+            'BEM id: ' + c.BEM(),
+            'dependencies: ' + c.depends._.raw().join(', '),
+            '',
+            'ELEMENTS',
+            c.elements.toString(),
+            '',
+            'EVENTS',
+            c.events.toString(),
+            '',
+            'STATES',
+            c.states.toString()
+          ];
+        
+          if (output && context.console && typeof context.console.log == 'function') {
+            context.console.log(strOut.join('\n'));
+          }
+        
+          d.fulfill(objOut);
+        }
+      
+        if (typeof component === 'string') {
+          Atomic.load([component])
+          .then(Atomic.expand(function(Component) {
+            printComponent(Component);
+          }, Atomic.e))
+          .then(null, Atomic.e);
+        }
+        else if (typeof component === 'function') {
+          var c = new component();
+          printComponent(c);
+        }
+        else {
+          printComponent(component);
+        }
+      
+        return d.promise;
+      },
+      
+      /**
+       * Shims the global define when an AMD loader doesn't exist
+       * very useful when running unit tests, so you are not tied to a loader's structure
+       * @method Atomic.define
+       * @param {String} id - the ID of the module
+       * @param {Array} depends - the dependencies array
+       * @param {Function} factory - the factory function that contains exports
+       */
+      define: function(id, depends, factory) {
+        if (typeof id !== 'string') {
+          throw new Error('you must specify an ID if you are not using a module loader system');
+        }
+        if (Object.prototype.toString.call(depends) !== '[object Array]') {
+          factory = depends;
+          depends = [];
+        }
+      
+        // a local require
+        var require = function(str) {
+          if (window.console && window.console.warn) {
+            window.console.warn('using runtime require() is dangerous without a module loader');
+          }
+          if (!Atomic._.modules[str]) {
+            throw new Error('Module not loaded: ' + str);
+          }
+          return Atomic._.modules[str];
+        };
+      
+        var module = {
+          exports: {}
+        };
+      
+        var resolved = [];
+        var result;
+        for (var i = 0, len = depends.length; i < len; i++) {
+          if (depends[i] === 'require') {
+            resolved.push(require);
+            continue;
+          }
+          if (depends[i] === 'module') {
+            resolved.push(module);
+            continue;
+          }
+          if (depends[i] === 'exports') {
+            resolved.push(module.exports);
+            continue;
+          }
+          if (!Atomic._.modules[depends[i]]) {
+            throw new Error('Module not loaded: ' + depends[i]);
+          }
+          resolved.push(Atomic._.modules[depends[i]]);
+        }
+      
+        if (typeof factory === 'function') {
+          result = factory.apply(factory, resolved);
+          if (result) {
+            Atomic._.modules[id] = result;
+          }
+          else {
+            Atomic._.modules[id] = module.exports;
+          }
+        }
+        else {
+          Atomic._.modules[id] = factory;
+        }
+      }
+    });
+  }(Atomic, context));
+
+  /*global Atomic:true */
+  /*
+  Atomic
+  Copyright 2013 LinkedIn
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an "AS
+  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  express or implied.   See the License for the specific language
+  governing permissions and limitations under the License.
+  */
+
+  // this file sets the Atomic Version string at build time
+  (function(Atomic) {
+    Atomic.augment(Atomic, {
+      version: '0.0.9-8-gecd85cb'
+    });
+  }(Atomic));
+
   // assign all the pieces to modules
   var defineCall = (typeof globalDefine == 'function' && globalDefine.amd) ? globalDefine : Atomic;
   defineCall('Atomic', [], function() { return Atomic; });
