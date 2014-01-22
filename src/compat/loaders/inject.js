@@ -35,11 +35,18 @@ governing permissions and limitations under the License.
       }
     },
     load: function(deps) {
-      var results = [];
-      var deferred = Atomic.deferred();
+      var results = [],
+          deferred = Atomic.deferred();
 
       deps.unshift('require');
       require(deps, function(require) {
+        // Inject provides better error information if we try and
+        // synchronously require() a module. So, we put the AMD style
+        // require() at the front of the dependency list, and then
+        // use only it for resolving dependencies. If a dependency
+        // fails, we can then reject the promise
+        deps.shift();
+
         try {
           for (var i = 0, len = deps.length; i < len; i++) {
             results[i] = require(deps[i]);
