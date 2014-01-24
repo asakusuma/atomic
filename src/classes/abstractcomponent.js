@@ -86,13 +86,6 @@ governing permissions and limitations under the License.
        * @private
        */
       _init: null,
-    
-      /**
-       * The internal state object
-       * @property {Object} AbstractComponent#_state
-       * @private
-       */
-      _state: {},
 
       /**
        * A local event emitter
@@ -140,7 +133,10 @@ governing permissions and limitations under the License.
           newListener: false,
           maxListeners: 0
         });
-      
+
+        // The internal state object.
+        this._state = {};
+
         this.elements.root = 'The root HTML node of this component (automatically generated)';
 
         // localize the nodes/events/needs variable BEFORE the user starts configuring
