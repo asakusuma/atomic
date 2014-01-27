@@ -617,7 +617,7 @@ governing permissions and limitations under the License.
           if (name === 'events') {
             for (eventsName in properties.events) {
               if (properties.events.hasOwnProperty(eventsName)) {
-                this.properties._.add(eventsName, properties.events[eventsName]);
+                this.events._.add(eventsName, properties.events[eventsName]);
               }
             }
             continue;
