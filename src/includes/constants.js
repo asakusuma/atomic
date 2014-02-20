@@ -15,8 +15,4 @@ express or implied.   See the License for the specific language
 governing permissions and limitations under the License.
 */
 
-// constants.js
-var __Atomic_CONSTANTS__ = {};
-
-// js hint requires var to be used
-__Atomic_CONSTANTS__ = __Atomic_CONSTANTS__;
+var INVALID_CLASS_CHARACTERS = /[^A-Z0-9\-\_]/gi;

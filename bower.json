@@ -11,7 +11,7 @@
   "dependencies": {
     "eventemitter2": "~0.4.13",
     "when": "~2.5.1",
-    "bluebird": "~0.9.11",
+    "bluebird": "~1.0.1",
     "redefine": "~0.0.3"
   },
   "ignore": [

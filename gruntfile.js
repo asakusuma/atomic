@@ -32,7 +32,7 @@ module.exports = function (grunt) {
       return str.replace(/__ATOMIC__VERSION__/g, version);
     }
 
-    // set the inject version everywhere we need to
+    // set the atomic version everywhere we need to
     grunt.config.set('anonymous_footer', addVersion(foot));
     grunt.config.set('version_string', addVersion(version_string));
     for (type in output_files) {
@@ -94,7 +94,7 @@ module.exports = function (grunt) {
         }
       },
       git_commit_release: {
-        command: 'git commit -m "chore(*): Release of Inject <%= version_string %> (via grunt)"',
+        command: 'git commit -m "chore(*): Release of Atomic <%= version_string %> (via grunt)"',
         options: {
           callback: function(err, stdout, stderr, next) {
             next();
@@ -131,6 +131,11 @@ module.exports = function (grunt) {
       fiber_to_tmp: {
         files: [
           {src: ['./node_modules/fiber/src/fiber.js'], dest: './tmp/lib/fiber/fiber.js', filter: 'isFile'}
+        ]
+      },
+      semver_to_tmp: {
+        files: [
+          {src: ['./node_modules/semver/semver.js'], dest: './tmp/lib/semver/semver.js', filter: 'isFile'}
         ]
       },
       atomic_to_uglify: {
@@ -232,19 +237,32 @@ module.exports = function (grunt) {
     },
 
     /**
-     * includereplace: replace segments of a file with contents of another
+     * includes: replace segments of a file with contents of another
      */
-    includereplace: {
+    includes: {
       atomic: {
-        options: {
-          globals: {
-            ATOMIC_VERSION: '<%= version_string %>'
-          },
-          prefix: '\/\/@@',
-          suffix: ''
-        },
         src: './src/atomic.js',
-        dest: './tmp'
+        dest: './tmp/atomic.js',
+        options: {
+          includeRegexp: /^(\s*)\/\/@@include\s*\(["'](\S+)["']\)\s*$/
+        }
+      }
+    },
+    
+    /**
+     * replaces strings (version)
+     */
+    'string-replace': {
+      atomic: {
+        files: {
+          './tmp/atomic.js': './tmp/atomic.js'
+        },
+        options: {
+          replacements: [{
+            pattern: /@@ATOMIC_VERSION/g,
+            replacement: '<%= version_string %>'
+          }]
+        }
       }
     },
 
@@ -338,8 +356,10 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-shell');
+  grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-express');
   grunt.loadNpmTasks('grunt-include-replace');
+  grunt.loadNpmTasks('grunt-includes');
   grunt.loadNpmTasks('grunt-bower-task');
   grunt.loadNpmTasks('grunt-conventional-changelog');
   grunt.loadNpmTasks('grunt-bumpup');
@@ -365,11 +385,13 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'bower:install',
     'copy:fiber_to_tmp', // fiber is in NPM, not bower, so copy it over
+    'copy:semver_to_tmp', // semver is in NPM, not bower
     'jshint',
     (grunt.option('as')) ? 'versionFromParam' : 'shell:versionFromTag',
     
     // create the atomic.js file
-    'includereplace:atomic',
+    'includes:atomic',
+    'string-replace:atomic',
     'copy:atomic_to_final',
     'copy:final_to_main',
     'copy:atomic_to_uglify',

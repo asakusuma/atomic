@@ -137,7 +137,7 @@
     <script type="text/javascript" src="/atomic.js"></script>
     <script type="text/javascript">
       // shoehorn jquery in
-      Atomic('jquery', [], function() { return window.jQuery; });
+      Atomic.define('jquery', [], function() { return window.jQuery.noConflict(); });
     </script>
 
     <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
@@ -149,9 +149,6 @@
     <script type="text/javascript" src="scripts/atomic/wirings/debugtracer.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/echo.js"></script>
     <script type="text/javascript" src="scripts/atomic/wirings/fetch.js"></script>
-
-    <!-- the jQuery plugin support -->
-    <script type="text/javascript" src="scripts/atomic/extras/jquery-plugin.js"></script>
 
     <!-- our page specific JavaScript -->
     <script type="text/javascript" src="scripts/page.js"></script>
