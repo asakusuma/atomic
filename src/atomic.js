@@ -116,7 +116,7 @@ governing permissions and limitations under the License.
   });
 
   cjsHarness(function(module, exports, process) {
-    //@@include('../tmp/lib/bluebird/js/browser/bluebird.js')
+    //@@include('../tmp/lib/bluebird/bluebird.js')
     Atomic._.Bluebird = module.exports;
   });
 
