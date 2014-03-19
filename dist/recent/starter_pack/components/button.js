@@ -66,8 +66,8 @@ nodes.
         var self = this;
         // nodes.root is the default container, either an el passed
         // to the constructor, or via attach()
-        $(self.elements().root).on('click', function() {
-          self.trigger(self.events.USE);
+        $(self.elements().root).on('click', function(e) {
+          self.trigger(self.events.USE, e);
         });
       }
     });

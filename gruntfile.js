@@ -276,6 +276,13 @@ module.exports = function (grunt) {
           debug: true,
           server: path.resolve('./server.js')
         }
+      },
+      ui: {
+        options: {
+          port: 5000,
+          debug: true,
+          server: path.resolve('./tests/ui/server/index.js')
+        }
       }
     },
 
@@ -328,6 +335,15 @@ module.exports = function (grunt) {
         version: '<%= version_string %>'
       }
     },
+
+    casperjs: {
+      options: {
+        async: {
+          parallel: true
+        }
+      },
+      files: ['tests/ui/specs/**/*.spec.ui.js']
+    },
     
     bumpup: {
       options: {
@@ -363,7 +379,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-bower-task');
   grunt.loadNpmTasks('grunt-conventional-changelog');
   grunt.loadNpmTasks('grunt-bumpup');
-  
+  grunt.loadNpmTasks('grunt-casperjs');
   
   grunt.registerMultiTask('log', 'Print some messages', function() {
     grunt.log.writeln(this.data.options.message);
@@ -446,6 +462,17 @@ module.exports = function (grunt) {
     'bower:install',
     'shell:venus_automated',
     'clean:tmp'
+  ]);
+
+  grunt.registerTask('uitest', [
+    'express:ui',
+    'casperjs',
+    'clean:tmp'
+  ]);
+
+  grunt.registerTask('uitestserver', [
+    'express:ui',
+    'express-keepalive'
   ]);
 
   grunt.registerTask('itest', [

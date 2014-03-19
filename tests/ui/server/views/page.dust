@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Atomic Template</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <style>
+      body {
+        padding: 10px;
+      }
+      
+      .components-select {
+        outline: none;
+      }
+      .components-select__viewport {
+        background-color: #ddddff;
+        border: 1px solid #aaa;
+      }
+      .components-select ul {
+        background-color: #ddffdd;
+        margin: -1px 0 0 0;
+        padding: 0;
+        border: 1px solid blue;
+      }
+      .components-select li {
+        list-style: none;
+      }
+      .components-select li.selected {
+        background-color: #559955;
+      }
+      .components-select--focused .components-select__viewport {
+        border: 1px solid blue;
+      }
+      
+      .components-carousel__item--current {
+        background: #fcc;
+      }
+    </style>
+  </head>
+  <body data-atomic-autoparse="true">
+
+     {>"components/{component}" /}
+
+
+    <!-- a global jquery, the latest built atomic.js, and the "none" loader -->
+    <script type="text/javascript" src="/tests/ui/scripts/jquery.js"></script>
+    <script type="text/javascript" src="/dist/recent/atomic.js"></script>
+    <script type="text/javascript">
+      // shoehorn jquery in
+      Atomic.define('jquery', [], function() { return window.jQuery.noConflict(); });
+    </script>
+
+    <!-- atomic/ is a virtual directory and maps to the dist's starter pack -->
+    <script type="text/javascript" src="/dist/recent/starter_pack/components/{component}.js"></script>
+    <script type="text/javascript" src="/tests/ui/scripts/{component}.js"></script>
+  </body>
+</html>

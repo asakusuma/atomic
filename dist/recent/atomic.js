@@ -1122,7 +1122,7 @@ governing permissions and limitations under the License.
 
   cjsHarness(function(module, exports, process) {
     /**
-     * bluebird build version 1.0.6
+     * bluebird build version 1.0.8
      * Features enabled: core, timers, race, any, call_get, filter, generators, map, nodeify, promisify, props, reduce, settle, some, progress, cancel, synchronous_inspection
     */
     /**
@@ -3539,6 +3539,8 @@ governing permissions and limitations under the License.
                 promise._getCarriedStackTrace());
         }
 
+        if (promise._isRejectionUnhandled()) promise._unsetRejectionIsUnhandled();
+
         if (debugging &&
             promise._traceParent == null) {
             promise._traceParent = this;
@@ -5347,12 +5349,32 @@ governing permissions and limitations under the License.
     if (typeof process !== "undefined" && process !== null &&
         typeof process.cwd === "function" &&
         typeof process.nextTick === "function") {
+        if (process.version.indexOf("v0.10.") === 0) {
+            schedule = (function () {
+                var domain = require("domain");
+                var activeDomain = null;
+                var callback = null;
+                function Promise$_Scheduler() {
+                    var fn = callback;
+                    var domain = activeDomain;
+                    activeDomain = null;
+                    callback = null;
+                    if (domain != null) domain.run(fn); else fn();
 
-        schedule = process.nextTick;
+                }
+                return function schedule(fn) {
+                    activeDomain = domain.active;
+                    callback = fn;
+                    process.nextTick(Promise$_Scheduler);
+                };
+            })();
+        } else {
+            schedule = process.nextTick;
+        }
     }
-    else if ((typeof MutationObserver === "function" ||
-            typeof WebkitMutationObserver === "function" ||
-            typeof WebKitMutationObserver === "function") &&
+    else if ((typeof global.MutationObserver === "function" ||
+            typeof global.WebkitMutationObserver === "function" ||
+            typeof global.WebKitMutationObserver === "function") &&
             typeof document !== "undefined" &&
             typeof document.createElement === "function") {
 
@@ -5409,11 +5431,11 @@ governing permissions and limitations under the License.
 
         })();
     }
-    else if (typeof MessageChannel === "function") {
+    else if (typeof global.MessageChannel === "function") {
         schedule = (function(){
             var queuedFn = void 0;
 
-            var channel = new MessageChannel();
+            var channel = new global.MessageChannel();
             channel.port1.onmessage = function Promise$_Scheduler() {
                     var fn = queuedFn;
                     queuedFn = void 0;
@@ -5439,7 +5461,7 @@ governing permissions and limitations under the License.
 
     module.exports = schedule;
 
-    },{"./assert.js":2,"./global.js":16}],32:[function(require,module,exports){
+    },{"./assert.js":2,"./global.js":16,"domain":40}],32:[function(require,module,exports){
     /**
      * Copyright (c) 2014 Petka Antonov
      * 
@@ -6223,7 +6245,13 @@ governing permissions and limitations under the License.
 
     module.exports = ret;
 
-    },{"./assert.js":2,"./es5.js":12,"./global.js":16}]},{},[4])
+    },{"./assert.js":2,"./es5.js":12,"./global.js":16}],40:[function(require,module,exports){
+
+    // not implemented
+    // The reason for having an empty file and not throwing is to allow
+    // untraditional implementation of this module.
+
+    },{}]},{},[4])
     (4)
     });
     ;
@@ -8853,7 +8881,7 @@ governing permissions and limitations under the License.
   // this file sets the Atomic Version string at build time
   (function(Atomic) {
     Atomic.augment(Atomic, {
-      version: '0.0.9-15-g7da267a'
+      version: '0.0.9-18-g2c8feb9'
     });
   }(Atomic));
 
